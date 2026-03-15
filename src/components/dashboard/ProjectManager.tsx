@@ -5,6 +5,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Edit2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 
@@ -25,6 +35,8 @@ const ProjectManager = ({ open, onOpenChange, projects, onUpdated }: ProjectMana
   const [color, setColor] = useState(COLORS[0]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
+  const [hasTasks, setHasTasks] = useState(false);
 
   const handleCreate = async () => {
     if (!user || !name.trim()) return;
@@ -35,13 +47,24 @@ const ProjectManager = ({ open, onOpenChange, projects, onUpdated }: ProjectMana
     onUpdated();
   };
 
-  const handleDelete = async (id: string) => {
-    const { data: tasks } = await supabase.from("tasks").select("id").eq("project_id", id).eq("is_completed", false).limit(1);
-    if (tasks && tasks.length > 0) {
-      toast.error("Mova ou exclua as tarefas deste projeto antes de deletá-lo");
-      return;
+  const handleDeleteClick = async (project: Project) => {
+    // Check if project has tasks (both completed and incomplete)
+    const { count } = await supabase
+      .from("tasks")
+      .select("id", { count: "exact", head: true })
+      .eq("project_id", project.id);
+    setHasTasks((count ?? 0) > 0);
+    setDeleteTarget(project);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    if (hasTasks) {
+      // Unlink tasks from project first
+      await supabase.from("tasks").update({ project_id: null }).eq("project_id", deleteTarget.id);
     }
-    await supabase.from("projects").delete().eq("id", id);
+    await supabase.from("projects").delete().eq("id", deleteTarget.id);
+    setDeleteTarget(null);
     toast.success("Projeto excluído");
     onUpdated();
   };
@@ -50,77 +73,100 @@ const ProjectManager = ({ open, onOpenChange, projects, onUpdated }: ProjectMana
     if (!editName.trim()) return;
     await supabase.from("projects").update({ name: editName.trim() }).eq("id", id);
     setEditingId(null);
+    toast.success("Projeto atualizado");
     onUpdated();
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-foreground text-tight">Projetos</DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-foreground text-tight">Projetos</DialogTitle>
+          </DialogHeader>
 
-        {/* Create new */}
-        <div className="space-y-3">
-          <Input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Nome do projeto"
-            className="bg-secondary border-border h-10"
-            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-          />
-          <div className="flex items-center gap-2">
-            {COLORS.map(c => (
-              <button
-                key={c}
-                onClick={() => setColor(c)}
-                className={`w-7 h-7 rounded-full transition-transform ${color === c ? "scale-125 ring-2 ring-foreground/20" : "hover:scale-110"}`}
-                style={{ backgroundColor: c }}
-              />
-            ))}
-          </div>
-          <Button onClick={handleCreate} disabled={!name.trim()} className="gradient-primary text-primary-foreground w-full h-10">
-            <Plus className="w-4 h-4 mr-2" /> Criar Projeto
-          </Button>
-        </div>
-
-        {/* Existing projects */}
-        <div className="mt-4 space-y-2">
-          {projects.map(p => (
-            <div key={p.id} className="flex items-center gap-3 bg-secondary/50 rounded-lg px-3 py-2.5">
-              <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
-              {editingId === p.id ? (
-                <input
-                  autoFocus
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  onBlur={() => handleSaveEdit(p.id)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSaveEdit(p.id)}
-                  className="flex-1 bg-transparent text-foreground text-sm outline-none border-b border-primary/50"
+          <div className="space-y-3">
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nome do projeto"
+              className="bg-secondary border-border h-10"
+              onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+            />
+            <div className="flex items-center gap-2">
+              {COLORS.map(c => (
+                <button
+                  key={c}
+                  onClick={() => setColor(c)}
+                  className={`w-7 h-7 rounded-full transition-transform ${color === c ? "scale-125 ring-2 ring-foreground/20" : "hover:scale-110"}`}
+                  style={{ backgroundColor: c }}
                 />
-              ) : (
-                <span className="flex-1 text-sm text-foreground">{p.name}</span>
-              )}
-              <button
-                onClick={() => { setEditingId(p.id); setEditName(p.name); }}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Edit2 className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => handleDelete(p.id)}
-                className="text-muted-foreground hover:text-destructive transition-colors"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+              ))}
             </div>
-          ))}
-          {projects.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-4">Nenhum projeto ainda</p>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+            <Button onClick={handleCreate} disabled={!name.trim()} className="gradient-primary text-primary-foreground w-full h-10">
+              <Plus className="w-4 h-4 mr-2" /> Criar Projeto
+            </Button>
+          </div>
+
+          <div className="mt-4 space-y-2">
+            {projects.map(p => (
+              <div key={p.id} className="flex items-center gap-3 bg-secondary/50 rounded-lg px-3 py-2.5">
+                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                {editingId === p.id ? (
+                  <input
+                    autoFocus
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    onBlur={() => handleSaveEdit(p.id)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSaveEdit(p.id)}
+                    className="flex-1 bg-transparent text-foreground text-sm outline-none border-b border-primary/50"
+                  />
+                ) : (
+                  <span className="flex-1 text-sm text-foreground">{p.name}</span>
+                )}
+                <button
+                  onClick={() => { setEditingId(p.id); setEditName(p.name); }}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => handleDeleteClick(p)}
+                  className="text-muted-foreground hover:text-destructive transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+            {projects.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">Nenhum projeto ainda</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground">Excluir projeto "{deleteTarget?.name}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {hasTasks
+                ? "Este projeto possui tarefas vinculadas. Elas serão desvinculadas (não excluídas) e ficarão sem projeto."
+                : "Este projeto será excluído permanentemente."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-secondary border-border text-foreground hover:bg-secondary/80">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 

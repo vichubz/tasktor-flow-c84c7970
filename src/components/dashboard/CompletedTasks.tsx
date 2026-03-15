@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronDown, ChevronRight, Check } from "lucide-react";
+import { ChevronRight, Check, Loader2 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Task = Tables<"tasks"> & { project?: Tables<"projects"> };
@@ -11,32 +11,42 @@ const CompletedTasks = () => {
   const { user } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
 
   const today = new Date().toISOString().split("T")[0];
 
-  useEffect(() => {
+  const fetchCompleted = useCallback(async () => {
     if (!user) return;
-    const fetchCompleted = async () => {
-      const { data } = await supabase
-        .from("tasks")
-        .select("*, project:projects(*)")
-        .eq("user_id", user.id)
-        .eq("is_completed", true)
-        .gte("completed_at", `${today}T00:00:00`)
-        .order("completed_at", { ascending: false });
-      if (data) setTasks(data as Task[]);
-    };
-    fetchCompleted();
+    setLoading(true);
+    const { data } = await supabase
+      .from("tasks")
+      .select("*, project:projects(*)")
+      .eq("user_id", user.id)
+      .eq("is_completed", true)
+      .gte("completed_at", `${today}T00:00:00`)
+      .order("completed_at", { ascending: false });
+    if (data) setTasks(data as Task[]);
+    setLoading(false);
+    setHasFetched(true);
+  }, [user, today]);
 
+  // Only fetch when expanded for the first time
+  useEffect(() => {
+    if (expanded && !hasFetched) {
+      fetchCompleted();
+    }
+  }, [expanded, hasFetched, fetchCompleted]);
+
+  // Listen for realtime changes only when expanded
+  useEffect(() => {
+    if (!user || !expanded) return;
     const channel = supabase
       .channel("completed-tasks")
       .on("postgres_changes", { event: "*", schema: "public", table: "tasks", filter: `user_id=eq.${user.id}` }, fetchCompleted)
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
-  }, [user, today]);
-
-  if (tasks.length === 0) return null;
+  }, [user, expanded, fetchCompleted]);
 
   return (
     <div className="mt-6">
@@ -49,7 +59,9 @@ const CompletedTasks = () => {
           <ChevronRight className="w-4 h-4" />
         </motion.div>
         <span>Concluídas hoje</span>
-        <span className="text-xs font-mono bg-success/10 text-success px-2 py-0.5 rounded-md">{tasks.length}</span>
+        {hasFetched && tasks.length > 0 && (
+          <span className="text-xs font-mono bg-success/10 text-success px-2 py-0.5 rounded-md">{tasks.length}</span>
+        )}
       </motion.button>
 
       <AnimatePresence>
@@ -60,7 +72,16 @@ const CompletedTasks = () => {
             exit={{ height: 0, opacity: 0 }}
             className="mt-2 space-y-1.5 overflow-hidden"
           >
-            {tasks.map((task, i) => (
+            {loading && (
+              <div className="flex items-center gap-2 py-4 justify-center text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">Carregando...</span>
+              </div>
+            )}
+            {!loading && tasks.length === 0 && (
+              <p className="text-sm text-muted-foreground/60 py-4 text-center">Nenhuma tarefa concluída hoje</p>
+            )}
+            {!loading && tasks.map((task, i) => (
               <motion.div
                 key={task.id}
                 initial={{ opacity: 0, x: -10 }}
