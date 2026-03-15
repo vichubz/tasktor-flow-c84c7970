@@ -95,24 +95,36 @@ Deno.serve(async (req) => {
     let timeMin: string;
     let timeMax: string;
 
-    if (targetDate) {
-      // Specific date requested
-      timeMin = `${targetDate}T00:00:00`;
-      timeMax = `${targetDate}T23:59:59`;
-    } else {
-      // Today + daysAhead
+    // Get timezone offset string for RFC3339
+    const getOffsetStr = (tz: string) => {
       const now = new Date();
-      // Use timezone-aware formatting
+      const parts = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "shortOffset" }).formatToParts(now);
+      const offsetPart = parts.find(p => p.type === "timeZoneName")?.value || "GMT";
+      // offsetPart is like "GMT-3" or "GMT+5:30"
+      const match = offsetPart.match(/GMT([+-]?)(\d{1,2})(?::(\d{2}))?/);
+      if (!match) return "Z";
+      const sign = match[1] || "+";
+      const hours = match[2].padStart(2, "0");
+      const minutes = match[3] || "00";
+      return `${sign}${hours}:${minutes}`;
+    };
+    const offset = getOffsetStr(timeZone);
+
+    if (targetDate) {
+      timeMin = `${targetDate}T00:00:00${offset}`;
+      timeMax = `${targetDate}T23:59:59${offset}`;
+    } else {
+      const now = new Date();
       const formatter = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" });
       const todayStr = formatter.format(now);
-      timeMin = `${todayStr}T00:00:00`;
+      timeMin = `${todayStr}T00:00:00${offset}`;
 
       if (daysAhead > 0) {
         const futureDate = new Date(now.getTime() + daysAhead * 24 * 60 * 60 * 1000);
         const futureStr = formatter.format(futureDate);
-        timeMax = `${futureStr}T23:59:59`;
+        timeMax = `${futureStr}T23:59:59${offset}`;
       } else {
-        timeMax = `${todayStr}T23:59:59`;
+        timeMax = `${todayStr}T23:59:59${offset}`;
       }
     }
 
