@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Video, Plus, Minus, Clock } from "lucide-react";
+import { toast } from "sonner";
 
 const MeetingMetricsCard = () => {
   const { user } = useAuth();
@@ -16,18 +17,23 @@ const MeetingMetricsCard = () => {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const { data } = await supabase
-        .from("meeting_logs")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("date", today)
-        .maybeSingle();
-      if (data) {
-        const totalMinutes = Math.round(Number(data.hours) * 60);
-        setHours(Math.floor(totalMinutes / 60));
-        setMinutes(totalMinutes % 60);
-        setCount(data.meeting_count);
-        setLogId(data.id);
+      try {
+        const { data, error } = await supabase
+          .from("meeting_logs")
+          .select("id, hours, meeting_count")
+          .eq("user_id", user.id)
+          .eq("date", today)
+          .maybeSingle();
+        if (error) throw error;
+        if (data) {
+          const totalMinutes = Math.round(Number(data.hours) * 60);
+          setHours(Math.floor(totalMinutes / 60));
+          setMinutes(totalMinutes % 60);
+          setCount(data.meeting_count);
+          setLogId(data.id);
+        }
+      } catch {
+        toast.error("Erro ao carregar reuniões");
       }
     };
     load();
@@ -35,15 +41,21 @@ const MeetingMetricsCard = () => {
 
   const upsert = async (totalHours: number, newCount: number) => {
     if (!user) return;
-    if (logId) {
-      await supabase.from("meeting_logs").update({ hours: totalHours, meeting_count: newCount }).eq("id", logId);
-    } else {
-      const { data } = await supabase
-        .from("meeting_logs")
-        .insert({ user_id: user.id, date: today, hours: totalHours, meeting_count: newCount })
-        .select()
-        .single();
-      if (data) setLogId(data.id);
+    try {
+      if (logId) {
+        const { error } = await supabase.from("meeting_logs").update({ hours: totalHours, meeting_count: newCount }).eq("id", logId);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from("meeting_logs")
+          .insert({ user_id: user.id, date: today, hours: totalHours, meeting_count: newCount })
+          .select()
+          .single();
+        if (error) throw error;
+        if (data) setLogId(data.id);
+      }
+    } catch {
+      toast.error("Erro ao salvar reuniões");
     }
   };
 
@@ -68,7 +80,6 @@ const MeetingMetricsCard = () => {
       animate={{ opacity: 1, y: 0 }}
       className="stat-card rounded-xl px-4 py-3 flex flex-col gap-2 card-lift"
     >
-      {/* Header */}
       <div className="flex items-center gap-2">
         <div className="w-7 h-7 rounded-md bg-accent/15 flex items-center justify-center">
           <Video className="w-3.5 h-3.5 text-accent" />
@@ -76,9 +87,7 @@ const MeetingMetricsCard = () => {
         <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Reuniões Hoje</span>
       </div>
 
-      {/* Content row */}
       <div className="flex items-center justify-between gap-3">
-        {/* Meeting count */}
         <div className="flex items-center gap-1">
           <motion.button onClick={() => adjustCount(-1)} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
             className="w-5 h-5 rounded bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-primary/15 transition-all">
@@ -96,7 +105,6 @@ const MeetingMetricsCard = () => {
 
         <div className="w-px h-6 bg-border/30" />
 
-        {/* Time in meetings */}
         <div className="flex items-center gap-1">
           <Clock className="w-3 h-3 text-muted-foreground" />
           <motion.button onClick={() => adjustTime(-15)} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}

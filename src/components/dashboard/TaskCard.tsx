@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Task = Tables<"tasks"> & { subtasks?: Tables<"subtasks">[], project?: Tables<"projects"> };
 
@@ -48,6 +49,9 @@ const CONFETTI_COLORS = [
   "hsl(45 93% 47%)", "hsl(339 90% 60%)", "hsl(210 100% 60%)",
 ];
 
+// Cache for subtasks to avoid refetching
+const subtaskCache = new Map<string, Tables<"subtasks">[]>();
+
 const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpdate }: TaskCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -59,25 +63,59 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
   const [saving, setSaving] = useState(false);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const [addingSubtask, setAddingSubtask] = useState(false);
+  const [subtasks, setSubtasks] = useState<Tables<"subtasks">[]>(task.subtasks || []);
+  const [loadingSubtasks, setLoadingSubtasks] = useState(false);
 
   const titleDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const descDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync title from props when task changes externally
   useEffect(() => { setTitle(task.title); }, [task.title]);
   useEffect(() => { setDescription(task.description || ""); }, [task.description]);
+  // If subtasks come from props (initial load), use them
+  useEffect(() => { if (task.subtasks) setSubtasks(task.subtasks); }, [task.subtasks]);
 
   const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !task.is_completed;
-  const completedSubtasks = task.subtasks?.filter(s => s.is_completed).length || 0;
-  const totalSubtasks = task.subtasks?.length || 0;
+  const completedSubtasks = subtasks.filter(s => s.is_completed).length;
+  const totalSubtasks = subtasks.length;
   const subtaskProgress = totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
+
+  // Lazy-load subtasks when expanded
+  const fetchSubtasks = useCallback(async () => {
+    const cached = subtaskCache.get(task.id);
+    if (cached) { setSubtasks(cached); return; }
+    setLoadingSubtasks(true);
+    try {
+      const { data, error } = await supabase
+        .from("subtasks")
+        .select("*")
+        .eq("task_id", task.id)
+        .order("position");
+      if (error) throw error;
+      if (data) {
+        setSubtasks(data);
+        subtaskCache.set(task.id, data);
+      }
+    } catch {
+      toast.error("Erro ao carregar subtarefas");
+    }
+    setLoadingSubtasks(false);
+  }, [task.id]);
+
+  const handleExpand = () => {
+    const next = !expanded;
+    setExpanded(next);
+    if (next && subtasks.length === 0 && !task.subtasks?.length) {
+      fetchSubtasks();
+    }
+  };
 
   const debouncedSaveTitle = useCallback((newTitle: string) => {
     if (titleDebounceRef.current) clearTimeout(titleDebounceRef.current);
     titleDebounceRef.current = setTimeout(async () => {
       if (newTitle !== task.title && newTitle.trim()) {
         setSaving(true);
-        await supabase.from("tasks").update({ title: newTitle.trim() }).eq("id", task.id);
+        const { error } = await supabase.from("tasks").update({ title: newTitle.trim() }).eq("id", task.id);
+        if (error) toast.error("Erro ao salvar título");
         setSaving(false);
       }
     }, 800);
@@ -89,28 +127,23 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
       const val = newDesc.trim() || null;
       if (val !== task.description) {
         setSaving(true);
-        await supabase.from("tasks").update({ description: val }).eq("id", task.id);
+        const { error } = await supabase.from("tasks").update({ description: val }).eq("id", task.id);
+        if (error) toast.error("Erro ao salvar descrição");
         setSaving(false);
       }
     }, 800);
   }, [task.id, task.description]);
 
-  const handleTitleChange = (val: string) => {
-    setTitle(val);
-    debouncedSaveTitle(val);
-  };
-
-  const handleDescChange = (val: string) => {
-    setDescription(val);
-    debouncedSaveDesc(val);
-  };
+  const handleTitleChange = (val: string) => { setTitle(val); debouncedSaveTitle(val); };
+  const handleDescChange = (val: string) => { setDescription(val); debouncedSaveDesc(val); };
 
   const handleTitleBlur = () => {
     setIsEditing(false);
     if (titleDebounceRef.current) clearTimeout(titleDebounceRef.current);
     if (title.trim() && title !== task.title) {
       setSaving(true);
-      supabase.from("tasks").update({ title: title.trim() }).eq("id", task.id).then(() => {
+      supabase.from("tasks").update({ title: title.trim() }).eq("id", task.id).then(({ error }) => {
+        if (error) toast.error("Erro ao salvar título");
         setSaving(false);
         onUpdate();
       });
@@ -123,7 +156,8 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
     const val = description.trim() || null;
     if (val !== task.description) {
       setSaving(true);
-      supabase.from("tasks").update({ description: val }).eq("id", task.id).then(() => {
+      supabase.from("tasks").update({ description: val }).eq("id", task.id).then(({ error }) => {
+        if (error) toast.error("Erro ao salvar descrição");
         setSaving(false);
         onUpdate();
       });
@@ -131,23 +165,40 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
   };
 
   const handleSubtaskToggle = async (subtaskId: string, completed: boolean) => {
-    await supabase.from("subtasks").update({ is_completed: !completed }).eq("id", subtaskId);
-    onUpdate();
+    // Optimistic update
+    setSubtasks(prev => prev.map(s => s.id === subtaskId ? { ...s, is_completed: !completed } : s));
+    subtaskCache.delete(task.id);
+    const { error } = await supabase.from("subtasks").update({ is_completed: !completed }).eq("id", subtaskId);
+    if (error) {
+      toast.error("Erro ao atualizar subtarefa");
+      setSubtasks(prev => prev.map(s => s.id === subtaskId ? { ...s, is_completed: completed } : s));
+    }
   };
 
   const handleAddSubtask = async () => {
     if (!newSubtaskTitle.trim()) return;
     setAddingSubtask(true);
-    const position = (task.subtasks?.length || 0);
-    await supabase.from("subtasks").insert({ task_id: task.id, title: newSubtaskTitle.trim(), position });
+    const position = subtasks.length;
+    const { data, error } = await supabase.from("subtasks").insert({ task_id: task.id, title: newSubtaskTitle.trim(), position }).select().single();
+    if (error) {
+      toast.error("Erro ao adicionar subtarefa");
+    } else if (data) {
+      setSubtasks(prev => [...prev, data]);
+      subtaskCache.delete(task.id);
+    }
     setNewSubtaskTitle("");
     setAddingSubtask(false);
-    onUpdate();
   };
 
   const handleDeleteSubtask = async (subtaskId: string) => {
-    await supabase.from("subtasks").delete().eq("id", subtaskId);
-    onUpdate();
+    const prev = subtasks;
+    setSubtasks(s => s.filter(x => x.id !== subtaskId));
+    subtaskCache.delete(task.id);
+    const { error } = await supabase.from("subtasks").delete().eq("id", subtaskId);
+    if (error) {
+      toast.error("Erro ao excluir subtarefa");
+      setSubtasks(prev);
+    }
   };
 
   const handleComplete = useCallback(() => {
@@ -175,7 +226,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
         animate={{ opacity: 1, y: 0, scale: isDragging ? 1.03 : 1 }}
         transition={{ duration: 0.35, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
         className={`relative rounded-xl overflow-hidden transition-all duration-300 group ${
-          isDragging ? "shadow-2xl z-50" : ""
+          isDragging ? "shadow-2xl z-50 ring-2 ring-primary/30" : ""
         } ${isTop3 ? "top3-card" : ""}`}
         style={{
           background: isTop3
@@ -185,7 +236,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
           backdropFilter: "blur(20px)",
         }}
       >
-        {/* Animated left accent bar */}
+        {/* Left accent bar */}
         <motion.div
           className="absolute left-0 top-0 bottom-0 w-1 rounded-full"
           style={{
@@ -282,14 +333,9 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
             )}
           </div>
 
-          {/* Saving indicator */}
           {saving && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex items-center gap-1 text-xs text-primary/60"
-            >
+            <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+              className="flex items-center gap-1 text-xs text-primary/60">
               <Loader2 className="w-3 h-3 animate-spin" />
             </motion.div>
           )}
@@ -366,7 +412,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
 
           {/* Expand */}
           <motion.button
-            onClick={() => setExpanded(!expanded)}
+            onClick={handleExpand}
             whileHover={{ scale: 1.15, backgroundColor: "rgba(14,165,195,0.08)" }}
             className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg"
           >
@@ -398,7 +444,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
               <div className="px-5 pb-5 pt-2 ml-[76px] border-t border-border/15 relative">
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent pointer-events-none" />
                 
-                {/* Editable description */}
+                {/* Description */}
                 <div className="mb-4 relative z-10">
                   <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2 block">Descrição</span>
                   {isEditingDesc ? (
@@ -426,7 +472,15 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
                     <Sparkles className="w-3 h-3 text-primary/50" />
                     Subtarefas
                   </span>
-                  {task.subtasks && task.subtasks.length > 0 && task.subtasks.map((sub, si) => (
+
+                  {loadingSubtasks && (
+                    <div className="space-y-2">
+                      <Skeleton className="h-8 w-full" />
+                      <Skeleton className="h-8 w-3/4" />
+                    </div>
+                  )}
+
+                  {!loadingSubtasks && subtasks.map((sub, si) => (
                     <motion.label
                       key={sub.id}
                       initial={{ opacity: 0, x: -10 }}
