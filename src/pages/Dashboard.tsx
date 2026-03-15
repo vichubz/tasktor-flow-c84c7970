@@ -8,7 +8,7 @@ import TaskCard from "@/components/dashboard/TaskCard";
 import NewTaskDialog from "@/components/dashboard/NewTaskDialog";
 import CompletedTasks from "@/components/dashboard/CompletedTasks";
 import SkeletonTaskCard from "@/components/dashboard/SkeletonTaskCard";
-import { Plus, Filter, Inbox, Sparkles } from "lucide-react";
+import { Plus, Filter, Inbox, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Tables } from "@/integrations/supabase/types";
@@ -99,48 +99,86 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-screen overflow-hidden">
+    <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
+      {/* Ambient background particles */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <motion.div
+          className="absolute w-[500px] h-[500px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(14,165,195,0.04), transparent 70%)", top: "-10%", right: "-10%" }}
+          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute w-[400px] h-[400px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(45,190,160,0.03), transparent 70%)", bottom: "10%", left: "-5%" }}
+          animate={{ scale: [1.1, 0.9, 1.1], opacity: [0.4, 0.7, 0.4] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
       <DashboardHeader projects={projects} todayCompleted={todayCompleted} />
 
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
+      <div className="flex-1 overflow-y-auto px-6 pb-6 relative z-10">
         {/* Task controls */}
         <div className="flex items-center justify-between mb-6 mt-5">
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-bold text-foreground text-tight font-display gradient-text">Tarefas</h2>
+            <motion.h2
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-xl font-extrabold text-tight font-display gradient-text flex items-center gap-2"
+            >
+              <Zap className="w-5 h-5 text-primary" />
+              Tarefas
+            </motion.h2>
             <motion.span
               key={filteredTasks.length}
-              initial={{ scale: 1.3, opacity: 0 }}
+              initial={{ scale: 1.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="text-sm text-muted-foreground font-mono bg-secondary/50 px-2.5 py-0.5 rounded-md"
+              className="text-sm text-muted-foreground font-mono px-3 py-1 rounded-lg relative overflow-hidden"
+              style={{
+                background: "linear-gradient(135deg, rgba(14,165,195,0.08), rgba(8,18,22,0.6))",
+                border: "1px solid rgba(14,165,195,0.1)",
+              }}
             >
               {filteredTasks.length} pendentes
             </motion.span>
           </div>
           <div className="flex items-center gap-3">
             <Select value={filterProject} onValueChange={setFilterProject}>
-              <SelectTrigger className="w-44 bg-secondary/50 border-border/50 h-9 backdrop-blur-sm">
+              <SelectTrigger className="w-44 bg-secondary/40 border-border/30 h-9 backdrop-blur-sm hover:border-primary/30 transition-colors">
                 <Filter className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
                 <SelectValue placeholder="Filtrar projeto" />
               </SelectTrigger>
-              <SelectContent className="bg-card/95 backdrop-blur-xl border-border/50">
+              <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
                 <SelectItem value="all">Todos os projetos</SelectItem>
                 {projects.map(p => (
                   <SelectItem key={p.id} value={p.id}>
                     <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color, boxShadow: `0 0 6px ${p.color}40` }} />
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color, boxShadow: `0 0 8px ${p.color}50` }} />
                       {p.name}
                     </span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Button
-              onClick={() => setShowNewTask(true)}
-              className="gradient-primary text-primary-foreground h-9 gap-2 glow-primary btn-shimmer font-semibold"
-            >
-              <Plus className="w-4 h-4" />
-              Nova Tarefa
-            </Button>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                onClick={() => setShowNewTask(true)}
+                className="h-9 gap-2 font-bold relative overflow-hidden group"
+                style={{
+                  background: "var(--gradient-primary)",
+                  boxShadow: "0 0 20px rgba(14,165,195,0.3), 0 4px 12px rgba(0,0,0,0.3)",
+                }}
+              >
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent"
+                  animate={{ x: ["-200%", "200%"] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 4 }}
+                />
+                <Plus className="w-4 h-4 relative z-10" />
+                <span className="relative z-10">Nova Tarefa</span>
+              </Button>
+            </motion.div>
           </div>
         </div>
 
@@ -157,13 +195,17 @@ const Dashboard = () => {
             className="text-center py-20 text-muted-foreground"
           >
             <motion.div
-              className="w-20 h-20 rounded-2xl glass-gradient flex items-center justify-center mx-auto mb-5"
-              animate={{ y: [0, -8, 0] }}
+              className="w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-5 relative"
+              style={{
+                background: "linear-gradient(145deg, rgba(14,165,195,0.1), rgba(45,190,160,0.05), rgba(8,18,22,0.8))",
+                border: "1px solid rgba(14,165,195,0.15)",
+              }}
+              animate={{ y: [0, -10, 0], boxShadow: ["0 0 0px rgba(14,165,195,0.2)", "0 0 30px rgba(14,165,195,0.4)", "0 0 0px rgba(14,165,195,0.2)"] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             >
-              <Sparkles className="w-9 h-9 text-primary/50" />
+              <Sparkles className="w-10 h-10 text-primary/60" />
             </motion.div>
-            <p className="text-lg mb-2 font-display font-semibold">Crie seu primeiro projeto para começar</p>
+            <p className="text-lg mb-2 font-display font-extrabold gradient-text">Crie seu primeiro projeto para começar</p>
             <p className="text-sm">Use o menu lateral para gerenciar seus projetos</p>
           </motion.div>
         )}
@@ -208,13 +250,17 @@ const Dashboard = () => {
             className="text-center py-20 text-muted-foreground"
           >
             <motion.div
-              className="w-20 h-20 rounded-2xl glass-gradient flex items-center justify-center mx-auto mb-5"
+              className="w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-5"
+              style={{
+                background: "linear-gradient(145deg, rgba(16,185,129,0.08), rgba(8,18,22,0.8))",
+                border: "1px solid rgba(16,185,129,0.12)",
+              }}
               animate={{ rotate: [0, 5, -5, 0] }}
               transition={{ duration: 4, repeat: Infinity }}
             >
-              <Inbox className="w-9 h-9 text-success/40" />
+              <Inbox className="w-10 h-10 text-success/50" />
             </motion.div>
-            <p className="text-lg font-display font-semibold">Nenhuma tarefa pendente</p>
+            <p className="text-lg font-display font-extrabold gradient-text">Nenhuma tarefa pendente</p>
             <p className="text-sm mt-1">Clique em "Nova Tarefa" para começar</p>
           </motion.div>
         )}

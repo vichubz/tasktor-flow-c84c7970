@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Trash2, GripVertical, ChevronDown, ChevronRight, Flame, AlertTriangle, Clock } from "lucide-react";
+import { Check, Trash2, GripVertical, ChevronRight, Flame, AlertTriangle, Clock, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -32,7 +32,7 @@ const ConfettiParticle = ({ delay, color, angle }: { delay: number; color: strin
 };
 
 const CONFETTI_COLORS = [
-  "hsl(263 70% 58%)", "hsl(187 92% 42%)", "hsl(160 60% 45%)",
+  "hsl(192 80% 50%)", "hsl(172 66% 50%)", "hsl(160 60% 45%)",
   "hsl(45 93% 47%)", "hsl(339 90% 60%)", "hsl(210 100% 60%)",
 ];
 
@@ -75,36 +75,74 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
     ? Math.ceil((new Date(task.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
     : null;
 
+  const projectColor = task.project?.color || "hsl(var(--primary))";
+
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 16, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: isDragging ? 1.03 : 1 }}
-      transition={{ duration: 0.25, delay: index * 0.04 }}
-      className={`glass-hover rounded-xl transition-all duration-200 ${
-        isDragging ? "shadow-2xl z-50 border-primary/20" : ""
+      transition={{ duration: 0.35, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      className={`relative rounded-xl overflow-hidden transition-all duration-300 group ${
+        isDragging ? "shadow-2xl z-50" : ""
       } ${isTop3 ? "top3-card" : ""}`}
+      style={{
+        background: isTop3
+          ? `linear-gradient(145deg, rgba(14, 165, 195, 0.08), rgba(45, 190, 160, 0.04), rgba(8, 18, 22, 0.85))`
+          : "var(--glass-bg)",
+        border: `1px solid ${isTop3 ? "rgba(14, 165, 195, 0.15)" : "var(--glass-border)"}`,
+        backdropFilter: "blur(20px)",
+      }}
     >
-      {/* Main row */}
-      <div className="flex items-center gap-4 px-5 py-4">
-        {/* Drag handle */}
-        <GripVertical className="w-5 h-5 text-muted-foreground/30 flex-shrink-0 cursor-grab hover:text-muted-foreground transition-colors" />
+      {/* Animated left accent bar */}
+      <motion.div
+        className="absolute left-0 top-0 bottom-0 w-1 rounded-full"
+        style={{
+          background: task.project
+            ? `linear-gradient(180deg, ${projectColor}, ${projectColor}80)`
+            : "var(--gradient-primary)",
+        }}
+        initial={{ scaleY: 0 }}
+        animate={{ scaleY: 1 }}
+        transition={{ duration: 0.4, delay: index * 0.05 }}
+      />
 
-        {/* Position badge */}
-        <div className={`flex items-center justify-center min-w-[36px] h-9 rounded-lg font-mono text-sm font-bold ${
-          isTop3
-            ? "bg-primary/15 text-primary neon-text-primary"
-            : "bg-secondary text-muted-foreground"
-        }`}>
-          #{index + 1}
-        </div>
+      {/* Hover shimmer */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{ transform: "skewX(-12deg)" }}
+      />
+
+      {/* Main row */}
+      <div className="flex items-center gap-4 px-5 py-4 pl-6">
+        <GripVertical className="w-5 h-5 text-muted-foreground/20 flex-shrink-0 cursor-grab hover:text-muted-foreground/50 transition-colors" />
+
+        {/* Position badge with gradient */}
+        <motion.div
+          whileHover={{ scale: 1.1, rotate: 3 }}
+          className={`flex items-center justify-center min-w-[36px] h-9 rounded-lg font-mono text-sm font-bold relative overflow-hidden ${
+            isTop3
+              ? "text-primary-foreground"
+              : "bg-secondary/60 text-muted-foreground"
+          }`}
+          style={isTop3 ? { background: "var(--gradient-primary)" } : {}}
+        >
+          {isTop3 && (
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+              animate={{ x: ["-200%", "200%"] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            />
+          )}
+          <span className="relative z-10">#{index + 1}</span>
+        </motion.div>
 
         {isTop3 && (
           <motion.div
-            animate={{ rotate: [0, -12, 12, 0], scale: [1, 1.1, 1] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+            animate={{ rotate: [0, -15, 15, 0], scale: [1, 1.2, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >
-            <Flame className="w-5 h-5 text-primary flex-shrink-0 drop-shadow-[0_0_6px_rgba(124,58,237,0.5)]" />
+            <Flame className="w-5 h-5 text-primary flex-shrink-0 drop-shadow-[0_0_8px_rgba(14,165,195,0.6)]" />
           </motion.div>
         )}
 
@@ -113,10 +151,16 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
           <motion.button
             onClick={handleComplete}
             whileHover={{ scale: 1.2 }}
-            whileTap={{ scale: 0.9 }}
-            className="w-8 h-8 rounded-full border-2 border-muted-foreground/25 flex items-center justify-center hover:border-success hover:bg-success/10 transition-all flex-shrink-0 group"
+            whileTap={{ scale: 0.85 }}
+            className="w-8 h-8 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center hover:border-success transition-all flex-shrink-0 group/btn relative overflow-hidden"
           >
-            <Check className="w-4 h-4 text-transparent group-hover:text-success transition-colors" />
+            <motion.div
+              className="absolute inset-0 rounded-full"
+              style={{ background: "linear-gradient(135deg, rgba(16,185,129,0.2), rgba(45,190,160,0.1))" }}
+              initial={{ scale: 0 }}
+              whileHover={{ scale: 1 }}
+            />
+            <Check className="w-4 h-4 text-transparent group-hover/btn:text-success transition-colors relative z-10" />
           </motion.button>
           <AnimatePresence>
             {showConfetti && confettiParticles.map((p, i) => (
@@ -125,7 +169,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
           </AnimatePresence>
         </div>
 
-        {/* Title + description preview */}
+        {/* Title + description */}
         <div className="flex-1 min-w-0">
           {isEditing ? (
             <input
@@ -139,31 +183,38 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
           ) : (
             <span
               onClick={() => setIsEditing(true)}
-              className="text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-medium"
+              className="text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-semibold"
             >
               {task.title}
             </span>
           )}
           {task.description && !expanded && (
-            <p className="text-xs text-muted-foreground/70 truncate mt-0.5">{task.description}</p>
+            <p className="text-xs text-muted-foreground/60 truncate mt-0.5">{task.description}</p>
           )}
         </div>
 
-        {/* Subtask progress bar */}
+        {/* Subtask progress */}
         {totalSubtasks > 0 && (
           <div className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-20 h-2 bg-secondary rounded-full overflow-hidden">
+            <div className="w-20 h-2.5 bg-secondary/60 rounded-full overflow-hidden relative">
               <motion.div
-                className="h-full rounded-full"
+                className="h-full rounded-full relative overflow-hidden"
                 style={{
                   background: subtaskProgress === 100
-                    ? "hsl(var(--success))"
+                    ? "linear-gradient(90deg, hsl(var(--success)), hsl(172 66% 45%))"
                     : "var(--gradient-primary)",
                 }}
                 initial={{ width: 0 }}
                 animate={{ width: `${subtaskProgress}%` }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-              />
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {/* Shimmer on progress bar */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                  animate={{ x: ["-100%", "100%"] }}
+                  transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
+                />
+              </motion.div>
             </div>
             <span className="text-xs text-muted-foreground font-mono">{completedSubtasks}/{totalSubtasks}</span>
           </div>
@@ -172,37 +223,52 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
         {/* Project badge */}
         {task.project && (
           <motion.span
-            whileHover={{ scale: 1.05 }}
-            className="text-xs font-semibold px-2.5 py-1 rounded-lg flex-shrink-0 cursor-default"
+            whileHover={{ scale: 1.08, y: -1 }}
+            className="text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0 cursor-default relative overflow-hidden"
             style={{
-              backgroundColor: `${task.project.color}18`,
+              background: `linear-gradient(135deg, ${task.project.color}20, ${task.project.color}08)`,
               color: task.project.color,
-              boxShadow: `0 0 12px ${task.project.color}15`,
+              border: `1px solid ${task.project.color}25`,
+              boxShadow: `0 0 16px ${task.project.color}12`,
             }}
           >
             {task.project.name}
           </motion.span>
         )}
 
+        {/* No project badge */}
+        {!task.project && (
+          <span className="text-xs font-medium px-2.5 py-1 rounded-lg flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/30">
+            Sem projeto
+          </span>
+        )}
+
         {/* Deadline */}
         {task.deadline && (
-          <span className={`text-xs font-mono flex-shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md ${
-            isOverdue
-              ? "text-destructive bg-destructive/10 animate-pulse"
-              : daysUntilDeadline !== null && daysUntilDeadline <= 2
-                ? "text-yellow-400 bg-yellow-400/10"
-                : "text-muted-foreground bg-secondary/50"
-          }`}>
-            {isOverdue ? <AlertTriangle className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
+          <motion.span
+            whileHover={{ scale: 1.05 }}
+            className={`text-xs font-mono flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg ${
+              isOverdue
+                ? "text-destructive bg-destructive/10 border border-destructive/20"
+                : daysUntilDeadline !== null && daysUntilDeadline <= 2
+                  ? "text-yellow-400 bg-yellow-400/10 border border-yellow-400/15"
+                  : "text-muted-foreground bg-secondary/50 border border-border/20"
+            }`}
+          >
+            {isOverdue ? (
+              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 0.5, repeat: Infinity }}>
+                <AlertTriangle className="w-3.5 h-3.5" />
+              </motion.div>
+            ) : <Clock className="w-3.5 h-3.5" />}
             {new Date(task.deadline).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
-          </span>
+          </motion.span>
         )}
 
         {/* Expand */}
         <motion.button
           onClick={() => setExpanded(!expanded)}
-          whileHover={{ scale: 1.15 }}
-          className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-secondary/50"
+          whileHover={{ scale: 1.15, backgroundColor: "rgba(14,165,195,0.08)" }}
+          className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg"
         >
           <motion.div animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
             <ChevronRight className="w-4 h-4" />
@@ -212,8 +278,8 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
         {/* Delete */}
         <motion.button
           onClick={() => onDelete(task.id)}
-          whileHover={{ scale: 1.15 }}
-          className="text-muted-foreground/30 hover:text-destructive transition-all flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-destructive/10"
+          whileHover={{ scale: 1.15, backgroundColor: "rgba(239,68,68,0.08)" }}
+          className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg"
         >
           <Trash2 className="w-4 h-4" />
         </motion.button>
@@ -226,30 +292,43 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <div className="px-5 pb-5 pt-2 ml-[76px] border-t border-border/20">
+            <div className="px-5 pb-5 pt-2 ml-[76px] border-t border-border/15 relative">
+              {/* Subtle gradient in expanded area */}
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent pointer-events-none" />
+              
               {task.description && (
-                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{task.description}</p>
+                <p className="text-sm text-muted-foreground mb-4 leading-relaxed relative z-10">{task.description}</p>
               )}
 
               {task.subtasks && task.subtasks.length > 0 && (
-                <div className="space-y-2">
-                  <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Subtarefas</span>
-                  {task.subtasks.map(sub => (
+                <div className="space-y-2 relative z-10">
+                  <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-2">
+                    <Sparkles className="w-3 h-3 text-primary/50" />
+                    Subtarefas
+                  </span>
+                  {task.subtasks.map((sub, si) => (
                     <motion.label
                       key={sub.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: si * 0.05 }}
                       whileHover={{ x: 4 }}
-                      className="flex items-center gap-3 cursor-pointer group py-1.5 px-3 rounded-lg hover:bg-secondary/30 transition-colors"
+                      className="flex items-center gap-3 cursor-pointer group/sub py-2 px-3 rounded-lg hover:bg-primary/[0.04] transition-all"
                     >
-                      <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
-                        sub.is_completed
-                          ? "bg-success border-success"
-                          : "border-muted-foreground/30 group-hover:border-primary"
-                      }`}>
-                        {sub.is_completed && <Check className="w-2.5 h-2.5 text-success-foreground" />}
-                      </div>
+                      <motion.div
+                        whileTap={{ scale: 0.8 }}
+                        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                          sub.is_completed
+                            ? "border-success bg-success/20"
+                            : "border-muted-foreground/25 group-hover/sub:border-primary"
+                        }`}
+                        style={sub.is_completed ? { boxShadow: "0 0 10px rgba(16,185,129,0.3)" } : {}}
+                      >
+                        {sub.is_completed && <Check className="w-3 h-3 text-success" />}
+                      </motion.div>
                       <input
                         type="checkbox"
                         checked={sub.is_completed}
@@ -257,7 +336,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
                         className="sr-only"
                       />
                       <span className={`text-sm transition-all ${
-                        sub.is_completed ? "line-through text-muted-foreground/50" : "text-foreground"
+                        sub.is_completed ? "line-through text-muted-foreground/40" : "text-foreground"
                       }`}>
                         {sub.title}
                       </span>

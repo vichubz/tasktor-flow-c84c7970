@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Outfit", "Space Grotesk", "sans-serif"],
-        display: ["Syne", "Space Grotesk", "sans-serif"],
+        sans: ["Outfit", "Plus Jakarta Sans", "sans-serif"],
+        display: ["Plus Jakarta Sans", "Space Grotesk", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
       colors: {
