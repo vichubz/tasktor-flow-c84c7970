@@ -3,7 +3,8 @@ import { NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, BarChart3, FolderKanban, LogOut, Zap, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, BarChart3, FolderKanban, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import logoIcone from "@/assets/tasktor_logo_icone.png";
 import ProjectManager from "@/components/dashboard/ProjectManager";
 import type { Tables } from "@/integrations/supabase/types";
 

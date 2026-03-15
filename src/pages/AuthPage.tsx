@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Zap } from "lucide-react";
+import logoCompleto from "@/assets/logo_completo_tasktor.png";
 import { toast } from "sonner";
 
 const FloatingOrb = ({ size, color, delay, x, y }: { size: number; color: string; delay: number; x: string; y: string }) => (
