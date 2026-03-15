@@ -50,6 +50,7 @@ const ProjectManager = ({ open, onOpenChange, projects, onUpdated }: ProjectMana
   const [color, setColor] = useState(COLORS[0]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [editColor, setEditColor] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
   const [hasTasks, setHasTasks] = useState(false);
 
