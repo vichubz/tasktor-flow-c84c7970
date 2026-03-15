@@ -129,32 +129,58 @@ const ProjectManager = ({ open, onOpenChange, projects, onUpdated }: ProjectMana
 
           <div className="mt-4 space-y-2">
             {projects.map(p => (
-              <div key={p.id} className="flex items-center gap-3 bg-secondary/50 rounded-lg px-3 py-2.5">
-                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
-                {editingId === p.id ? (
-                  <input
-                    autoFocus
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    onBlur={() => handleSaveEdit(p.id)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSaveEdit(p.id)}
-                    className="flex-1 bg-transparent text-foreground text-sm outline-none border-b border-primary/50"
+              <div key={p.id} className="bg-secondary/50 rounded-lg px-3 py-2.5 space-y-2">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      if (editingId === p.id) {
+                        // cycle — already editing, just focus color
+                      } else {
+                        setEditingId(p.id);
+                        setEditName(p.name);
+                        setEditColor(p.color);
+                      }
+                    }}
+                    className="w-4 h-4 rounded-full flex-shrink-0 ring-1 ring-foreground/10 hover:ring-foreground/30 transition-all"
+                    style={{ backgroundColor: editingId === p.id ? (editColor || p.color) : p.color }}
                   />
-                ) : (
-                  <span className="flex-1 text-sm text-foreground">{p.name}</span>
+                  {editingId === p.id ? (
+                    <input
+                      autoFocus
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      onBlur={() => handleSaveEdit(p.id)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSaveEdit(p.id)}
+                      className="flex-1 bg-transparent text-foreground text-sm outline-none border-b border-primary/50"
+                    />
+                  ) : (
+                    <span className="flex-1 text-sm text-foreground">{p.name}</span>
+                  )}
+                  <button
+                    onClick={() => { setEditingId(p.id); setEditName(p.name); setEditColor(p.color); }}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteClick(p)}
+                    className="text-muted-foreground hover:text-destructive transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                {editingId === p.id && (
+                  <div className="flex flex-wrap gap-1 pl-7">
+                    {COLORS.map(c => (
+                      <button
+                        key={c}
+                        onClick={() => setEditColor(c)}
+                        className={`w-5 h-5 rounded-full transition-all ${editColor === c ? "scale-125 ring-2 ring-foreground/30 ring-offset-1 ring-offset-card" : "hover:scale-110"}`}
+                        style={{ backgroundColor: c }}
+                      />
+                    ))}
+                  </div>
                 )}
-                <button
-                  onClick={() => { setEditingId(p.id); setEditName(p.name); }}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Edit2 className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => handleDeleteClick(p)}
-                  className="text-muted-foreground hover:text-destructive transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
               </div>
             ))}
             {projects.length === 0 && (
