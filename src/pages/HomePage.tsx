@@ -5,42 +5,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { ChevronDown, ArrowRight } from "lucide-react";
 import logoCompleto from "@/assets/logo_completo_tasktor.png";
 
-// Particle component using CSS animation for performance
-const Particle = ({ index }: { index: number }) => {
-  const style = useMemo(() => {
-    const size = 2 + Math.random() * 3;
-    const colors = [
-      "rgba(14,165,195,0.25)",
-      "rgba(124,58,237,0.2)",
-      "rgba(255,255,255,0.15)",
-      "rgba(45,190,160,0.2)",
-    ];
-    const color = colors[index % colors.length];
-    const left = Math.random() * 100;
-    const top = Math.random() * 100;
-    const duration = 15 + Math.random() * 25;
-    const delay = Math.random() * -30;
-    const driftX = -30 + Math.random() * 60;
-    const driftY = -30 + Math.random() * 60;
-
-    return {
-      width: size,
-      height: size,
-      background: color,
-      left: `${left}%`,
-      top: `${top}%`,
-      borderRadius: "50%",
-      position: "absolute" as const,
-      animation: `particle-drift-${index % 6} ${duration}s ease-in-out ${delay}s infinite`,
-      boxShadow: `0 0 ${size * 2}px ${color}`,
-      "--drift-x": `${driftX}px`,
-      "--drift-y": `${driftY}px`,
-    };
-  }, [index]);
-
-  return <div style={style} />;
-};
-
 const HomePage = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
@@ -61,52 +25,60 @@ const HomePage = () => {
     year: "numeric",
   });
 
-  const particles = useMemo(() => Array.from({ length: 40 }, (_, i) => i), []);
-
   return (
-    <div className="flex-1 h-screen overflow-hidden relative flex items-center justify-center">
-      {/* ═══ LAYER 1: Animated gradient background ═══ */}
+    <div className="flex-1 h-screen overflow-hidden relative flex items-center justify-center" style={{ background: "#0A0A0F" }}>
+      {/* ═══ LAYER 0: YouTube Video Background ═══ */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="fixed inset-0 pointer-events-none overflow-hidden"
+        style={{ zIndex: 0 }}
+      >
+        <div
+          className="absolute"
+          style={{
+            top: "50%",
+            left: "50%",
+            width: "120vw",
+            height: "120vh",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <iframe
+            src="https://www.youtube.com/embed/tnd958ovCqI?autoplay=1&mute=1&loop=1&playlist=tnd958ovCqI&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            title="Background Video"
+            style={{
+              width: "100%",
+              height: "100%",
+              border: "none",
+              pointerEvents: "none",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* ═══ LAYER 1: Dark Overlay ═══ */}
+      <div
+        className="fixed inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse 120% 80% at 50% 50%, #1a0a2e 0%, #0d1033 30%, #0A0A1A 70%, #080812 100%)",
-          animation: "bg-breathe 10s ease-in-out infinite",
+          zIndex: 1,
+          background: "linear-gradient(180deg, rgba(5,5,15,0.75) 0%, rgba(5,5,15,0.60) 40%, rgba(5,5,15,0.70) 100%)",
         }}
       />
 
-      {/* ═══ LAYER 2: Perspective grid ═══ */}
-      <div
-        className="absolute inset-0 pointer-events-none overflow-hidden"
-        style={{ perspective: "400px" }}
-      >
-        <div
-          className="absolute w-full"
-          style={{
-            height: "200%",
-            bottom: "-20%",
-            transform: "rotateX(55deg)",
-            transformOrigin: "center bottom",
-            backgroundImage:
-              "linear-gradient(rgba(14,165,195,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px)",
-            backgroundSize: "60px 60px",
-            animation: "grid-scroll 20s linear infinite",
-          }}
-        />
-      </div>
-
-      {/* ═══ LAYER 3: Glow orbs ═══ */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {/* ═══ LAYER 2: Glow orbs (subtle over overlay) ═══ */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 2 }}>
         <motion.div
           className="absolute rounded-full"
           style={{
             width: 450,
             height: 450,
-            background: "radial-gradient(circle, rgba(14,165,195,0.12), transparent 70%)",
+            background: "radial-gradient(circle, rgba(14,165,195,0.08), transparent 70%)",
             filter: "blur(80px)",
             top: "-10%",
             right: "-5%",
           }}
-          animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0.7, 0.4] }}
+          animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.5, 0.3] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
@@ -114,34 +86,14 @@ const HomePage = () => {
           style={{
             width: 400,
             height: 400,
-            background: "radial-gradient(circle, rgba(124,58,237,0.1), transparent 70%)",
+            background: "radial-gradient(circle, rgba(124,58,237,0.07), transparent 70%)",
             filter: "blur(100px)",
             bottom: "-5%",
             left: "-8%",
           }}
-          animate={{ scale: [1.2, 0.9, 1.2], opacity: [0.3, 0.6, 0.3] }}
+          animate={{ scale: [1.2, 0.9, 1.2], opacity: [0.2, 0.45, 0.2] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         />
-        <motion.div
-          className="absolute rounded-full"
-          style={{
-            width: 350,
-            height: 350,
-            background: "radial-gradient(circle, rgba(16,185,129,0.08), transparent 70%)",
-            filter: "blur(90px)",
-            top: "50%",
-            left: "60%",
-          }}
-          animate={{ scale: [0.9, 1.15, 0.9], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
-
-      {/* ═══ LAYER 4: Particles ═══ */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {particles.map(i => (
-          <Particle key={i} index={i} />
-        ))}
       </div>
 
       {/* ═══ CLOCK — top right ═══ */}
@@ -149,7 +101,8 @@ const HomePage = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
-        className="absolute top-6 right-8 text-right z-20"
+        className="absolute top-6 right-8 text-right"
+        style={{ zIndex: 10 }}
       >
         <div className="font-mono text-sm text-white/40 tracking-wider">
           {hours}
@@ -161,7 +114,7 @@ const HomePage = () => {
       </motion.div>
 
       {/* ═══ CENTRAL CONTENT ═══ */}
-      <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-2xl">
+      <div className="relative flex flex-col items-center text-center px-6 max-w-2xl" style={{ zIndex: 10 }}>
         {/* Greeting */}
         <motion.p
           initial={{ opacity: 0, y: -10 }}
@@ -186,7 +139,7 @@ const HomePage = () => {
           />
         </motion.div>
 
-        {/* Tagline glow */}
+        {/* Tagline */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -225,7 +178,6 @@ const HomePage = () => {
             boxShadow: "0 0 40px rgba(14,165,195,0.35), 0 8px 32px rgba(0,0,0,0.4)",
           }}
         >
-          {/* Shimmer effect */}
           <motion.div
             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
             animate={{ x: ["-200%", "200%"] }}
@@ -243,7 +195,8 @@ const HomePage = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        style={{ zIndex: 10 }}
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}
@@ -252,32 +205,6 @@ const HomePage = () => {
           <ChevronDown className="w-5 h-5 text-white/15" />
         </motion.div>
       </motion.div>
-
-      {/* ═══ CSS keyframes for particles and background ═══ */}
-      <style>{`
-        @keyframes bg-breathe {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-        @keyframes grid-scroll {
-          0% { background-position: 0 0; }
-          100% { background-position: 0 60px; }
-        }
-        ${Array.from({ length: 6 }, (_, i) => {
-          const x1 = -20 + Math.random() * 40;
-          const y1 = -20 + Math.random() * 40;
-          const x2 = -15 + Math.random() * 30;
-          const y2 = -15 + Math.random() * 30;
-          return `
-            @keyframes particle-drift-${i} {
-              0%, 100% { transform: translate(0, 0); opacity: 0.15; }
-              25% { transform: translate(${x1}px, ${y1}px); opacity: 0.3; }
-              50% { transform: translate(${x2}px, ${y2}px); opacity: 0.1; }
-              75% { transform: translate(${-x1}px, ${-y2}px); opacity: 0.25; }
-            }
-          `;
-        }).join("")}
-      `}</style>
     </div>
   );
 };
