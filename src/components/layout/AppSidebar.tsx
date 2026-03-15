@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { LayoutDashboard, BarChart3, FolderKanban, LogOut, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import logoIcone from "@/assets/tasktor_logo_icone.png";
+import logoCompleto from "@/assets/logo_completo_tasktor.png";
 import ProjectManager from "@/components/dashboard/ProjectManager";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -49,23 +50,23 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
 
         {/* Logo */}
-        <div className="flex items-center gap-2.5 px-4 py-5 border-b border-border/20 relative z-10">
-          <motion.div
-            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
-            whileHover={{ rotate: 15, scale: 1.1 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <img src={logoIcone} alt="Tasktor" className="w-8 h-8 object-contain" />
-          </motion.div>
-          {!collapsed && (
-            <motion.span
+        <div className="flex items-center justify-center px-3 py-4 border-b border-border/20 relative z-10">
+          {collapsed ? (
+            <motion.div
+              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
+              whileHover={{ rotate: 15, scale: 1.1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <img src={logoIcone} alt="Tasktor" className="w-8 h-8 object-contain" />
+            </motion.div>
+          ) : (
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-lg font-bold font-display gradient-text text-tight"
+              className="flex items-center justify-center"
             >
-              Tasktor
-            </motion.span>
+              <img src={logoCompleto} alt="Tasktor" className="h-9 object-contain" />
+            </motion.div>
           )}
         </div>
 
