@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,10 +9,25 @@ const HomePage = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Set playback speed to 0.5x via YouTube postMessage API
+  const onIframeLoad = useCallback(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    // Wait a moment for the player to initialize
+    const t = setTimeout(() => {
+      iframe.contentWindow?.postMessage(
+        JSON.stringify({ event: "command", func: "setPlaybackRate", args: [0.5] }),
+        "*"
+      );
+    }, 1500);
+    return () => clearTimeout(t);
   }, []);
 
   const hours = time.getHours().toString().padStart(2, "0");
@@ -29,7 +44,7 @@ const HomePage = () => {
     <div className="flex-1 h-screen overflow-hidden relative flex items-center justify-center" style={{ background: "#0A0A0F" }}>
       {/* ═══ LAYER 0: YouTube Video Background ═══ */}
       <div
-        className="fixed inset-0 pointer-events-none overflow-hidden"
+        className="absolute inset-0 pointer-events-none overflow-hidden"
         style={{ zIndex: 0 }}
       >
         <div
@@ -37,12 +52,14 @@ const HomePage = () => {
           style={{
             top: "50%",
             left: "50%",
-            width: "120vw",
-            height: "120vh",
+            width: "120%",
+            height: "120%",
             transform: "translate(-50%, -50%)",
           }}
         >
           <iframe
+            ref={iframeRef}
+            onLoad={onIframeLoad}
             src="https://www.youtube.com/embed/tnd958ovCqI?autoplay=1&mute=1&loop=1&playlist=tnd958ovCqI&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3"
             allow="autoplay; encrypted-media"
             allowFullScreen
@@ -59,7 +76,7 @@ const HomePage = () => {
 
       {/* ═══ LAYER 1: Dark Overlay ═══ */}
       <div
-        className="fixed inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none"
         style={{
           zIndex: 1,
           background: "linear-gradient(180deg, rgba(5,5,15,0.75) 0%, rgba(5,5,15,0.60) 40%, rgba(5,5,15,0.70) 100%)",
