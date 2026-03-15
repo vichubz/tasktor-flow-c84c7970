@@ -35,7 +35,7 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !title || !projectId) return;
+    if (!user || !title) return;
     setLoading(true);
 
     // Get max position
