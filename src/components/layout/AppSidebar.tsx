@@ -40,10 +40,14 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
       <motion.div
         animate={{ width: collapsed ? 64 : 224 }}
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-        className="h-screen flex flex-col border-r border-border/50 bg-sidebar overflow-hidden"
+        className="h-screen flex flex-col border-r border-border/30 overflow-hidden relative"
+        style={{ background: "var(--gradient-sidebar)" }}
       >
+        {/* Subtle glow at top */}
+        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+
         {/* Logo */}
-        <div className="flex items-center gap-2.5 px-4 py-5 border-b border-border/30">
+        <div className="flex items-center gap-2.5 px-4 py-5 border-b border-border/20 relative z-10">
           <motion.div
             className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
             whileHover={{ rotate: 15, scale: 1.1 }}
@@ -56,7 +60,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="text-lg font-bold text-foreground text-tight"
+              className="text-lg font-bold font-display gradient-text text-tight"
             >
               Tasktor
             </motion.span>
@@ -68,15 +72,15 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="px-4 py-3 border-b border-border/30"
+            className="px-4 py-3 border-b border-border/20"
           >
             <p className="text-xs text-muted-foreground">Olá,</p>
-            <p className="text-sm font-semibold text-foreground truncate">{profile.name || "Usuário"}</p>
+            <p className="text-sm font-semibold text-foreground truncate font-display">{profile.name || "Usuário"}</p>
           </motion.div>
         )}
 
         {/* Nav */}
-        <nav className="flex-1 py-3 px-2 space-y-1">
+        <nav className="flex-1 py-3 px-2 space-y-1 relative z-10">
           {links.map(link => {
             const isActive = location.pathname === link.to;
             return (
@@ -94,7 +98,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
                 {isActive && (
                   <motion.div
                     layoutId="nav-indicator"
-                    className="absolute inset-0 bg-primary/10 rounded-lg -z-10"
+                    className="absolute inset-0 bg-primary/8 rounded-lg -z-10 border border-primary/10"
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
                 )}
@@ -110,14 +114,21 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
             {!collapsed && <span>Projetos</span>}
           </button>
 
-          {/* Project list in sidebar */}
+          {/* Project list */}
           {!collapsed && projects.length > 0 && (
             <div className="ml-4 mt-1 space-y-0.5">
               {projects.slice(0, 5).map(p => (
-                <div key={p.id} className="flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground">
-                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                <motion.div
+                  key={p.id}
+                  whileHover={{ x: 4 }}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground rounded-md hover:bg-secondary/30 transition-colors cursor-default"
+                >
+                  <span
+                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: p.color, boxShadow: `0 0 6px ${p.color}40` }}
+                  />
                   <span className="truncate">{p.name}</span>
-                </div>
+                </motion.div>
               ))}
               {projects.length > 5 && (
                 <span className="text-[10px] text-muted-foreground/60 px-3">+{projects.length - 5} mais</span>
@@ -127,7 +138,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
         </nav>
 
         {/* Bottom */}
-        <div className="px-2 py-3 border-t border-border/30 space-y-1">
+        <div className="px-2 py-3 border-t border-border/20 space-y-1 relative z-10">
           <button
             onClick={signOut}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-destructive transition-all w-full"
