@@ -44,7 +44,7 @@ const HomePage = () => {
     <div className="flex-1 h-screen overflow-hidden relative flex items-center justify-center" style={{ background: "#0A0A0F" }}>
       {/* ═══ LAYER 0: YouTube Video Background ═══ */}
       <div
-        className="fixed inset-0 pointer-events-none overflow-hidden"
+        className="absolute inset-0 pointer-events-none overflow-hidden"
         style={{ zIndex: 0 }}
       >
         <div
@@ -52,12 +52,14 @@ const HomePage = () => {
           style={{
             top: "50%",
             left: "50%",
-            width: "120vw",
-            height: "120vh",
+            width: "120%",
+            height: "120%",
             transform: "translate(-50%, -50%)",
           }}
         >
           <iframe
+            ref={iframeRef}
+            onLoad={onIframeLoad}
             src="https://www.youtube.com/embed/tnd958ovCqI?autoplay=1&mute=1&loop=1&playlist=tnd958ovCqI&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1&iv_load_policy=3"
             allow="autoplay; encrypted-media"
             allowFullScreen
