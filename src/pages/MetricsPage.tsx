@@ -5,9 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
 import { CalendarDays, Clock, CheckCircle2, TrendingUp, Award } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { Tables } from "@/integrations/supabase/types";
-
-type Project = Tables<"projects">;
+import { toast } from "sonner";
 
 const useCountUp = (end: number, duration = 600) => {
   const [count, setCount] = useState(0);
@@ -27,7 +25,7 @@ const useCountUp = (end: number, duration = 600) => {
 const MetricsPage = () => {
   const { user } = useAuth();
   const [period, setPeriod] = useState("week");
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<{ id: string; name: string; color: string }[]>([]);
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
   const [timeEntries, setTimeEntries] = useState<any[]>([]);
   const [meetingLogs, setMeetingLogs] = useState<any[]>([]);
@@ -44,17 +42,24 @@ const MetricsPage = () => {
       else { startDate = new Date(now); startDate.setDate(now.getDate() - 30); }
       const startStr = startDate.toISOString();
 
-      const [tasksRes, projectsRes, timeRes, meetingRes] = await Promise.all([
-        supabase.from("tasks").select("*, project:projects(*)").eq("user_id", user.id).eq("is_completed", true).gte("completed_at", startStr).order("completed_at", { ascending: false }),
-        supabase.from("projects").select("*").eq("user_id", user.id),
-        supabase.from("time_entries").select("*").eq("user_id", user.id).gte("date", startDate.toISOString().split("T")[0]),
-        supabase.from("meeting_logs").select("*").eq("user_id", user.id).gte("date", startDate.toISOString().split("T")[0]),
-      ]);
+      try {
+        const [tasksRes, projectsRes, timeRes, meetingRes] = await Promise.all([
+          supabase.from("tasks").select("id, title, completed_at, project_id, project:projects(name, color)").eq("user_id", user.id).eq("is_completed", true).gte("completed_at", startStr).order("completed_at", { ascending: false }),
+          supabase.from("projects").select("id, name, color").eq("user_id", user.id),
+          supabase.from("time_entries").select("id, project_id, date, duration_seconds").eq("user_id", user.id).gte("date", startDate.toISOString().split("T")[0]),
+          supabase.from("meeting_logs").select("id, date, hours, meeting_count").eq("user_id", user.id).gte("date", startDate.toISOString().split("T")[0]),
+        ]);
 
-      if (tasksRes.data) setCompletedTasks(tasksRes.data);
-      if (projectsRes.data) setProjects(projectsRes.data);
-      if (timeRes.data) setTimeEntries(timeRes.data);
-      if (meetingRes.data) setMeetingLogs(meetingRes.data);
+        if (tasksRes.error || projectsRes.error || timeRes.error || meetingRes.error) {
+          toast.error("Erro ao carregar métricas");
+        }
+        if (tasksRes.data) setCompletedTasks(tasksRes.data);
+        if (projectsRes.data) setProjects(projectsRes.data);
+        if (timeRes.data) setTimeEntries(timeRes.data);
+        if (meetingRes.data) setMeetingLogs(meetingRes.data);
+      } catch {
+        toast.error("Erro ao carregar métricas");
+      }
       setLoading(false);
     };
     fetchMetrics();
@@ -132,7 +137,6 @@ const MetricsPage = () => {
         </Select>
       </div>
 
-      {/* Stat cards */}
       <div className="grid grid-cols-5 gap-4 mb-8">
         {statCards.map((stat, i) => (
           <motion.div
@@ -142,7 +146,6 @@ const MetricsPage = () => {
             transition={{ delay: i * 0.08, ease: "easeOut" }}
             className="stat-card rounded-xl p-5 card-lift relative overflow-hidden"
           >
-            {/* Gradient glow */}
             <div className={`absolute inset-0 bg-gradient-to-br ${stat.glow} to-transparent opacity-50 pointer-events-none`} />
             <div className="relative z-10">
               <stat.icon className={`w-5 h-5 ${stat.color} mb-3`} />
@@ -160,14 +163,8 @@ const MetricsPage = () => {
         ))}
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-2 gap-6 mb-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="glass-gradient rounded-xl p-6"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-gradient rounded-xl p-6">
           <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tarefas Concluídas por Dia</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={tasksChartData}>
@@ -185,12 +182,7 @@ const MetricsPage = () => {
           </ResponsiveContainer>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="glass-gradient rounded-xl p-6"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="glass-gradient rounded-xl p-6">
           <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tempo por Projeto</h3>
           {projectTimeData.length > 0 ? (
             <div className="flex items-center gap-4">
@@ -220,12 +212,7 @@ const MetricsPage = () => {
         </motion.div>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="glass-gradient rounded-xl p-6 mb-8"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-gradient rounded-xl p-6 mb-8">
         <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tempo Trabalhado por Dia</h3>
         <ResponsiveContainer width="100%" height={220}>
           <AreaChart data={timeChartData}>
@@ -243,13 +230,7 @@ const MetricsPage = () => {
         </ResponsiveContainer>
       </motion.div>
 
-      {/* Completed tasks history */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="glass-gradient rounded-xl p-6"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="glass-gradient rounded-xl p-6">
         <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Histórico de Tarefas</h3>
         {completedTasks.length > 0 ? (
           <div className="space-y-1">

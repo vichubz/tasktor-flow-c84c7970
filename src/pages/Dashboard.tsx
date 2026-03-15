@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,38 +25,62 @@ const Dashboard = () => {
   const [showNewTask, setShowNewTask] = useState(false);
   const [loading, setLoading] = useState(true);
   const [todayCompleted, setTodayCompleted] = useState(0);
+  const skipRealtimeRef = useRef(false);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
     const today = new Date().toISOString().split("T")[0];
-    const [tasksRes, projectsRes, completedRes] = await Promise.all([
-      supabase
-        .from("tasks")
-        .select("*, subtasks(*), project:projects(*)")
-        .eq("user_id", user.id)
-        .eq("is_completed", false)
-        .order("position", { ascending: true }),
-      supabase.from("projects").select("*").eq("user_id", user.id).order("created_at"),
-      supabase
-        .from("tasks")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .eq("is_completed", true)
-        .gte("completed_at", `${today}T00:00:00`),
-    ]);
-    if (tasksRes.data) setTasks(tasksRes.data as Task[]);
-    if (projectsRes.data) setProjects(projectsRes.data);
-    setTodayCompleted(completedRes.count ?? 0);
+    try {
+      const [tasksRes, projectsRes, completedRes] = await Promise.all([
+        supabase
+          .from("tasks")
+          .select("*, project:projects(id, name, color)")
+          .eq("user_id", user.id)
+          .eq("is_completed", false)
+          .order("position", { ascending: true }),
+        supabase.from("projects").select("id, name, color, icon, created_at, user_id").eq("user_id", user.id).order("created_at"),
+        supabase
+          .from("tasks")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .eq("is_completed", true)
+          .gte("completed_at", `${today}T00:00:00`),
+      ]);
+      if (tasksRes.data) setTasks(tasksRes.data as Task[]);
+      if (projectsRes.data) setProjects(projectsRes.data);
+      setTodayCompleted(completedRes.count ?? 0);
+    } catch {
+      toast.error("Erro ao carregar dados");
+    }
     setLoading(false);
   }, [user]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  // Keyboard shortcut: N to open new task
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "n" || e.key === "N") {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) return;
+        e.preventDefault();
+        setShowNewTask(true);
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
+  // Realtime — skip self-triggered events
   useEffect(() => {
     if (!user) return;
     const channel = supabase
       .channel("dashboard-tasks")
       .on("postgres_changes", { event: "*", schema: "public", table: "tasks", filter: `user_id=eq.${user.id}` }, () => {
+        if (skipRealtimeRef.current) {
+          skipRealtimeRef.current = false;
+          return;
+        }
         fetchData();
       })
       .subscribe();
@@ -72,47 +96,77 @@ const Dashboard = () => {
     const items = Array.from(filteredTasks);
     const [reordered] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reordered);
-    const updatedTasks = items.map((t, i) => ({ ...t, position: i }));
+
+    // Only update tasks whose position actually changed
+    const changes: { id: string; position: number }[] = [];
+    const updatedTasks = items.map((t, i) => {
+      if (t.position !== i) changes.push({ id: t.id, position: i });
+      return { ...t, position: i };
+    });
+
     setTasks(prev => {
       const otherTasks = prev.filter(t => !updatedTasks.find(u => u.id === t.id));
       return [...updatedTasks, ...otherTasks].sort((a, b) => a.position - b.position);
     });
-    await Promise.all(
-      updatedTasks.map(t => supabase.from("tasks").update({ position: t.position }).eq("id", t.id))
-    );
+
+    if (changes.length === 0) return;
+    skipRealtimeRef.current = true;
+
+    try {
+      const { error } = await supabase.rpc("reorder_tasks", {
+        task_ids: changes.map(c => c.id),
+        new_positions: changes.map(c => c.position),
+      });
+      if (error) throw error;
+    } catch {
+      toast.error("Erro ao reordenar tarefas");
+      fetchData();
+    }
   };
 
   const handleComplete = async (taskId: string) => {
-    setTasks(prev => prev.filter(t => t.id !== taskId));
-    setTodayCompleted(prev => prev + 1);
-    toast.success("Tarefa concluída! 🎉");
-    await supabase.from("tasks").update({
+    const prev = [...tasks];
+    setTasks(p => p.filter(t => t.id !== taskId));
+    setTodayCompleted(p => p + 1);
+    skipRealtimeRef.current = true;
+
+    const { error } = await supabase.from("tasks").update({
       is_completed: true,
       completed_at: new Date().toISOString()
     }).eq("id", taskId);
+
+    if (error) {
+      toast.error("Erro ao concluir tarefa");
+      setTasks(prev);
+      setTodayCompleted(p => p - 1);
+    } else {
+      toast.success("Tarefa concluída! 🎉");
+    }
   };
 
   const handleDelete = async (taskId: string) => {
-    setTasks(prev => prev.filter(t => t.id !== taskId));
-    toast.success("Tarefa excluída");
-    await supabase.from("tasks").delete().eq("id", taskId);
+    const prev = [...tasks];
+    setTasks(p => p.filter(t => t.id !== taskId));
+    skipRealtimeRef.current = true;
+
+    const { error } = await supabase.from("tasks").delete().eq("id", taskId);
+    if (error) {
+      toast.error("Erro ao excluir tarefa");
+      setTasks(prev);
+    } else {
+      toast.success("Tarefa excluída");
+    }
   };
 
   return (
     <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
-      {/* Ambient background particles */}
+      {/* Ambient background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
           className="absolute w-[500px] h-[500px] rounded-full"
           style={{ background: "radial-gradient(circle, rgba(14,165,195,0.04), transparent 70%)", top: "-10%", right: "-10%" }}
           animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute w-[400px] h-[400px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(45,190,160,0.03), transparent 70%)", bottom: "10%", left: "-5%" }}
-          animate={{ scale: [1.1, 0.9, 1.1], opacity: [0.4, 0.7, 0.4] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
 
@@ -177,12 +231,12 @@ const Dashboard = () => {
                 />
                 <Plus className="w-4 h-4 relative z-10" />
                 <span className="relative z-10">Nova Tarefa</span>
+                <kbd className="relative z-10 ml-1 text-[10px] bg-white/10 px-1.5 py-0.5 rounded font-mono">N</kbd>
               </Button>
             </motion.div>
           </div>
         </div>
 
-        {/* Loading skeleton */}
         {loading && (
           <div className="space-y-3">
             {[0, 1, 2].map(i => <SkeletonTaskCard key={i} />)}
@@ -210,7 +264,6 @@ const Dashboard = () => {
           </motion.div>
         )}
 
-        {/* Task list */}
         {!loading && (
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="tasks">

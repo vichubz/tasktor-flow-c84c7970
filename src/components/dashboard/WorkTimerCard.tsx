@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Play, Pause, Square, Timer } from "lucide-react";
+import { Play, Pause, Square, Timer, Cloud } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
@@ -30,47 +30,60 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
   const [selectedProject, setSelectedProject] = useState("");
   const [activeEntryId, setActiveEntryId] = useState<string | null>(null);
   const [dayTotal, setDayTotal] = useState(0);
+  const [showSync, setShowSync] = useState(false);
   const pausedSecondsRef = useRef(0);
   const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startedAtRef = useRef<string | null>(null);
+  const secondsRef = useRef(0);
+
+  // Keep ref in sync with state
+  useEffect(() => { secondsRef.current = seconds; }, [seconds]);
 
   const today = new Date().toISOString().split("T")[0];
 
   const fetchDayTotal = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from("time_entries")
-      .select("duration_seconds")
-      .eq("user_id", user.id)
-      .eq("date", today)
-      .not("ended_at", "is", null);
-    if (data) setDayTotal(data.reduce((sum, e) => sum + e.duration_seconds, 0));
+    try {
+      const { data } = await supabase
+        .from("time_entries")
+        .select("duration_seconds")
+        .eq("user_id", user.id)
+        .eq("date", today)
+        .not("ended_at", "is", null);
+      if (data) setDayTotal(data.reduce((sum, e) => sum + e.duration_seconds, 0));
+    } catch {
+      // silent
+    }
   }, [user, today]);
 
   useEffect(() => {
     if (!user) return;
     const loadActive = async () => {
-      const { data } = await supabase
-        .from("time_entries")
-        .select("*")
-        .eq("user_id", user.id)
-        .is("ended_at", null)
-        .order("started_at", { ascending: false })
-        .limit(1);
-      if (data && data.length > 0) {
-        const entry = data[0];
-        setActiveEntryId(entry.id);
-        setSelectedProject(entry.project_id);
-        startedAtRef.current = entry.started_at;
-        if (entry.duration_seconds > 0) {
-          setSeconds(entry.duration_seconds);
-          pausedSecondsRef.current = entry.duration_seconds;
-          setIsPaused(true);
-        } else {
-          const elapsed = Math.floor((Date.now() - new Date(entry.started_at).getTime()) / 1000);
-          setSeconds(elapsed);
-          setIsRunning(true);
+      try {
+        const { data } = await supabase
+          .from("time_entries")
+          .select("*")
+          .eq("user_id", user.id)
+          .is("ended_at", null)
+          .order("started_at", { ascending: false })
+          .limit(1);
+        if (data && data.length > 0) {
+          const entry = data[0];
+          setActiveEntryId(entry.id);
+          setSelectedProject(entry.project_id);
+          startedAtRef.current = entry.started_at;
+          if (entry.duration_seconds > 0) {
+            setSeconds(entry.duration_seconds);
+            pausedSecondsRef.current = entry.duration_seconds;
+            setIsPaused(true);
+          } else {
+            const elapsed = Math.floor((Date.now() - new Date(entry.started_at).getTime()) / 1000);
+            setSeconds(elapsed);
+            setIsRunning(true);
+          }
         }
+      } catch {
+        toast.error("Erro ao carregar timer");
       }
     };
     loadActive();
@@ -83,43 +96,54 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
     return () => clearInterval(interval);
   }, [isRunning]);
 
+  // Sync interval — created once when isRunning changes, reads from ref
   useEffect(() => {
     if (!isRunning || !activeEntryId) {
       if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
       return;
     }
-    syncIntervalRef.current = setInterval(() => {
-      supabase.from("time_entries").update({ duration_seconds: seconds }).eq("id", activeEntryId);
+    syncIntervalRef.current = setInterval(async () => {
+      const { error } = await supabase.from("time_entries").update({ duration_seconds: secondsRef.current }).eq("id", activeEntryId);
+      if (!error) {
+        setShowSync(true);
+        setTimeout(() => setShowSync(false), 1200);
+      }
     }, 30000);
     return () => { if (syncIntervalRef.current) clearInterval(syncIntervalRef.current); };
-  }, [isRunning, activeEntryId, seconds]);
+  }, [isRunning, activeEntryId]);
 
   const handleStart = async () => {
     if (!user || !selectedProject) {
       if (!selectedProject) toast.error("Selecione um projeto primeiro");
       return;
     }
-    if (isPaused && activeEntryId) {
-      const newStartedAt = new Date(Date.now() - pausedSecondsRef.current * 1000).toISOString();
-      startedAtRef.current = newStartedAt;
-      await supabase.from("time_entries").update({ started_at: newStartedAt, duration_seconds: 0 }).eq("id", activeEntryId);
-      setIsPaused(false);
-      setIsRunning(true);
-      return;
-    }
-    if (activeEntryId) {
-      await supabase.from("time_entries").update({ ended_at: new Date().toISOString(), duration_seconds: seconds }).eq("id", activeEntryId);
-    }
-    const now = new Date().toISOString();
-    const { data } = await supabase.from("time_entries").insert({ user_id: user.id, project_id: selectedProject, started_at: now }).select().single();
-    if (data) {
-      setActiveEntryId(data.id);
-      startedAtRef.current = now;
-      setSeconds(0);
-      pausedSecondsRef.current = 0;
-      setIsRunning(true);
-      setIsPaused(false);
-      toast.success("Timer iniciado!");
+    try {
+      if (isPaused && activeEntryId) {
+        const newStartedAt = new Date(Date.now() - pausedSecondsRef.current * 1000).toISOString();
+        startedAtRef.current = newStartedAt;
+        const { error } = await supabase.from("time_entries").update({ started_at: newStartedAt, duration_seconds: 0 }).eq("id", activeEntryId);
+        if (error) throw error;
+        setIsPaused(false);
+        setIsRunning(true);
+        return;
+      }
+      if (activeEntryId) {
+        await supabase.from("time_entries").update({ ended_at: new Date().toISOString(), duration_seconds: seconds }).eq("id", activeEntryId);
+      }
+      const now = new Date().toISOString();
+      const { data, error } = await supabase.from("time_entries").insert({ user_id: user.id, project_id: selectedProject, started_at: now }).select().single();
+      if (error) throw error;
+      if (data) {
+        setActiveEntryId(data.id);
+        startedAtRef.current = now;
+        setSeconds(0);
+        pausedSecondsRef.current = 0;
+        setIsRunning(true);
+        setIsPaused(false);
+        toast.success("Timer iniciado!");
+      }
+    } catch {
+      toast.error("Erro ao iniciar timer");
     }
   };
 
@@ -128,17 +152,23 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
     setIsPaused(true);
     pausedSecondsRef.current = seconds;
     if (activeEntryId) {
-      await supabase.from("time_entries").update({ duration_seconds: seconds }).eq("id", activeEntryId);
+      const { error } = await supabase.from("time_entries").update({ duration_seconds: seconds }).eq("id", activeEntryId);
+      if (error) toast.error("Erro ao pausar timer");
     }
     toast("Timer pausado", { icon: "⏸️" });
   };
 
   const handleStop = async () => {
+    const prevSeconds = seconds;
     setIsRunning(false);
     setIsPaused(false);
     if (activeEntryId) {
-      await supabase.from("time_entries").update({ ended_at: new Date().toISOString(), duration_seconds: seconds }).eq("id", activeEntryId);
-      toast.success("Tempo salvo!");
+      const { error } = await supabase.from("time_entries").update({ ended_at: new Date().toISOString(), duration_seconds: prevSeconds }).eq("id", activeEntryId);
+      if (error) {
+        toast.error("Erro ao salvar tempo");
+      } else {
+        toast.success("Tempo salvo!");
+      }
     }
     setActiveEntryId(null);
     startedAtRef.current = null;
@@ -167,6 +197,19 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
             {isRunning && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-success animate-pulse" />}
           </div>
           <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Timer</span>
+          {/* Sync indicator */}
+          <AnimatePresence>
+            {showSync && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                className="flex items-center gap-1 text-success"
+              >
+                <Cloud className="w-3 h-3" />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         <span className="text-[10px] text-muted-foreground font-mono">
           Hoje: <span className="text-foreground font-bold">{formatDayTotal(dayTotal + (isActive ? seconds : 0))}</span>
