@@ -29,11 +29,17 @@ const AuthPage = () => {
         navigate("/");
       }
     } else {
+      if (inviteCode.toLowerCase() !== "ebss") {
+        toast.error("Código de convite inválido.");
+        setIsLoading(false);
+        return;
+      }
       const { error } = await signUp(email, password, name);
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success("Conta criada! Verifique seu email para confirmar.");
+        toast.success("Conta criada com sucesso!");
+        navigate("/");
       }
     }
     setIsLoading(false);
