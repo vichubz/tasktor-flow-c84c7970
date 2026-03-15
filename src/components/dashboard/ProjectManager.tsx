@@ -20,7 +20,22 @@ import { toast } from "sonner";
 
 type Project = Tables<"projects">;
 
-const COLORS = ["#7C3AED", "#6366F1", "#06B6D4", "#10B981", "#EF4444", "#F59E0B", "#EC4899", "#8B5CF6"];
+const COLORS = [
+  // Roxos & Violetas
+  "#7C3AED", "#8B5CF6", "#6366F1", "#A855F7", "#C084FC",
+  // Azuis
+  "#3B82F6", "#2563EB", "#06B6D4", "#0EA5E9", "#38BDF8",
+  // Verdes
+  "#10B981", "#059669", "#22C55E", "#34D399", "#2DD4A0",
+  // Vermelhos & Laranjas
+  "#EF4444", "#F97316", "#FB923C", "#DC2626",
+  // Amarelos
+  "#F59E0B", "#EAB308", "#FBBF24",
+  // Rosas
+  "#EC4899", "#F472B6", "#DB2777",
+  // Neutros
+  "#6B7280", "#78716C", "#64748B",
+];
 
 interface ProjectManagerProps {
   open: boolean;
