@@ -235,7 +235,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      reorder_tasks: {
+        Args: { new_positions: number[]; task_ids: string[] }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
