@@ -11,6 +11,7 @@ import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/NotFound";
 
 const MetricsPage = lazy(() => import("@/pages/MetricsPage"));
+const HomePage = lazy(() => import("@/pages/HomePage"));
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,15 @@ const AnimatedRoutes = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><AuthPage /></PageTransition>} />
+        <Route path="/home" element={
+          <AppLayout>
+            <PageTransition>
+              <Suspense fallback={<LoadingFallback />}>
+                <HomePage />
+              </Suspense>
+            </PageTransition>
+          </AppLayout>
+        } />
         <Route path="/dashboard" element={<AppLayout><PageTransition><Dashboard /></PageTransition></AppLayout>} />
         <Route path="/metrics" element={
           <AppLayout>

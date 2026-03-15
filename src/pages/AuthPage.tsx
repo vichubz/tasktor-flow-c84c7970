@@ -33,7 +33,7 @@ const AuthPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user) navigate("/dashboard", { replace: true });
+    if (!loading && user) navigate("/home", { replace: true });
   }, [user, loading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,7 +45,7 @@ const AuthPage = () => {
       if (error) {
         toast.error(error.message);
       } else {
-        navigate("/dashboard");
+        navigate("/home");
       }
     } else {
       if (inviteCode.toLowerCase() !== "ebss") {
@@ -58,7 +58,7 @@ const AuthPage = () => {
         toast.error(error.message);
       } else {
         toast.success("Conta criada com sucesso!");
-        navigate("/dashboard");
+        navigate("/home");
       }
     }
     setIsLoading(false);
