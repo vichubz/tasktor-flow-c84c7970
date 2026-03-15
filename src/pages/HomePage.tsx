@@ -9,10 +9,25 @@ const HomePage = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Set playback speed to 0.5x via YouTube postMessage API
+  const onIframeLoad = useCallback(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    // Wait a moment for the player to initialize
+    const t = setTimeout(() => {
+      iframe.contentWindow?.postMessage(
+        JSON.stringify({ event: "command", func: "setPlaybackRate", args: [0.5] }),
+        "*"
+      );
+    }, 1500);
+    return () => clearTimeout(t);
   }, []);
 
   const hours = time.getHours().toString().padStart(2, "0");
