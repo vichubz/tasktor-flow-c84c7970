@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
 import { CalendarDays, Clock, CheckCircle2, TrendingUp, Award } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Tables } from "@/integrations/supabase/types";
@@ -95,35 +95,36 @@ const MetricsPage = () => {
     return `${h}h ${m}m`;
   };
 
-  const mostWorked = projectTimeData.length > 0 
-    ? projectTimeData.reduce((a, b) => a.value > b.value ? a : b).name 
+  const mostWorked = projectTimeData.length > 0
+    ? projectTimeData.reduce((a, b) => a.value > b.value ? a : b).name
     : "—";
 
   const statCards = [
-    { icon: CheckCircle2, label: "Tarefas Concluídas", value: animatedCompleted.toString(), color: "text-success" },
-    { icon: Clock, label: "Tempo Trabalhado", value: formatHours(totalWorkSeconds), color: "text-accent" },
-    { icon: CalendarDays, label: "Horas em Reunião", value: `${totalMeetingHours.toFixed(1)}h`, color: "text-primary" },
-    { icon: TrendingUp, label: "Média Tarefas/Dia", value: avgTasksPerDay, color: "text-accent" },
-    { icon: Award, label: "Projeto + Trabalhado", value: mostWorked, color: "text-primary" },
+    { icon: CheckCircle2, label: "Tarefas Concluídas", value: animatedCompleted.toString(), color: "text-success", glow: "from-success/10" },
+    { icon: Clock, label: "Tempo Trabalhado", value: formatHours(totalWorkSeconds), color: "text-primary", glow: "from-primary/10" },
+    { icon: CalendarDays, label: "Horas em Reunião", value: `${totalMeetingHours.toFixed(1)}h`, color: "text-accent", glow: "from-accent/10" },
+    { icon: TrendingUp, label: "Média Tarefas/Dia", value: avgTasksPerDay, color: "text-primary", glow: "from-primary/10" },
+    { icon: Award, label: "Projeto + Trabalhado", value: mostWorked, color: "text-accent", glow: "from-accent/10" },
   ];
 
   const tooltipStyle = {
-    background: "hsl(240 18% 8%)",
-    border: "1px solid hsl(240 6% 16%)",
-    borderRadius: "8px",
-    color: "hsl(210 40% 96%)",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+    background: "hsl(200 22% 7% / 0.95)",
+    border: "1px solid hsl(200 12% 14%)",
+    borderRadius: "10px",
+    color: "hsl(185 30% 95%)",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(14, 165, 195, 0.08)",
+    backdropFilter: "blur(12px)",
   };
 
   return (
     <div className="flex-1 h-screen overflow-y-auto px-6 py-6">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-foreground text-tight">Métricas & Relatórios</h1>
+        <h1 className="text-2xl font-bold font-display text-tight gradient-text">Métricas & Relatórios</h1>
         <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-40 bg-secondary border-border h-9">
+          <SelectTrigger className="w-40 bg-secondary/50 border-border/50 h-9 backdrop-blur-sm">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-card border-border">
+          <SelectContent className="bg-card/95 backdrop-blur-xl border-border/50">
             <SelectItem value="today">Hoje</SelectItem>
             <SelectItem value="week">Esta Semana</SelectItem>
             <SelectItem value="month">Este Mês</SelectItem>
@@ -139,18 +140,22 @@ const MetricsPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08, ease: "easeOut" }}
-            className="glass-hover rounded-xl p-4 card-lift"
+            className="stat-card rounded-xl p-5 card-lift relative overflow-hidden"
           >
-            <stat.icon className={`w-5 h-5 ${stat.color} mb-2`} />
-            <motion.p
-              className="text-2xl font-bold text-foreground font-mono"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: i * 0.08 + 0.2 }}
-            >
-              {stat.value}
-            </motion.p>
-            <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+            {/* Gradient glow */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${stat.glow} to-transparent opacity-50 pointer-events-none`} />
+            <div className="relative z-10">
+              <stat.icon className={`w-5 h-5 ${stat.color} mb-3`} />
+              <motion.p
+                className="text-2xl font-bold text-foreground font-mono"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: i * 0.08 + 0.2 }}
+              >
+                {stat.value}
+              </motion.p>
+              <p className="text-xs text-muted-foreground mt-1.5 font-medium">{stat.label}</p>
+            </div>
           </motion.div>
         ))}
       </div>
@@ -161,15 +166,21 @@ const MetricsPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="glass-hover rounded-xl p-6"
+          className="glass-gradient rounded-xl p-6"
         >
-          <h3 className="text-sm font-semibold text-foreground mb-4 text-tight">Tarefas Concluídas por Dia</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tarefas Concluídas por Dia</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={tasksChartData}>
-              <XAxis dataKey="date" stroke="hsl(215 16% 57%)" fontSize={11} />
-              <YAxis stroke="hsl(215 16% 57%)" fontSize={11} />
+              <defs>
+                <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(192 80% 40%)" />
+                  <stop offset="100%" stopColor="hsl(172 66% 45%)" />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="date" stroke="hsl(195 14% 50%)" fontSize={11} />
+              <YAxis stroke="hsl(195 14% 50%)" fontSize={11} />
               <Tooltip contentStyle={tooltipStyle} />
-              <Bar dataKey="count" fill="hsl(263 70% 58%)" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="count" fill="url(#barGrad)" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </motion.div>
@@ -178,9 +189,9 @@ const MetricsPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="glass-hover rounded-xl p-6"
+          className="glass-gradient rounded-xl p-6"
         >
-          <h3 className="text-sm font-semibold text-foreground mb-4 text-tight">Tempo por Projeto</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tempo por Projeto</h3>
           {projectTimeData.length > 0 ? (
             <div className="flex items-center gap-4">
               <ResponsiveContainer width="60%" height={220}>
@@ -193,12 +204,12 @@ const MetricsPage = () => {
                   <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => `${Number(v).toFixed(1)}h`} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex-1 space-y-2">
+              <div className="flex-1 space-y-2.5">
                 {projectTimeData.map(p => (
                   <div key={p.name} className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                    <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: p.color, boxShadow: `0 0 8px ${p.color}40` }} />
                     <span className="text-xs text-muted-foreground truncate flex-1">{p.name}</span>
-                    <span className="text-xs font-mono text-foreground">{p.value.toFixed(1)}h</span>
+                    <span className="text-xs font-mono text-foreground font-semibold">{p.value.toFixed(1)}h</span>
                   </div>
                 ))}
               </div>
@@ -213,21 +224,21 @@ const MetricsPage = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="glass-hover rounded-xl p-6 mb-8"
+        className="glass-gradient rounded-xl p-6 mb-8"
       >
-        <h3 className="text-sm font-semibold text-foreground mb-4 text-tight">Tempo Trabalhado por Dia</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tempo Trabalhado por Dia</h3>
         <ResponsiveContainer width="100%" height={220}>
           <AreaChart data={timeChartData}>
             <defs>
               <linearGradient id="colorHours" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(187 92% 42%)" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(187 92% 42%)" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(192 80% 40%)" stopOpacity={0.35} />
+                <stop offset="95%" stopColor="hsl(192 80% 40%)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <XAxis dataKey="date" stroke="hsl(215 16% 57%)" fontSize={11} />
-            <YAxis stroke="hsl(215 16% 57%)" fontSize={11} />
+            <XAxis dataKey="date" stroke="hsl(195 14% 50%)" fontSize={11} />
+            <YAxis stroke="hsl(195 14% 50%)" fontSize={11} />
             <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => `${v}h`} />
-            <Area type="monotone" dataKey="hours" stroke="hsl(187 92% 42%)" strokeWidth={2} fill="url(#colorHours)" dot={{ fill: "hsl(187 92% 42%)", strokeWidth: 0, r: 4 }} />
+            <Area type="monotone" dataKey="hours" stroke="hsl(192 80% 40%)" strokeWidth={2.5} fill="url(#colorHours)" dot={{ fill: "hsl(192 80% 40%)", strokeWidth: 0, r: 4 }} activeDot={{ r: 6, fill: "hsl(192 80% 40%)", stroke: "hsl(192 80% 60%)", strokeWidth: 2 }} />
           </AreaChart>
         </ResponsiveContainer>
       </motion.div>
@@ -237,12 +248,12 @@ const MetricsPage = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
-        className="glass-hover rounded-xl p-6"
+        className="glass-gradient rounded-xl p-6"
       >
-        <h3 className="text-sm font-semibold text-foreground mb-4 text-tight">Histórico de Tarefas</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Histórico de Tarefas</h3>
         {completedTasks.length > 0 ? (
-          <div className="space-y-2">
-            <div className="grid grid-cols-4 text-xs text-muted-foreground font-medium px-3 pb-2">
+          <div className="space-y-1">
+            <div className="grid grid-cols-4 text-xs text-muted-foreground font-medium px-3 pb-2 uppercase tracking-wider">
               <span>Título</span><span>Projeto</span><span>Concluída em</span><span>Criada em</span>
             </div>
             {completedTasks.slice(0, 20).map((task: any, i: number) => (
@@ -251,12 +262,12 @@ const MetricsPage = () => {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.03 }}
-                className="grid grid-cols-4 text-sm px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors"
+                className="grid grid-cols-4 text-sm px-3 py-2.5 rounded-lg hover:bg-primary/5 transition-all group"
               >
-                <span className="text-foreground truncate">{task.title}</span>
+                <span className="text-foreground truncate group-hover:text-primary transition-colors">{task.title}</span>
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: task.project?.color }} />
-                  <span className="text-muted-foreground truncate">{task.project?.name}</span>
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: task.project?.color, boxShadow: `0 0 6px ${task.project?.color}40` }} />
+                  <span className="text-muted-foreground truncate">{task.project?.name || "Sem projeto"}</span>
                 </span>
                 <span className="text-muted-foreground font-mono text-xs">
                   {task.completed_at ? new Date(task.completed_at).toLocaleDateString("pt-BR") : "—"}

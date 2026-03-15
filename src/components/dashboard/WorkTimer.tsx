@@ -38,7 +38,6 @@ const WorkTimer = ({ projects }: WorkTimerProps) => {
         .is("ended_at", null)
         .order("started_at", { ascending: false })
         .limit(1);
-
       if (data && data.length > 0) {
         const entry = data[0];
         setActiveEntryId(entry.id);
@@ -114,28 +113,30 @@ const WorkTimer = ({ projects }: WorkTimerProps) => {
 
   return (
     <motion.div
-      className={`glass rounded-xl px-4 py-3 flex items-center gap-3 transition-all duration-300 ${
+      className={`stat-card rounded-xl px-4 py-3 flex items-center gap-3 transition-all duration-300 ${
         isRunning ? "animate-pulse-glow" : ""
-      } ${isActive ? "border-primary/30" : ""}`}
+      } ${isActive ? "border-primary/20" : ""}`}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
     >
       <div className="relative">
-        <Timer className="w-5 h-5 text-primary" />
+        <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center">
+          <Timer className="w-5 h-5 text-primary" />
+        </div>
         {isRunning && (
           <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-success animate-pulse" />
         )}
       </div>
 
       <Select value={selectedProject} onValueChange={setSelectedProject} disabled={isActive}>
-        <SelectTrigger className="w-36 h-9 bg-secondary border-border text-xs">
+        <SelectTrigger className="w-36 h-9 bg-secondary/50 border-border/30 text-xs backdrop-blur-sm">
           <SelectValue placeholder="Projeto" />
         </SelectTrigger>
-        <SelectContent className="bg-card border-border">
+        <SelectContent className="bg-card/95 backdrop-blur-xl border-border/50">
           {projects.map(p => (
             <SelectItem key={p.id} value={p.id}>
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color, boxShadow: `0 0 6px ${p.color}40` }} />
                 {p.name}
               </span>
             </SelectItem>
@@ -161,7 +162,7 @@ const WorkTimer = ({ projects }: WorkTimerProps) => {
             disabled={!selectedProject}
             whileHover={{ scale: 1.15 }}
             whileTap={{ scale: 0.9 }}
-            className="w-9 h-9 rounded-lg bg-success/20 text-success flex items-center justify-center hover:bg-success/30 transition-all disabled:opacity-30"
+            className="w-9 h-9 rounded-lg bg-success/15 text-success flex items-center justify-center hover:bg-success/25 transition-all disabled:opacity-30"
           >
             <Play className="w-4 h-4" />
           </motion.button>
@@ -170,7 +171,7 @@ const WorkTimer = ({ projects }: WorkTimerProps) => {
             onClick={handlePause}
             whileHover={{ scale: 1.15 }}
             whileTap={{ scale: 0.9 }}
-            className="w-9 h-9 rounded-lg bg-primary/20 text-primary flex items-center justify-center hover:bg-primary/30 transition-all"
+            className="w-9 h-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center hover:bg-primary/25 transition-all"
           >
             <Pause className="w-4 h-4" />
           </motion.button>
@@ -180,7 +181,7 @@ const WorkTimer = ({ projects }: WorkTimerProps) => {
           disabled={!activeEntryId}
           whileHover={{ scale: 1.15 }}
           whileTap={{ scale: 0.9 }}
-          className="w-9 h-9 rounded-lg bg-destructive/20 text-destructive flex items-center justify-center hover:bg-destructive/30 transition-all disabled:opacity-30"
+          className="w-9 h-9 rounded-lg bg-destructive/15 text-destructive flex items-center justify-center hover:bg-destructive/25 transition-all disabled:opacity-30"
         >
           <Square className="w-4 h-4" />
         </motion.button>
