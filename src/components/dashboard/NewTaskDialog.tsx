@@ -51,7 +51,7 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
 
     const { data: task, error } = await supabase.from("tasks").insert({
       user_id: user.id,
-      project_id: projectId || null,
+      project_id: (projectId && projectId !== "none") ? projectId : null,
       title,
       description: description || null,
       position,
