@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Zap } from "lucide-react";
+import logoCompleto from "@/assets/logo_completo_tasktor.png";
 import { toast } from "sonner";
 
 const FloatingOrb = ({ size, color, delay, x, y }: { size: number; color: string; delay: number; x: string; y: string }) => (
@@ -90,13 +90,10 @@ const AuthPage = () => {
           transition={{ delay: 0.15, duration: 0.5, ease: "easeOut" }}
         >
           <motion.div
-            className="inline-flex items-center gap-3 mb-3"
+            className="inline-flex items-center justify-center mb-3"
             whileHover={{ scale: 1.05 }}
           >
-            <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center glow-primary">
-              <Zap className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <h1 className="text-4xl font-bold text-foreground text-tight neon-text-primary">Tasktor</h1>
+            <img src={logoCompleto} alt="Tasktor Produtividade" className="h-16 object-contain" />
           </motion.div>
           <p className="text-muted-foreground text-sm">Produtividade premium para quem exige mais</p>
         </motion.div>

@@ -3,7 +3,8 @@ import { NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, BarChart3, FolderKanban, LogOut, Zap, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, BarChart3, FolderKanban, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import logoIcone from "@/assets/tasktor_logo_icone.png";
 import ProjectManager from "@/components/dashboard/ProjectManager";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -44,11 +45,11 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-4 py-5 border-b border-border/30">
           <motion.div
-            className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center glow-primary flex-shrink-0"
+            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
             whileHover={{ rotate: 15, scale: 1.1 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <Zap className="w-4 h-4 text-primary-foreground" />
+            <img src={logoIcone} alt="Tasktor" className="w-8 h-8 object-contain" />
           </motion.div>
           {!collapsed && (
             <motion.span
