@@ -12,6 +12,7 @@ const AuthPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -28,11 +29,17 @@ const AuthPage = () => {
         navigate("/");
       }
     } else {
+      if (inviteCode.toLowerCase() !== "ebss") {
+        toast.error("Código de convite inválido.");
+        setIsLoading(false);
+        return;
+      }
       const { error } = await signUp(email, password, name);
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success("Conta criada! Verifique seu email para confirmar.");
+        toast.success("Conta criada com sucesso!");
+        navigate("/");
       }
     }
     setIsLoading(false);
@@ -101,16 +108,28 @@ const AuthPage = () => {
               className="space-y-5"
             >
               {!isLogin && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Nome</label>
-                  <Input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Seu nome"
-                    className="bg-secondary border-border focus:border-primary focus:ring-primary/20 h-11"
-                    required={!isLogin}
-                  />
-                </div>
+                <>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Nome</label>
+                    <Input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Seu nome"
+                      className="bg-secondary border-border focus:border-primary focus:ring-primary/20 h-11"
+                      required={!isLogin}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Código de convite</label>
+                    <Input
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value)}
+                      placeholder="Insira o código"
+                      className="bg-secondary border-border focus:border-primary focus:ring-primary/20 h-11"
+                      required={!isLogin}
+                    />
+                  </div>
+                </>
               )}
               <div>
                 <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Email</label>
