@@ -87,8 +87,11 @@ const ProjectManager = ({ open, onOpenChange, projects, onUpdated }: ProjectMana
 
   const handleSaveEdit = async (id: string) => {
     if (!editName.trim()) return;
-    await supabase.from("projects").update({ name: editName.trim() }).eq("id", id);
+    const updates: { name: string; color?: string } = { name: editName.trim() };
+    if (editColor) updates.color = editColor;
+    await supabase.from("projects").update(updates).eq("id", id);
     setEditingId(null);
+    setEditColor(null);
     toast.success("Projeto atualizado");
     onUpdated();
   };
