@@ -108,16 +108,28 @@ const AuthPage = () => {
               className="space-y-5"
             >
               {!isLogin && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Nome</label>
-                  <Input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Seu nome"
-                    className="bg-secondary border-border focus:border-primary focus:ring-primary/20 h-11"
-                    required={!isLogin}
-                  />
-                </div>
+                <>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Nome</label>
+                    <Input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Seu nome"
+                      className="bg-secondary border-border focus:border-primary focus:ring-primary/20 h-11"
+                      required={!isLogin}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Código de convite</label>
+                    <Input
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value)}
+                      placeholder="Insira o código"
+                      className="bg-secondary border-border focus:border-primary focus:ring-primary/20 h-11"
+                      required={!isLogin}
+                    />
+                  </div>
+                </>
               )}
               <div>
                 <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Email</label>
