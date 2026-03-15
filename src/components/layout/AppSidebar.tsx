@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, BarChart3, FolderKanban, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, BarChart3, FolderKanban, LogOut, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import logoIcone from "@/assets/tasktor_logo_icone.png";
 import ProjectManager from "@/components/dashboard/ProjectManager";
 import type { Tables } from "@/integrations/supabase/types";
@@ -12,9 +12,11 @@ type Project = Tables<"projects">;
 
 interface AppSidebarProps {
   onProjectsChange?: () => void;
+  onCalendarToggle?: () => void;
+  calendarOpen?: boolean;
 }
 
-const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
+const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSidebarProps) => {
   const { user, profile, signOut } = useAuth();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
@@ -40,7 +42,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
       <motion.div
         animate={{ width: collapsed ? 64 : 224 }}
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-        className="h-screen flex flex-col border-r border-border/30 overflow-hidden relative"
+        className="h-screen flex flex-col border-r border-border/30 overflow-hidden relative flex-shrink-0"
         style={{ background: "var(--gradient-sidebar)" }}
       >
         {/* Subtle glow at top */}
@@ -105,6 +107,19 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
               </NavLink>
             );
           })}
+
+          {/* Calendar button */}
+          <button
+            onClick={onCalendarToggle}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all w-full ${
+              calendarOpen
+                ? "bg-primary/10 text-primary"
+                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            }`}
+          >
+            <Calendar className="w-[18px] h-[18px] flex-shrink-0" />
+            {!collapsed && <span>Calendário</span>}
+          </button>
 
           <button
             onClick={() => setShowProjects(true)}
