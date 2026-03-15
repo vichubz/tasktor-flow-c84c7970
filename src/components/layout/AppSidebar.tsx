@@ -34,6 +34,7 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
   useEffect(() => { fetchProjects(); }, [user]);
 
   const links = [
+    { to: "/home", icon: Rocket, label: "Início" },
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/metrics", icon: BarChart3, label: "Métricas" },
   ];
