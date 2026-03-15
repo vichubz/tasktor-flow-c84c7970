@@ -76,7 +76,7 @@ const HomePage = () => {
 
       {/* ═══ LAYER 1: Dark Overlay ═══ */}
       <div
-        className="fixed inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none"
         style={{
           zIndex: 1,
           background: "linear-gradient(180deg, rgba(5,5,15,0.75) 0%, rgba(5,5,15,0.60) 40%, rgba(5,5,15,0.70) 100%)",
