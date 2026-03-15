@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 async function refreshToken(supabase: any, userId: string, refreshTokenValue: string) {
@@ -54,6 +54,20 @@ Deno.serve(async (req) => {
     const { data: { user }, error: userError } = await userClient.auth.getUser();
     if (userError || !user) throw new Error("Unauthorized");
 
+    // Parse optional body for timezone and date range
+    let timeZone = "America/Sao_Paulo";
+    let targetDate: string | null = null;
+    let daysAhead = 0;
+
+    if (req.method === "POST") {
+      try {
+        const body = await req.json();
+        if (body.timeZone) timeZone = body.timeZone;
+        if (body.date) targetDate = body.date;
+        if (body.daysAhead) daysAhead = body.daysAhead;
+      } catch {}
+    }
+
     // Get tokens
     const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
@@ -77,18 +91,40 @@ Deno.serve(async (req) => {
       accessToken = await refreshToken(adminClient, user.id, tokenRow.refresh_token);
     }
 
-    // Fetch today's events
-    const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString();
+    // Calculate time range using timezone-aware approach
+    let timeMin: string;
+    let timeMax: string;
+
+    if (targetDate) {
+      // Specific date requested
+      timeMin = `${targetDate}T00:00:00`;
+      timeMax = `${targetDate}T23:59:59`;
+    } else {
+      // Today + daysAhead
+      const now = new Date();
+      // Use timezone-aware formatting
+      const formatter = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" });
+      const todayStr = formatter.format(now);
+      timeMin = `${todayStr}T00:00:00`;
+
+      if (daysAhead > 0) {
+        const futureDate = new Date(now.getTime() + daysAhead * 24 * 60 * 60 * 1000);
+        const futureStr = formatter.format(futureDate);
+        timeMax = `${futureStr}T23:59:59`;
+      } else {
+        timeMax = `${todayStr}T23:59:59`;
+      }
+    }
 
     const calendarRes = await fetch(
       `https://www.googleapis.com/calendar/v3/calendars/primary/events?` +
       new URLSearchParams({
-        timeMin: startOfDay,
-        timeMax: endOfDay,
+        timeMin: timeMin,
+        timeMax: timeMax,
+        timeZone: timeZone,
         singleEvents: "true",
         orderBy: "startTime",
+        maxResults: "50",
       }),
       {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -108,6 +144,8 @@ Deno.serve(async (req) => {
       end: event.end?.dateTime || event.end?.date,
       meetLink: event.hangoutLink || event.conferenceData?.entryPoints?.[0]?.uri || null,
       location: event.location || null,
+      description: event.description || null,
+      allDay: !event.start?.dateTime,
     }));
 
     return new Response(JSON.stringify({ connected: true, events }), {
