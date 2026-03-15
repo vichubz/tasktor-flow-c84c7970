@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import AppSidebar from "@/components/layout/AppSidebar";
+import CalendarPanel from "@/components/dashboard/CalendarPanel";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -8,6 +10,7 @@ interface AppLayoutProps {
 
 const AppLayout = ({ children }: AppLayoutProps) => {
   const { user, loading } = useAuth();
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   if (loading) {
     return (
@@ -21,7 +24,11 @@ const AppLayout = ({ children }: AppLayoutProps) => {
 
   return (
     <div className="flex min-h-screen mesh-gradient w-full ambient-bg">
-      <AppSidebar />
+      <AppSidebar
+        onCalendarToggle={() => setCalendarOpen(prev => !prev)}
+        calendarOpen={calendarOpen}
+      />
+      <CalendarPanel open={calendarOpen} onClose={() => setCalendarOpen(false)} />
       <div className="relative z-10 flex-1 flex flex-col">
         {children}
       </div>

@@ -38,8 +38,10 @@ const GoogleCalendarCard = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const res = await supabase.functions.invoke("google-calendar-events", {
         headers: { Authorization: `Bearer ${session.access_token}` },
+        body: { timeZone },
       });
       if (res.error) throw res.error;
       setConnected(res.data.connected);
