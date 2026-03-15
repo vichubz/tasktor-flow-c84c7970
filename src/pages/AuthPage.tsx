@@ -45,7 +45,7 @@ const AuthPage = () => {
       if (error) {
         toast.error(error.message);
       } else {
-        navigate("/dashboard");
+        navigate("/home");
       }
     } else {
       if (inviteCode.toLowerCase() !== "ebss") {
