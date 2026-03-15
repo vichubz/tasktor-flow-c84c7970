@@ -180,7 +180,7 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
 
           <Button
             type="submit"
-            disabled={loading || !title || !projectId}
+            disabled={loading || !title}
             className="w-full gradient-primary text-primary-foreground h-11 font-semibold"
           >
             {loading ? "Criando..." : "Criar Tarefa"}
