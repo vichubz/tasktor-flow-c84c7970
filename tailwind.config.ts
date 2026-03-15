@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ["Outfit", "Space Grotesk", "sans-serif"],
+        display: ["Space Grotesk", "Outfit", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
       colors: {
@@ -110,6 +111,11 @@ export default {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "gradient-shift": {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -121,6 +127,7 @@ export default {
         "float": "float 8s ease-in-out infinite",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
         "count-up": "count-up 0.5s ease-out",
+        "gradient-shift": "gradient-shift 6s ease infinite",
       },
     },
   },

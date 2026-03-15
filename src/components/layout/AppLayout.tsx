@@ -11,8 +11,8 @@ const AppLayout = ({ children }: AppLayoutProps) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-8 h-8 rounded-lg gradient-primary animate-pulse" />
+      <div className="min-h-screen flex items-center justify-center mesh-gradient">
+        <div className="w-10 h-10 rounded-xl gradient-primary animate-pulse glow-primary" />
       </div>
     );
   }
@@ -20,9 +20,11 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   if (!user) return <Navigate to="/" replace />;
 
   return (
-    <div className="flex min-h-screen bg-background w-full">
+    <div className="flex min-h-screen mesh-gradient w-full ambient-bg">
       <AppSidebar />
-      {children}
+      <div className="relative z-10 flex-1 flex flex-col">
+        {children}
+      </div>
     </div>
   );
 };

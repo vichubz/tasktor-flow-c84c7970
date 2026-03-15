@@ -16,7 +16,7 @@ const CompletedTasks = () => {
 
   useEffect(() => {
     if (!user) return;
-    const fetch = async () => {
+    const fetchCompleted = async () => {
       const { data } = await supabase
         .from("tasks")
         .select("*, project:projects(*)")
@@ -26,12 +26,11 @@ const CompletedTasks = () => {
         .order("completed_at", { ascending: false });
       if (data) setTasks(data as Task[]);
     };
-    fetch();
+    fetchCompleted();
 
-    // Subscribe to changes
     const channel = supabase
       .channel("completed-tasks")
-      .on("postgres_changes", { event: "*", schema: "public", table: "tasks", filter: `user_id=eq.${user.id}` }, fetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "tasks", filter: `user_id=eq.${user.id}` }, fetchCompleted)
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
@@ -41,13 +40,17 @@ const CompletedTasks = () => {
 
   return (
     <div className="mt-6">
-      <button
+      <motion.button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        whileHover={{ x: 4 }}
+        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors font-display font-semibold"
       >
-        {expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-        Concluídas hoje ({tasks.length})
-      </button>
+        <motion.div animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
+          <ChevronRight className="w-4 h-4" />
+        </motion.div>
+        <span>Concluídas hoje</span>
+        <span className="text-xs font-mono bg-success/10 text-success px-2 py-0.5 rounded-md">{tasks.length}</span>
+      </motion.button>
 
       <AnimatePresence>
         {expanded && (
@@ -57,22 +60,27 @@ const CompletedTasks = () => {
             exit={{ height: 0, opacity: 0 }}
             className="mt-2 space-y-1.5 overflow-hidden"
           >
-            {tasks.map((task) => (
-              <div
+            {tasks.map((task, i) => (
+              <motion.div
                 key={task.id}
-                className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-secondary/30"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg glass-gradient hover:bg-primary/5 transition-all group"
               >
-                <Check className="w-4 h-4 text-success" />
-                <span className="text-sm text-muted-foreground line-through flex-1">{task.title}</span>
+                <div className="w-5 h-5 rounded-full bg-success/15 flex items-center justify-center">
+                  <Check className="w-3 h-3 text-success" />
+                </div>
+                <span className="text-sm text-muted-foreground line-through flex-1 group-hover:text-foreground/60 transition-colors">{task.title}</span>
                 {task.project && (
                   <span
-                    className="text-[10px] px-1.5 py-0.5 rounded"
-                    style={{ backgroundColor: `${task.project.color}15`, color: task.project.color }}
+                    className="text-[10px] px-2 py-0.5 rounded-md font-semibold"
+                    style={{ backgroundColor: `${task.project.color}12`, color: task.project.color }}
                   >
                     {task.project.name}
                   </span>
                 )}
-              </div>
+              </motion.div>
             ))}
           </motion.div>
         )}

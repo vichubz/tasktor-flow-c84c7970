@@ -21,18 +21,18 @@ const DigitalClock = () => {
   return (
     <div className="flex flex-col">
       <div className="flex items-baseline gap-1">
-        <span className="font-mono text-2xl font-bold text-foreground text-tight tracking-wider neon-text-primary">
+        <span className="font-display text-3xl font-bold text-foreground text-tight tracking-wider neon-text-primary">
           {hours}
         </span>
         <motion.span
-          className="font-mono text-lg text-primary/60"
-          animate={{ opacity: [1, 0.3, 1] }}
+          className="font-mono text-lg text-primary/50"
+          animate={{ opacity: [1, 0.2, 1] }}
           transition={{ duration: 1, repeat: Infinity }}
         >
           :{seconds}
         </motion.span>
       </div>
-      <span className="text-xs text-muted-foreground capitalize">{dateStr}</span>
+      <span className="text-xs text-muted-foreground capitalize font-body">{dateStr}</span>
     </div>
   );
 };

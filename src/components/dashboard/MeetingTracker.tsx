@@ -61,64 +61,73 @@ const MeetingTracker = () => {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="glass rounded-xl px-4 py-3 flex items-center gap-4"
+      className="stat-card rounded-xl px-4 py-3 flex items-center gap-4 card-lift"
     >
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center relative">
           <Video className="w-4 h-4 text-accent" />
+          <div className="absolute inset-0 rounded-lg bg-accent/5 animate-pulse" />
         </div>
-        <span className="text-xs text-muted-foreground font-medium">Reuniões</span>
+        <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Reuniões</span>
       </div>
 
       {/* Meeting count */}
       <div className="flex items-center gap-1.5">
-        <button
+        <motion.button
           onClick={() => adjustCount(-1)}
-          className="w-6 h-6 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all hover:scale-110"
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.9 }}
+          className="w-6 h-6 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-primary/15 transition-all"
         >
           <Minus className="w-3 h-3" />
-        </button>
+        </motion.button>
         <motion.span
           key={count}
-          initial={{ scale: 1.3, opacity: 0 }}
+          initial={{ scale: 1.4, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="font-mono text-sm font-bold text-accent min-w-[20px] text-center neon-text-accent"
+          className="font-mono text-base font-bold text-accent min-w-[24px] text-center neon-text-accent"
         >
           {count}
         </motion.span>
-        <button
+        <motion.button
           onClick={() => adjustCount(1)}
-          className="w-6 h-6 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all hover:scale-110"
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.9 }}
+          className="w-6 h-6 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-primary/15 transition-all"
         >
           <Plus className="w-3 h-3" />
-        </button>
+        </motion.button>
       </div>
 
-      <div className="w-px h-6 bg-border/50" />
+      <div className="w-px h-6 bg-border/30" />
 
       {/* Hours */}
       <div className="flex items-center gap-1.5">
-        <span className="text-[10px] text-muted-foreground">hrs</span>
-        <button
+        <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">hrs</span>
+        <motion.button
           onClick={() => adjustHours(-0.5)}
-          className="w-6 h-6 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all hover:scale-110"
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.9 }}
+          className="w-6 h-6 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-primary/15 transition-all"
         >
           <Minus className="w-3 h-3" />
-        </button>
+        </motion.button>
         <motion.span
           key={hours}
-          initial={{ scale: 1.3, opacity: 0 }}
+          initial={{ scale: 1.4, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="font-mono text-sm font-bold text-accent min-w-[28px] text-center"
+          className="font-mono text-base font-bold text-accent min-w-[32px] text-center"
         >
           {hours}
         </motion.span>
-        <button
+        <motion.button
           onClick={() => adjustHours(0.5)}
-          className="w-6 h-6 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all hover:scale-110"
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.9 }}
+          className="w-6 h-6 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-primary/15 transition-all"
         >
           <Plus className="w-3 h-3" />
-        </button>
+        </motion.button>
       </div>
     </motion.div>
   );
