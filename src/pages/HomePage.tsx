@@ -23,7 +23,7 @@ const HomePage = () => {
     // Wait a moment for the player to initialize
     const t = setTimeout(() => {
       iframe.contentWindow?.postMessage(
-        JSON.stringify({ event: "command", func: "setPlaybackRate", args: [0.5] }),
+        JSON.stringify({ event: "command", func: "setPlaybackRate", args: [0.25] }),
         "*"
       );
     }, 1500);
