@@ -1,0 +1,127 @@
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Plus, Trash2, Edit2 } from "lucide-react";
+import type { Tables } from "@/integrations/supabase/types";
+import { toast } from "sonner";
+
+type Project = Tables<"projects">;
+
+const COLORS = ["#7C3AED", "#6366F1", "#06B6D4", "#10B981", "#EF4444", "#F59E0B", "#EC4899", "#8B5CF6"];
+
+interface ProjectManagerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  projects: Project[];
+  onUpdated: () => void;
+}
+
+const ProjectManager = ({ open, onOpenChange, projects, onUpdated }: ProjectManagerProps) => {
+  const { user } = useAuth();
+  const [name, setName] = useState("");
+  const [color, setColor] = useState(COLORS[0]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+
+  const handleCreate = async () => {
+    if (!user || !name.trim()) return;
+    await supabase.from("projects").insert({ user_id: user.id, name: name.trim(), color });
+    setName("");
+    setColor(COLORS[0]);
+    toast.success("Projeto criado!");
+    onUpdated();
+  };
+
+  const handleDelete = async (id: string) => {
+    const { data: tasks } = await supabase.from("tasks").select("id").eq("project_id", id).eq("is_completed", false).limit(1);
+    if (tasks && tasks.length > 0) {
+      toast.error("Mova ou exclua as tarefas deste projeto antes de deletá-lo");
+      return;
+    }
+    await supabase.from("projects").delete().eq("id", id);
+    toast.success("Projeto excluído");
+    onUpdated();
+  };
+
+  const handleSaveEdit = async (id: string) => {
+    if (!editName.trim()) return;
+    await supabase.from("projects").update({ name: editName.trim() }).eq("id", id);
+    setEditingId(null);
+    onUpdated();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-card border-border max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-foreground text-tight">Projetos</DialogTitle>
+        </DialogHeader>
+
+        {/* Create new */}
+        <div className="space-y-3">
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nome do projeto"
+            className="bg-secondary border-border h-10"
+            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+          />
+          <div className="flex items-center gap-2">
+            {COLORS.map(c => (
+              <button
+                key={c}
+                onClick={() => setColor(c)}
+                className={`w-7 h-7 rounded-full transition-transform ${color === c ? "scale-125 ring-2 ring-foreground/20" : "hover:scale-110"}`}
+                style={{ backgroundColor: c }}
+              />
+            ))}
+          </div>
+          <Button onClick={handleCreate} disabled={!name.trim()} className="gradient-primary text-primary-foreground w-full h-10">
+            <Plus className="w-4 h-4 mr-2" /> Criar Projeto
+          </Button>
+        </div>
+
+        {/* Existing projects */}
+        <div className="mt-4 space-y-2">
+          {projects.map(p => (
+            <div key={p.id} className="flex items-center gap-3 bg-secondary/50 rounded-lg px-3 py-2.5">
+              <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+              {editingId === p.id ? (
+                <input
+                  autoFocus
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  onBlur={() => handleSaveEdit(p.id)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSaveEdit(p.id)}
+                  className="flex-1 bg-transparent text-foreground text-sm outline-none border-b border-primary/50"
+                />
+              ) : (
+                <span className="flex-1 text-sm text-foreground">{p.name}</span>
+              )}
+              <button
+                onClick={() => { setEditingId(p.id); setEditName(p.name); }}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => handleDelete(p.id)}
+                className="text-muted-foreground hover:text-destructive transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+          {projects.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">Nenhum projeto ainda</p>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default ProjectManager;
