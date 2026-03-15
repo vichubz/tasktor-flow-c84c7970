@@ -2,7 +2,8 @@ import { motion } from "framer-motion";
 import DigitalClock from "./DigitalClock";
 import WorkTimer from "./WorkTimer";
 import MeetingTracker from "./MeetingTracker";
-import { CheckCircle2, Zap } from "lucide-react";
+import GoogleCalendarWidget from "./GoogleCalendarWidget";
+import { CheckCircle2 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
@@ -33,7 +34,7 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
       }} />
 
       <div className="glass px-6 py-4 relative z-10 border-0">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <DigitalClock />
 
           {/* Completed today */}
@@ -47,9 +48,7 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
               border: "1px solid rgba(16, 185, 129, 0.12)",
             }}
           >
-            {/* Hover glow */}
             <div className="absolute inset-0 bg-gradient-to-r from-success/10 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            
             <motion.div
               className="w-9 h-9 rounded-lg flex items-center justify-center relative z-10"
               style={{ background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05))" }}
@@ -72,6 +71,9 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
           </motion.div>
 
           <MeetingTracker />
+
+          {/* Google Calendar */}
+          <GoogleCalendarWidget />
 
           <WorkTimer projects={projects} />
         </div>
