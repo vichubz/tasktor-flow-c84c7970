@@ -7,6 +7,21 @@ import { Button } from "@/components/ui/button";
 import { Zap } from "lucide-react";
 import { toast } from "sonner";
 
+const FloatingOrb = ({ size, color, delay, x, y }: { size: number; color: string; delay: number; x: string; y: string }) => (
+  <div
+    className="floating-orb"
+    style={{
+      width: size,
+      height: size,
+      background: color,
+      left: x,
+      top: y,
+      animationDelay: `${delay}s`,
+      opacity: 0.15,
+    }}
+  />
+);
+
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -47,36 +62,52 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-1/2 -left-1/2 w-full h-full rounded-full bg-primary/5 blur-3xl animate-pulse" />
-        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full rounded-full bg-accent/5 blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-      </div>
+      {/* Floating orbs */}
+      <FloatingOrb size={400} color="hsl(263 70% 58%)" delay={0} x="-10%" y="-20%" />
+      <FloatingOrb size={300} color="hsl(187 92% 42%)" delay={2} x="70%" y="60%" />
+      <FloatingOrb size={200} color="hsl(160 60% 45%)" delay={4} x="50%" y="-10%" />
+      <FloatingOrb size={250} color="hsl(263 70% 58%)" delay={6} x="10%" y="70%" />
+
+      {/* Grid overlay */}
+      <div className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="relative z-10 w-full max-w-md px-6"
       >
         {/* Logo */}
         <motion.div
           className="text-center mb-10"
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1, duration: 0.4 }}
+          transition={{ delay: 0.15, duration: 0.5, ease: "easeOut" }}
         >
-          <div className="inline-flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center glow-primary">
-              <Zap className="w-5 h-5 text-primary-foreground" />
+          <motion.div
+            className="inline-flex items-center gap-3 mb-3"
+            whileHover={{ scale: 1.05 }}
+          >
+            <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center glow-primary">
+              <Zap className="w-6 h-6 text-primary-foreground" />
             </div>
-            <h1 className="text-4xl font-bold text-foreground text-tight">Tasktor</h1>
-          </div>
+            <h1 className="text-4xl font-bold text-foreground text-tight neon-text-primary">Tasktor</h1>
+          </motion.div>
           <p className="text-muted-foreground text-sm">Produtividade premium para quem exige mais</p>
         </motion.div>
 
         {/* Card */}
-        <div className="glass rounded-2xl p-8">
+        <motion.div 
+          className="glass rounded-2xl p-8 border border-border/50"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.5 }}
+        >
           {/* Toggle */}
           <div className="flex rounded-xl bg-secondary p-1 mb-8">
             <button
@@ -109,7 +140,7 @@ const AuthPage = () => {
             >
               {!isLogin && (
                 <>
-                  <div>
+                  <div className="input-glow rounded-lg transition-all">
                     <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Nome</label>
                     <Input
                       value={name}
@@ -119,7 +150,7 @@ const AuthPage = () => {
                       required={!isLogin}
                     />
                   </div>
-                  <div>
+                  <div className="input-glow rounded-lg transition-all">
                     <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Código de convite</label>
                     <Input
                       value={inviteCode}
@@ -131,7 +162,7 @@ const AuthPage = () => {
                   </div>
                 </>
               )}
-              <div>
+              <div className="input-glow rounded-lg transition-all">
                 <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Email</label>
                 <Input
                   type="email"
@@ -142,7 +173,7 @@ const AuthPage = () => {
                   required
                 />
               </div>
-              <div>
+              <div className="input-glow rounded-lg transition-all">
                 <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Senha</label>
                 <Input
                   type="password"
@@ -157,13 +188,17 @@ const AuthPage = () => {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-11 gradient-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity"
+                className="w-full h-11 gradient-primary text-primary-foreground font-semibold btn-shimmer hover:opacity-90 transition-opacity"
               >
-                {isLoading ? "Carregando..." : isLogin ? "Entrar" : "Criar conta"}
+                {isLoading ? (
+                  <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ duration: 1, repeat: Infinity }}>
+                    Carregando...
+                  </motion.span>
+                ) : isLogin ? "Entrar" : "Criar conta"}
               </Button>
             </motion.form>
           </AnimatePresence>
-        </div>
+        </motion.div>
       </motion.div>
     </div>
   );

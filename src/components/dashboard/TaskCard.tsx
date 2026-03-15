@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Check, Trash2, GripVertical, ChevronDown, ChevronRight, Flame, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -16,10 +16,33 @@ interface TaskCardProps {
   onUpdate: () => void;
 }
 
+// Confetti particle component
+const ConfettiParticle = ({ delay, color, angle }: { delay: number; color: string; angle: number }) => {
+  const distance = 40 + Math.random() * 60;
+  const x = Math.cos(angle) * distance;
+  const y = Math.sin(angle) * distance;
+
+  return (
+    <motion.div
+      className="absolute w-1.5 h-1.5 rounded-full"
+      style={{ backgroundColor: color, left: "50%", top: "50%" }}
+      initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
+      animate={{ scale: [0, 1.5, 0], x, y, opacity: [1, 1, 0] }}
+      transition={{ duration: 0.6, delay, ease: "easeOut" }}
+    />
+  );
+};
+
+const CONFETTI_COLORS = [
+  "hsl(263 70% 58%)", "hsl(187 92% 42%)", "hsl(160 60% 45%)",
+  "hsl(45 93% 47%)", "hsl(339 90% 60%)", "hsl(210 100% 60%)",
+];
+
 const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpdate }: TaskCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !task.is_completed;
   const completedSubtasks = task.subtasks?.filter(s => s.is_completed).length || 0;
@@ -39,38 +62,60 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
     onUpdate();
   };
 
+  const handleComplete = useCallback(() => {
+    setShowConfetti(true);
+    setTimeout(() => onComplete(task.id), 500);
+  }, [task.id, onComplete]);
+
+  const confettiParticles = Array.from({ length: 14 }, (_, i) => ({
+    delay: Math.random() * 0.15,
+    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+    angle: (i / 14) * Math.PI * 2,
+  }));
+
   return (
     <motion.div
       layout
       initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0, scale: isDragging ? 1.02 : 1 }}
+      animate={{ opacity: 1, y: 0, scale: isDragging ? 1.03 : 1 }}
       transition={{ duration: 0.2, delay: index * 0.03 }}
-      className={`glass rounded-xl transition-all duration-200 ${
-        isDragging ? "shadow-2xl z-50" : "hover:bg-secondary/30"
+      className={`glass-hover rounded-xl transition-all duration-200 ${
+        isDragging ? "shadow-2xl z-50 border-primary/20" : ""
       } ${isTop3 ? "top3-card" : ""}`}
     >
       <div className="flex items-center gap-3 px-4 py-3">
         {/* Drag handle */}
-        <GripVertical className="w-4 h-4 text-muted-foreground/40 flex-shrink-0 cursor-grab" />
+        <GripVertical className="w-4 h-4 text-muted-foreground/40 flex-shrink-0 cursor-grab hover:text-muted-foreground transition-colors" />
 
         {/* Position badge */}
         <span className={`font-mono text-xs font-bold min-w-[28px] text-center rounded-md px-1.5 py-0.5 ${
           isTop3 
-            ? "bg-primary/20 text-primary" 
+            ? "bg-primary/20 text-primary neon-text-primary" 
             : "bg-secondary text-muted-foreground"
         }`}>
           #{index + 1}
         </span>
 
-        {isTop3 && <Flame className="w-4 h-4 text-primary flex-shrink-0" />}
+        {isTop3 && (
+          <motion.div animate={{ rotate: [0, -10, 10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+            <Flame className="w-4 h-4 text-primary flex-shrink-0" />
+          </motion.div>
+        )}
 
-        {/* Complete button */}
-        <button
-          onClick={() => onComplete(task.id)}
-          className="w-6 h-6 rounded-full border-2 border-muted-foreground/30 flex items-center justify-center hover:border-success hover:bg-success/10 transition-all flex-shrink-0 group"
-        >
-          <Check className="w-3 h-3 text-transparent group-hover:text-success transition-colors" />
-        </button>
+        {/* Complete button with confetti */}
+        <div className="relative">
+          <button
+            onClick={handleComplete}
+            className="w-6 h-6 rounded-full border-2 border-muted-foreground/30 flex items-center justify-center hover:border-success hover:bg-success/10 transition-all flex-shrink-0 group hover:scale-110"
+          >
+            <Check className="w-3 h-3 text-transparent group-hover:text-success transition-colors" />
+          </button>
+          <AnimatePresence>
+            {showConfetti && confettiParticles.map((p, i) => (
+              <ConfettiParticle key={i} {...p} />
+            ))}
+          </AnimatePresence>
+        </div>
 
         {/* Title */}
         <div className="flex-1 min-w-0">
@@ -86,7 +131,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
           ) : (
             <span
               onClick={() => setIsEditing(true)}
-              className="text-sm text-foreground cursor-text truncate block"
+              className="text-sm text-foreground cursor-text truncate block hover:text-primary transition-colors"
             >
               {task.title}
             </span>
@@ -97,9 +142,11 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
         {totalSubtasks > 0 && (
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <div className="w-16 h-1.5 bg-secondary rounded-full overflow-hidden">
-              <div
-                className="h-full bg-success rounded-full transition-all"
-                style={{ width: `${subtaskProgress}%` }}
+              <motion.div
+                className="h-full bg-success rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${subtaskProgress}%` }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
               />
             </div>
             <span className="text-[10px] text-muted-foreground font-mono">{completedSubtasks}/{totalSubtasks}</span>
@@ -121,7 +168,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
 
         {/* Deadline */}
         {task.deadline && (
-          <span className={`text-[11px] font-mono flex-shrink-0 flex items-center gap-1 ${isOverdue ? "text-destructive" : "text-muted-foreground"}`}>
+          <span className={`text-[11px] font-mono flex-shrink-0 flex items-center gap-1 ${isOverdue ? "text-destructive animate-pulse" : "text-muted-foreground"}`}>
             {isOverdue && <AlertTriangle className="w-3 h-3" />}
             {new Date(task.deadline).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
           </span>
@@ -130,7 +177,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
         {/* Expand */}
         <button
           onClick={() => setExpanded(!expanded)}
-          className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+          className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 hover:scale-110"
         >
           {expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         </button>
@@ -138,44 +185,47 @@ const TaskCard = ({ task, index, isTop3, isDragging, onComplete, onDelete, onUpd
         {/* Delete */}
         <button
           onClick={() => onDelete(task.id)}
-          className="text-muted-foreground/40 hover:text-destructive transition-colors flex-shrink-0"
+          className="text-muted-foreground/40 hover:text-destructive transition-all flex-shrink-0 hover:scale-110"
         >
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
 
       {/* Expanded content */}
-      {expanded && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          className="px-4 pb-4 border-t border-border/30 pt-3 ml-[72px]"
-        >
-          {task.description && (
-            <p className="text-sm text-muted-foreground mb-3">{task.description}</p>
-          )}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="px-4 pb-4 border-t border-border/30 pt-3 ml-[72px] overflow-hidden"
+          >
+            {task.description && (
+              <p className="text-sm text-muted-foreground mb-3">{task.description}</p>
+            )}
 
-          {task.subtasks && task.subtasks.length > 0 && (
-            <div className="space-y-1.5">
-              <span className="text-xs text-muted-foreground font-medium">Subtarefas</span>
-              {task.subtasks.map(sub => (
-                <label key={sub.id} className="flex items-center gap-2 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={sub.is_completed}
-                    onChange={() => handleSubtaskToggle(sub.id, sub.is_completed)}
-                    className="w-3.5 h-3.5 rounded border-muted-foreground/30 accent-primary"
-                  />
-                  <span className={`text-sm ${sub.is_completed ? "line-through text-muted-foreground" : "text-foreground"}`}>
-                    {sub.title}
-                  </span>
-                </label>
-              ))}
-            </div>
-          )}
-        </motion.div>
-      )}
+            {task.subtasks && task.subtasks.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-xs text-muted-foreground font-medium">Subtarefas</span>
+                {task.subtasks.map(sub => (
+                  <label key={sub.id} className="flex items-center gap-2 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={sub.is_completed}
+                      onChange={() => handleSubtaskToggle(sub.id, sub.is_completed)}
+                      className="w-3.5 h-3.5 rounded border-muted-foreground/30 accent-primary"
+                    />
+                    <span className={`text-sm transition-all ${sub.is_completed ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                      {sub.title}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
