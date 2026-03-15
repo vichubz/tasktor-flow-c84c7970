@@ -107,11 +107,14 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
             />
           </div>
 
-          <Select value={projectId} onValueChange={setProjectId} required>
+          <Select value={projectId} onValueChange={setProjectId}>
             <SelectTrigger className="bg-secondary border-border h-11">
-              <SelectValue placeholder="Selecionar projeto" />
+              <SelectValue placeholder="Projeto (opcional)" />
             </SelectTrigger>
             <SelectContent className="bg-card border-border">
+              <SelectItem value="none">
+                <span className="text-muted-foreground">Sem projeto</span>
+              </SelectItem>
               {projects.map(p => (
                 <SelectItem key={p.id} value={p.id}>
                   <span className="flex items-center gap-2">
