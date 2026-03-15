@@ -20,7 +20,22 @@ import { toast } from "sonner";
 
 type Project = Tables<"projects">;
 
-const COLORS = ["#7C3AED", "#6366F1", "#06B6D4", "#10B981", "#EF4444", "#F59E0B", "#EC4899", "#8B5CF6"];
+const COLORS = [
+  // Roxos & Violetas
+  "#7C3AED", "#8B5CF6", "#6366F1", "#A855F7", "#C084FC",
+  // Azuis
+  "#3B82F6", "#2563EB", "#06B6D4", "#0EA5E9", "#38BDF8",
+  // Verdes
+  "#10B981", "#059669", "#22C55E", "#34D399", "#2DD4A0",
+  // Vermelhos & Laranjas
+  "#EF4444", "#F97316", "#FB923C", "#DC2626",
+  // Amarelos
+  "#F59E0B", "#EAB308", "#FBBF24",
+  // Rosas
+  "#EC4899", "#F472B6", "#DB2777",
+  // Neutros
+  "#6B7280", "#78716C", "#64748B",
+];
 
 interface ProjectManagerProps {
   open: boolean;
@@ -35,6 +50,7 @@ const ProjectManager = ({ open, onOpenChange, projects, onUpdated }: ProjectMana
   const [color, setColor] = useState(COLORS[0]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [editColor, setEditColor] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
   const [hasTasks, setHasTasks] = useState(false);
 
@@ -71,8 +87,11 @@ const ProjectManager = ({ open, onOpenChange, projects, onUpdated }: ProjectMana
 
   const handleSaveEdit = async (id: string) => {
     if (!editName.trim()) return;
-    await supabase.from("projects").update({ name: editName.trim() }).eq("id", id);
+    const updates: { name: string; color?: string } = { name: editName.trim() };
+    if (editColor) updates.color = editColor;
+    await supabase.from("projects").update(updates).eq("id", id);
     setEditingId(null);
+    setEditColor(null);
     toast.success("Projeto atualizado");
     onUpdated();
   };
@@ -93,12 +112,12 @@ const ProjectManager = ({ open, onOpenChange, projects, onUpdated }: ProjectMana
               className="bg-secondary border-border h-10"
               onKeyDown={(e) => e.key === "Enter" && handleCreate()}
             />
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5">
               {COLORS.map(c => (
                 <button
                   key={c}
                   onClick={() => setColor(c)}
-                  className={`w-7 h-7 rounded-full transition-transform ${color === c ? "scale-125 ring-2 ring-foreground/20" : "hover:scale-110"}`}
+                  className={`w-6 h-6 rounded-full transition-all ${color === c ? "scale-125 ring-2 ring-foreground/30 ring-offset-1 ring-offset-card" : "hover:scale-110"}`}
                   style={{ backgroundColor: c }}
                 />
               ))}
@@ -110,32 +129,58 @@ const ProjectManager = ({ open, onOpenChange, projects, onUpdated }: ProjectMana
 
           <div className="mt-4 space-y-2">
             {projects.map(p => (
-              <div key={p.id} className="flex items-center gap-3 bg-secondary/50 rounded-lg px-3 py-2.5">
-                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
-                {editingId === p.id ? (
-                  <input
-                    autoFocus
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    onBlur={() => handleSaveEdit(p.id)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSaveEdit(p.id)}
-                    className="flex-1 bg-transparent text-foreground text-sm outline-none border-b border-primary/50"
+              <div key={p.id} className="bg-secondary/50 rounded-lg px-3 py-2.5 space-y-2">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      if (editingId === p.id) {
+                        // cycle — already editing, just focus color
+                      } else {
+                        setEditingId(p.id);
+                        setEditName(p.name);
+                        setEditColor(p.color);
+                      }
+                    }}
+                    className="w-4 h-4 rounded-full flex-shrink-0 ring-1 ring-foreground/10 hover:ring-foreground/30 transition-all"
+                    style={{ backgroundColor: editingId === p.id ? (editColor || p.color) : p.color }}
                   />
-                ) : (
-                  <span className="flex-1 text-sm text-foreground">{p.name}</span>
+                  {editingId === p.id ? (
+                    <input
+                      autoFocus
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      onBlur={() => handleSaveEdit(p.id)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSaveEdit(p.id)}
+                      className="flex-1 bg-transparent text-foreground text-sm outline-none border-b border-primary/50"
+                    />
+                  ) : (
+                    <span className="flex-1 text-sm text-foreground">{p.name}</span>
+                  )}
+                  <button
+                    onClick={() => { setEditingId(p.id); setEditName(p.name); setEditColor(p.color); }}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteClick(p)}
+                    className="text-muted-foreground hover:text-destructive transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                {editingId === p.id && (
+                  <div className="flex flex-wrap gap-1 pl-7">
+                    {COLORS.map(c => (
+                      <button
+                        key={c}
+                        onClick={() => setEditColor(c)}
+                        className={`w-5 h-5 rounded-full transition-all ${editColor === c ? "scale-125 ring-2 ring-foreground/30 ring-offset-1 ring-offset-card" : "hover:scale-110"}`}
+                        style={{ backgroundColor: c }}
+                      />
+                    ))}
+                  </div>
                 )}
-                <button
-                  onClick={() => { setEditingId(p.id); setEditName(p.name); }}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Edit2 className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => handleDeleteClick(p)}
-                  className="text-muted-foreground hover:text-destructive transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
               </div>
             ))}
             {projects.length === 0 && (
