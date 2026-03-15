@@ -18,8 +18,8 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/" element={<AppLayout><Dashboard /></AppLayout>} />
+            <Route path="/" element={<AuthPage />} />
+            <Route path="/dashboard" element={<AppLayout><Dashboard /></AppLayout>} />
             <Route path="/metrics" element={<AppLayout><MetricsPage /></AppLayout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

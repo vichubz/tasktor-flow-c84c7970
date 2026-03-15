@@ -17,7 +17,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     );
   }
 
-  if (!user) return <Navigate to="/auth" replace />;
+  if (!user) return <Navigate to="/" replace />;
 
   return (
     <div className="flex min-h-screen bg-background w-full">

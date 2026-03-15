@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -29,8 +29,12 @@ const AuthPage = () => {
   const [name, setName] = useState("");
   const [inviteCode, setInviteCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user, loading } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user) navigate("/dashboard", { replace: true });
+  }, [user, loading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +45,7 @@ const AuthPage = () => {
       if (error) {
         toast.error(error.message);
       } else {
-        navigate("/");
+        navigate("/dashboard");
       }
     } else {
       if (inviteCode.toLowerCase() !== "ebss") {
@@ -54,7 +58,7 @@ const AuthPage = () => {
         toast.error(error.message);
       } else {
         toast.success("Conta criada com sucesso!");
-        navigate("/");
+        navigate("/dashboard");
       }
     }
     setIsLoading(false);
