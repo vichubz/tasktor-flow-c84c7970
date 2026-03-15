@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import DigitalClock from "./DigitalClock";
@@ -75,8 +76,14 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
 
         {/* Mini stat cards */}
         <div className="flex items-center gap-3">
-          {miniCards.map((card) => (
-            <div key={card.label} className="flex items-center gap-2 bg-secondary/50 rounded-lg px-3 py-2">
+          {miniCards.map((card, i) => (
+            <motion.div
+              key={card.label}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className="flex items-center gap-2 bg-secondary/50 rounded-lg px-3 py-2 card-lift cursor-default"
+            >
               <card.icon className={`w-4 h-4 ${card.color}`} />
               <div className="flex flex-col">
                 <span className="text-[10px] text-muted-foreground leading-none mb-0.5">{card.label}</span>
@@ -90,10 +97,17 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
                     min="0"
                   />
                 ) : (
-                  <span className="text-foreground font-mono text-sm font-semibold">{card.value}</span>
+                  <motion.span
+                    key={card.value}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-foreground font-mono text-sm font-semibold"
+                  >
+                    {card.value}
+                  </motion.span>
                 )}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
