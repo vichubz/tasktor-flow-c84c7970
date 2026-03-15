@@ -108,12 +108,12 @@ const ProjectManager = ({ open, onOpenChange, projects, onUpdated }: ProjectMana
               className="bg-secondary border-border h-10"
               onKeyDown={(e) => e.key === "Enter" && handleCreate()}
             />
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5">
               {COLORS.map(c => (
                 <button
                   key={c}
                   onClick={() => setColor(c)}
-                  className={`w-7 h-7 rounded-full transition-transform ${color === c ? "scale-125 ring-2 ring-foreground/20" : "hover:scale-110"}`}
+                  className={`w-6 h-6 rounded-full transition-all ${color === c ? "scale-125 ring-2 ring-foreground/30 ring-offset-1 ring-offset-card" : "hover:scale-110"}`}
                   style={{ backgroundColor: c }}
                 />
               ))}
