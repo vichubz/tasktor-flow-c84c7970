@@ -139,7 +139,6 @@ const Dashboard = () => {
             <Button
               onClick={() => setShowNewTask(true)}
               className="gradient-primary text-primary-foreground h-9 gap-2 glow-primary btn-shimmer"
-              >
             >
               <Plus className="w-4 h-4" />
               Nova Tarefa
