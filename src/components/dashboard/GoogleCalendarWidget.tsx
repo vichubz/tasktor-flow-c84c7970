@@ -26,7 +26,6 @@ const GoogleCalendarWidget = () => {
   const [showSchedule, setShowSchedule] = useState(false);
   const [scheduling, setScheduling] = useState(false);
 
-  // Schedule form
   const [schedTitle, setSchedTitle] = useState("");
   const [schedDate, setSchedDate] = useState(new Date().toISOString().split("T")[0]);
   const [schedStart, setSchedStart] = useState("09:00");
@@ -58,12 +57,10 @@ const GoogleCalendarWidget = () => {
 
   useEffect(() => {
     fetchEvents();
-    // Refresh every 5 min
     const interval = setInterval(fetchEvents, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, [fetchEvents]);
 
-  // Check if just connected
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("calendar") === "connected") {
@@ -137,7 +134,6 @@ const GoogleCalendarWidget = () => {
     }
   };
 
-  // Find next upcoming event
   const now = new Date();
   const nextEvent = events.find(e => new Date(e.start) > now);
   const totalMeetings = events.length;
@@ -270,85 +266,87 @@ const GoogleCalendarWidget = () => {
         </motion.button>
       </div>
 
-      {/* Schedule Dialog */}
-      <Dialog open={showSchedule} onOpenChange={setShowSchedule}>
-        <DialogContent className="bg-card/95 backdrop-blur-xl border-border/30 max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-display gradient-text">Agendar Reunião</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSchedule} className="space-y-4">
-            <div className="input-glow rounded-lg">
-              <label className="text-xs font-semibold text-muted-foreground mb-1 block">Título *</label>
-              <Input
-                value={schedTitle}
-                onChange={e => setSchedTitle(e.target.value)}
-                placeholder="Nome da reunião"
-                className="bg-secondary/60 border-border/30"
-                required
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-3">
+      {/* Schedule Dialog - using controlled state instead of passing ref */}
+      {showSchedule && (
+        <Dialog open={showSchedule} onOpenChange={setShowSchedule}>
+          <DialogContent className="bg-card/95 backdrop-blur-xl border-border/30 max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-display gradient-text">Agendar Reunião</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSchedule} className="space-y-4">
               <div className="input-glow rounded-lg">
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Data *</label>
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Título *</label>
                 <Input
-                  type="date"
-                  value={schedDate}
-                  onChange={e => setSchedDate(e.target.value)}
+                  value={schedTitle}
+                  onChange={e => setSchedTitle(e.target.value)}
+                  placeholder="Nome da reunião"
                   className="bg-secondary/60 border-border/30"
                   required
                 />
               </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="input-glow rounded-lg">
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Data *</label>
+                  <Input
+                    type="date"
+                    value={schedDate}
+                    onChange={e => setSchedDate(e.target.value)}
+                    className="bg-secondary/60 border-border/30"
+                    required
+                  />
+                </div>
+                <div className="input-glow rounded-lg">
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Início *</label>
+                  <Input
+                    type="time"
+                    value={schedStart}
+                    onChange={e => setSchedStart(e.target.value)}
+                    className="bg-secondary/60 border-border/30"
+                    required
+                  />
+                </div>
+                <div className="input-glow rounded-lg">
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Fim *</label>
+                  <Input
+                    type="time"
+                    value={schedEnd}
+                    onChange={e => setSchedEnd(e.target.value)}
+                    className="bg-secondary/60 border-border/30"
+                    required
+                  />
+                </div>
+              </div>
               <div className="input-glow rounded-lg">
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Início *</label>
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Link da call</label>
                 <Input
-                  type="time"
-                  value={schedStart}
-                  onChange={e => setSchedStart(e.target.value)}
+                  value={schedLink}
+                  onChange={e => setSchedLink(e.target.value)}
+                  placeholder="https://meet.google.com/..."
                   className="bg-secondary/60 border-border/30"
-                  required
                 />
               </div>
               <div className="input-glow rounded-lg">
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Fim *</label>
-                <Input
-                  type="time"
-                  value={schedEnd}
-                  onChange={e => setSchedEnd(e.target.value)}
-                  className="bg-secondary/60 border-border/30"
-                  required
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Descrição</label>
+                <Textarea
+                  value={schedDesc}
+                  onChange={e => setSchedDesc(e.target.value)}
+                  placeholder="Opcional"
+                  className="bg-secondary/60 border-border/30 h-20 resize-none"
                 />
               </div>
-            </div>
-            <div className="input-glow rounded-lg">
-              <label className="text-xs font-semibold text-muted-foreground mb-1 block">Link da call</label>
-              <Input
-                value={schedLink}
-                onChange={e => setSchedLink(e.target.value)}
-                placeholder="https://meet.google.com/..."
-                className="bg-secondary/60 border-border/30"
-              />
-            </div>
-            <div className="input-glow rounded-lg">
-              <label className="text-xs font-semibold text-muted-foreground mb-1 block">Descrição</label>
-              <Textarea
-                value={schedDesc}
-                onChange={e => setSchedDesc(e.target.value)}
-                placeholder="Opcional"
-                className="bg-secondary/60 border-border/30 h-20 resize-none"
-              />
-            </div>
-            <Button
-              type="submit"
-              disabled={scheduling}
-              className="w-full font-bold"
-              style={{ background: "var(--gradient-primary)", boxShadow: "0 0 20px rgba(14,165,195,0.3)" }}
-            >
-              {scheduling ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              {scheduling ? "Agendando..." : "Agendar Reunião"}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+              <Button
+                type="submit"
+                disabled={scheduling}
+                className="w-full font-bold"
+                style={{ background: "var(--gradient-primary)", boxShadow: "0 0 20px rgba(14,165,195,0.3)" }}
+              >
+                {scheduling ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                {scheduling ? "Agendando..." : "Agendar Reunião"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };

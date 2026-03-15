@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Play, Pause, Square, Timer } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Tables } from "@/integrations/supabase/types";
+import { toast } from "sonner";
 
 type Project = Tables<"projects">;
 
@@ -27,6 +28,8 @@ const WorkTimer = ({ projects }: WorkTimerProps) => {
   const [selectedProject, setSelectedProject] = useState("");
   const [activeEntryId, setActiveEntryId] = useState<string | null>(null);
   const pausedSecondsRef = useRef(0);
+  const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const startedAtRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -42,11 +45,14 @@ const WorkTimer = ({ projects }: WorkTimerProps) => {
         const entry = data[0];
         setActiveEntryId(entry.id);
         setSelectedProject(entry.project_id);
+        startedAtRef.current = entry.started_at;
         if (entry.duration_seconds > 0) {
+          // Was paused
           setSeconds(entry.duration_seconds);
           pausedSecondsRef.current = entry.duration_seconds;
           setIsPaused(true);
         } else {
+          // Running - calculate elapsed from started_at
           const elapsed = Math.floor((Date.now() - new Date(entry.started_at).getTime()) / 1000);
           setSeconds(elapsed);
           setIsRunning(true);
@@ -56,35 +62,56 @@ const WorkTimer = ({ projects }: WorkTimerProps) => {
     loadActive();
   }, [user]);
 
+  // Local tick every second
   useEffect(() => {
     if (!isRunning) return;
     const interval = setInterval(() => setSeconds(s => s + 1), 1000);
     return () => clearInterval(interval);
   }, [isRunning]);
 
+  // Sync to DB every 30 seconds when running
+  useEffect(() => {
+    if (!isRunning || !activeEntryId) {
+      if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
+      return;
+    }
+    syncIntervalRef.current = setInterval(() => {
+      supabase.from("time_entries").update({ duration_seconds: seconds }).eq("id", activeEntryId);
+    }, 30000);
+    return () => { if (syncIntervalRef.current) clearInterval(syncIntervalRef.current); };
+  }, [isRunning, activeEntryId, seconds]);
+
   const handleStart = async () => {
-    if (!user || !selectedProject) return;
+    if (!user || !selectedProject) {
+      if (!selectedProject) toast.error("Selecione um projeto primeiro");
+      return;
+    }
     if (isPaused && activeEntryId) {
       const newStartedAt = new Date(Date.now() - pausedSecondsRef.current * 1000).toISOString();
+      startedAtRef.current = newStartedAt;
       await supabase.from("time_entries").update({ started_at: newStartedAt, duration_seconds: 0 }).eq("id", activeEntryId);
       setIsPaused(false);
       setIsRunning(true);
       return;
     }
+    // Stop any existing entry
     if (activeEntryId) {
       await supabase.from("time_entries").update({ ended_at: new Date().toISOString(), duration_seconds: seconds }).eq("id", activeEntryId);
     }
+    const now = new Date().toISOString();
     const { data } = await supabase.from("time_entries").insert({
       user_id: user.id,
       project_id: selectedProject,
-      started_at: new Date().toISOString(),
+      started_at: now,
     }).select().single();
     if (data) {
       setActiveEntryId(data.id);
+      startedAtRef.current = now;
       setSeconds(0);
       pausedSecondsRef.current = 0;
       setIsRunning(true);
       setIsPaused(false);
+      toast.success("Timer iniciado!");
     }
   };
 
@@ -95,6 +122,7 @@ const WorkTimer = ({ projects }: WorkTimerProps) => {
     if (activeEntryId) {
       await supabase.from("time_entries").update({ duration_seconds: seconds }).eq("id", activeEntryId);
     }
+    toast("Timer pausado", { icon: "⏸️" });
   };
 
   const handleStop = async () => {
@@ -102,8 +130,10 @@ const WorkTimer = ({ projects }: WorkTimerProps) => {
     setIsPaused(false);
     if (activeEntryId) {
       await supabase.from("time_entries").update({ ended_at: new Date().toISOString(), duration_seconds: seconds }).eq("id", activeEntryId);
+      toast.success("Tempo salvo!");
     }
     setActiveEntryId(null);
+    startedAtRef.current = null;
     setSeconds(0);
     pausedSecondsRef.current = 0;
   };
@@ -144,16 +174,12 @@ const WorkTimer = ({ projects }: WorkTimerProps) => {
         </SelectContent>
       </Select>
 
-      <motion.span
+      <span
         className={`font-mono text-xl font-bold min-w-[90px] text-center ${isRunning ? "neon-text-primary" : ""}`}
         style={{ color: activeProject?.color }}
-        key={formatTime(seconds)}
-        initial={false}
-        animate={isRunning ? { scale: [1, 1.02, 1] } : {}}
-        transition={{ duration: 1, repeat: Infinity }}
       >
         {formatTime(seconds)}
-      </motion.span>
+      </span>
 
       <div className="flex gap-1.5">
         {!isRunning ? (

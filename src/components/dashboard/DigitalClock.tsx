@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { motion } from "framer-motion";
 
-const DigitalClock = () => {
+const DigitalClock = memo(() => {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -22,7 +22,6 @@ const DigitalClock = () => {
   return (
     <div className="flex flex-col">
       <div className="flex items-baseline gap-0.5">
-        {/* Hours */}
         <div className="flex gap-1">
           {hours.split("").map((digit, i) => (
             <motion.span
@@ -44,7 +43,6 @@ const DigitalClock = () => {
           :
         </motion.span>
 
-        {/* Minutes */}
         <div className="flex gap-1">
           {minutes.split("").map((digit, i) => (
             <motion.span
@@ -69,6 +67,8 @@ const DigitalClock = () => {
       <span className="text-xs text-muted-foreground capitalize font-body mt-0.5">{dateStr}</span>
     </div>
   );
-};
+});
+
+DigitalClock.displayName = "DigitalClock";
 
 export default DigitalClock;
