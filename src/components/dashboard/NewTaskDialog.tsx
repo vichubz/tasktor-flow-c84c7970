@@ -35,7 +35,7 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !title || !projectId) return;
+    if (!user || !title) return;
     setLoading(true);
 
     // Get max position
@@ -51,7 +51,7 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
 
     const { data: task, error } = await supabase.from("tasks").insert({
       user_id: user.id,
-      project_id: projectId,
+      project_id: (projectId && projectId !== "none") ? projectId : null,
       title,
       description: description || null,
       position,
@@ -107,11 +107,14 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
             />
           </div>
 
-          <Select value={projectId} onValueChange={setProjectId} required>
+          <Select value={projectId} onValueChange={setProjectId}>
             <SelectTrigger className="bg-secondary border-border h-11">
-              <SelectValue placeholder="Selecionar projeto" />
+              <SelectValue placeholder="Projeto (opcional)" />
             </SelectTrigger>
             <SelectContent className="bg-card border-border">
+              <SelectItem value="none">
+                <span className="text-muted-foreground">Sem projeto</span>
+              </SelectItem>
               {projects.map(p => (
                 <SelectItem key={p.id} value={p.id}>
                   <span className="flex items-center gap-2">
@@ -177,7 +180,7 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
 
           <Button
             type="submit"
-            disabled={loading || !title || !projectId}
+            disabled={loading || !title}
             className="w-full gradient-primary text-primary-foreground h-11 font-semibold"
           >
             {loading ? "Criando..." : "Criar Tarefa"}

@@ -124,7 +124,7 @@ export type Database = {
           id: string
           is_completed: boolean
           position: number
-          project_id: string
+          project_id: string | null
           title: string
           user_id: string
         }
@@ -136,7 +136,7 @@ export type Database = {
           id?: string
           is_completed?: boolean
           position?: number
-          project_id: string
+          project_id?: string | null
           title: string
           user_id: string
         }
@@ -148,7 +148,7 @@ export type Database = {
           id?: string
           is_completed?: boolean
           position?: number
-          project_id?: string
+          project_id?: string | null
           title?: string
           user_id?: string
         }
