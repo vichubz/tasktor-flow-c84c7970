@@ -33,7 +33,7 @@ const AuthPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user) navigate("/dashboard", { replace: true });
+    if (!loading && user) navigate("/home", { replace: true });
   }, [user, loading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
