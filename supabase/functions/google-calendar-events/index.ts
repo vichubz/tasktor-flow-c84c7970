@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
     // Verify user
-    const userClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: authHeader } },
       auth: { persistSession: false },
     });
