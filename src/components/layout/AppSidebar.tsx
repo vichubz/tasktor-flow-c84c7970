@@ -31,7 +31,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
   useEffect(() => { fetchProjects(); }, [user]);
 
   const links = [
-    { to: "/", icon: LayoutDashboard, label: "Dashboard" },
+    { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/metrics", icon: BarChart3, label: "Métricas" },
   ];
 

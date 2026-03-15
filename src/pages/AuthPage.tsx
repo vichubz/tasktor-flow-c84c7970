@@ -58,7 +58,7 @@ const AuthPage = () => {
         toast.error(error.message);
       } else {
         toast.success("Conta criada com sucesso!");
-        navigate("/");
+        navigate("/dashboard");
       }
     }
     setIsLoading(false);
