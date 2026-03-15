@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
 import DigitalClock from "./DigitalClock";
-import WorkTimer from "./WorkTimer";
-import MeetingTracker from "./MeetingTracker";
-import GoogleCalendarWidget from "./GoogleCalendarWidget";
-import { CheckCircle2 } from "lucide-react";
+import WorkTimerCard from "./WorkTimerCard";
+import MeetingMetricsCard from "./MeetingMetricsCard";
+import GoogleCalendarCard from "./GoogleCalendarCard";
+import { CheckCircle2, History } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import { useState } from "react";
+import HistoryModal from "./HistoryModal";
 
 type Project = Tables<"projects">;
 
@@ -14,6 +16,8 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => {
+  const [showHistory, setShowHistory] = useState(false);
+
   return (
     <div className="relative overflow-hidden border-b border-border/20">
       {/* Animated gradient background */}
@@ -33,51 +37,57 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
         backgroundSize: "20px 20px",
       }} />
 
-      <div className="glass px-6 py-4 relative z-10 border-0">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="glass px-4 py-3 relative z-10 border-0">
+        {/* Row 1: Clock + Completed + History */}
+        <div className="flex items-center justify-between mb-3">
           <DigitalClock />
-
-          {/* Completed today */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileHover={{ scale: 1.04, y: -2 }}
-            className="flex items-center gap-3 rounded-xl px-4 py-3 cursor-default relative overflow-hidden group"
-            style={{
-              background: "linear-gradient(145deg, rgba(16, 185, 129, 0.08), rgba(8, 18, 22, 0.8))",
-              border: "1px solid rgba(16, 185, 129, 0.12)",
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-success/10 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="flex items-center gap-3">
+            {/* Completed today */}
             <motion.div
-              className="w-9 h-9 rounded-lg flex items-center justify-center relative z-10"
-              style={{ background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05))" }}
-              animate={{ boxShadow: ["0 0 0px rgba(16,185,129,0.3)", "0 0 20px rgba(16,185,129,0.5)", "0 0 0px rgba(16,185,129,0.3)"] }}
-              transition={{ duration: 2, repeat: Infinity }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.04 }}
+              className="flex items-center gap-2 rounded-lg px-3 py-2 cursor-default stat-card"
             >
-              <CheckCircle2 className="w-4.5 h-4.5 text-success" />
+              <div className="w-7 h-7 rounded-md flex items-center justify-center"
+                style={{ background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05))" }}>
+                <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[9px] text-muted-foreground leading-none font-medium uppercase tracking-wider">Concluídas</span>
+                <motion.span
+                  key={todayCompleted}
+                  initial={{ opacity: 0, scale: 2 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-foreground font-mono text-sm font-bold neon-text-success"
+                >
+                  {todayCompleted}
+                </motion.span>
+              </div>
             </motion.div>
-            <div className="flex flex-col relative z-10">
-              <span className="text-[10px] text-muted-foreground leading-none mb-1 font-medium uppercase tracking-wider">Concluídas</span>
-              <motion.span
-                key={todayCompleted}
-                initial={{ opacity: 0, scale: 2, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="text-foreground font-mono text-lg font-bold neon-text-success"
-              >
-                {todayCompleted}
-              </motion.span>
-            </div>
-          </motion.div>
 
-          <MeetingTracker />
+            {/* History button */}
+            <motion.button
+              onClick={() => setShowHistory(true)}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 stat-card text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <History className="w-4 h-4" />
+              <span className="text-xs font-semibold hidden sm:inline">Histórico</span>
+            </motion.button>
+          </div>
+        </div>
 
-          {/* Google Calendar */}
-          <GoogleCalendarWidget />
-
-          <WorkTimer projects={projects} />
+        {/* Row 2: Metric cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <MeetingMetricsCard />
+          <GoogleCalendarCard />
+          <WorkTimerCard projects={projects} />
         </div>
       </div>
+
+      <HistoryModal open={showHistory} onOpenChange={setShowHistory} projects={projects} />
     </div>
   );
 };
