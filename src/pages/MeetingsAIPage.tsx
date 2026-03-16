@@ -180,7 +180,7 @@ const MeetingsAIPage = () => {
   const handleStartEdit = (e: React.MouseEvent, item: MeetingSummary) => {
     e.stopPropagation();
     setEditingId(item.id);
-    setEditingTitle(item.title || item.client || item.objective || "Untitled meeting");
+    setEditingTitle(item.title || item.client || item.objective || "Reunião sem título");
   };
 
   const handleSaveTitle = async (e: React.MouseEvent, id: string) => {
