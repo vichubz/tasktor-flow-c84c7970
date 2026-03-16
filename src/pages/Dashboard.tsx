@@ -60,7 +60,7 @@ const Dashboard = () => {
         // Retry once after 2s on network failure
         setTimeout(() => fetchData(false), 2000);
       } else {
-        toast.error("Erro ao carregar dados. Tente recarregar a página.");
+        toast.error("Failed to load data. Please reload the page.");
         setLoading(false);
       }
     }
