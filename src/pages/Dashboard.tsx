@@ -7,7 +7,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import TaskCard from "@/components/dashboard/TaskCard";
 import NewTaskDialog from "@/components/dashboard/NewTaskDialog";
 import CompletedTasks from "@/components/dashboard/CompletedTasks";
-import InlineTaskCreator from "@/components/dashboard/InlineTaskCreator";
+import InlineTaskCreator, { type InlineTaskCreatorHandle } from "@/components/dashboard/InlineTaskCreator";
 import SkeletonTaskCard from "@/components/dashboard/SkeletonTaskCard";
 import { Plus, Filter, Inbox, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
