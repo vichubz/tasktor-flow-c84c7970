@@ -13,6 +13,7 @@ import NotFound from "@/pages/NotFound";
 const MetricsPage = lazy(() => import("@/pages/MetricsPage"));
 const HomePage = lazy(() => import("@/pages/HomePage"));
 const MeetingsAIPage = lazy(() => import("@/pages/MeetingsAIPage"));
+const CalendarPage = lazy(() => import("@/pages/CalendarPage"));
 
 const queryClient = new QueryClient();
 
