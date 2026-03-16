@@ -72,6 +72,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
   const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
   const [editingSubtaskTitle, setEditingSubtaskTitle] = useState("");
   const [showSubtaskDropdown, setShowSubtaskDropdown] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const titleDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const descDebounceRef = useRef<NodeJS.Timeout | null>(null);
