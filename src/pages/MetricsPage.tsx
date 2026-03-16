@@ -149,7 +149,7 @@ const MetricsPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08, ease: "easeOut" }}
             whileHover={{ y: -2 }}
-            className="stat-card rounded-xl p-5 card-lift relative overflow-hidden"
+            className="stat-card rounded-xl p-4 sm:p-5 card-lift relative overflow-hidden"
           >
             <div className={`absolute inset-0 bg-gradient-to-br ${stat.glow} to-transparent opacity-50 pointer-events-none`} />
             <div className="relative z-10">
