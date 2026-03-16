@@ -2,9 +2,11 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronRight, Check, Loader2, Undo2, Trash2, X } from "lucide-react";
+import { ChevronRight, Check, Loader2, Undo2, Trash2, X, Pencil } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Task = Tables<"tasks"> & { project?: Tables<"projects"> };
 
@@ -20,6 +22,10 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
   const [hasFetched, setHasFetched] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [confirmClearAll, setConfirmClearAll] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editProjectId, setEditProjectId] = useState<string>("none");
+  const [projects, setProjects] = useState<Tables<"projects">[]>([]);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -41,9 +47,15 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
     setHasFetched(true);
   }, [user, today]);
 
+  const fetchProjects = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase.from("projects").select("*").eq("user_id", user.id).order("name");
+    if (data) setProjects(data);
+  }, [user]);
+
   useEffect(() => {
-    if (expanded && !hasFetched) fetchCompleted();
-  }, [expanded, hasFetched, fetchCompleted]);
+    if (expanded && !hasFetched) { fetchCompleted(); fetchProjects(); }
+  }, [expanded, hasFetched, fetchCompleted, fetchProjects]);
 
   const handleUncomplete = async (taskId: string) => {
     const prev = [...tasks];
@@ -93,6 +105,23 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
       if (error) { toast.error("Erro ao limpar tarefas"); setTasks(prev); return; }
     }
     toast.success("Todas as tarefas concluídas foram excluídas");
+  };
+
+  const startEdit = (task: Task) => {
+    setEditingId(task.id);
+    setEditTitle(task.title);
+    setEditProjectId(task.project_id || "none");
+  };
+
+  const saveEdit = async (taskId: string) => {
+    if (!editTitle.trim()) return;
+    const prev = [...tasks];
+    const newProjectId = editProjectId === "none" ? null : editProjectId;
+    setTasks(t => t.map(x => x.id === taskId ? { ...x, title: editTitle.trim(), project_id: newProjectId } : x));
+    setEditingId(null);
+    const { error } = await supabase.from("tasks").update({ title: editTitle.trim(), project_id: newProjectId }).eq("id", taskId);
+    if (error) { toast.error("Erro ao salvar"); setTasks(prev); }
+    else { toast.success("Tarefa atualizada"); fetchCompleted(); }
   };
 
   return (
@@ -165,45 +194,81 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
                 <div className="w-5 h-5 rounded-full bg-success/15 flex items-center justify-center">
                   <Check className="w-3 h-3 text-success" />
                 </div>
-                <span className="text-sm text-muted-foreground line-through flex-1 group-hover:text-foreground/60 transition-colors">{task.title}</span>
-                {task.completed_at && (
-                  <span className="text-[10px] text-muted-foreground/50 font-mono">
-                    {new Date(task.completed_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                )}
-                {task.project && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold" style={{ backgroundColor: `${task.project.color}12`, color: task.project.color }}>
-                    {task.project.name}
-                  </span>
-                )}
 
-                {confirmDeleteId === task.id ? (
-                  <div className="flex items-center gap-1">
-                    <motion.button onClick={() => handleDelete(task.id)} whileTap={{ scale: 0.9 }} className="text-[10px] px-2 py-0.5 rounded bg-destructive text-destructive-foreground font-bold">
-                      Excluir
+                {editingId === task.id ? (
+                  <div className="flex-1 flex items-center gap-2 min-w-0">
+                    <Input
+                      value={editTitle}
+                      onChange={e => setEditTitle(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter") saveEdit(task.id); if (e.key === "Escape") setEditingId(null); }}
+                      className="h-7 text-sm bg-secondary/40 border-border/30 flex-1"
+                      autoFocus
+                    />
+                    <Select value={editProjectId} onValueChange={setEditProjectId}>
+                      <SelectTrigger className="h-7 text-xs bg-secondary/40 border-border/30 w-28"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sem projeto</SelectItem>
+                        {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <motion.button onClick={() => saveEdit(task.id)} whileTap={{ scale: 0.9 }} className="text-primary hover:text-primary/80">
+                      <Check className="w-4 h-4" />
                     </motion.button>
-                    <motion.button onClick={() => setConfirmDeleteId(null)} whileTap={{ scale: 0.9 }} className="text-muted-foreground/40 hover:text-foreground">
-                      <X className="w-3 h-3" />
+                    <motion.button onClick={() => setEditingId(null)} whileTap={{ scale: 0.9 }} className="text-muted-foreground/50 hover:text-foreground">
+                      <X className="w-4 h-4" />
                     </motion.button>
                   </div>
                 ) : (
                   <>
-                    <motion.button
-                      onClick={() => handleUncomplete(task.id)}
-                      whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
-                      className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-primary transition-all"
-                      title="Restaurar tarefa"
-                    >
-                      <Undo2 className="w-3.5 h-3.5" />
-                    </motion.button>
-                    <motion.button
-                      onClick={() => setConfirmDeleteId(task.id)}
-                      whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
-                      className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-destructive transition-all"
-                      title="Excluir tarefa"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </motion.button>
+                    <span className="text-sm text-muted-foreground line-through flex-1 group-hover:text-foreground/60 transition-colors">{task.title}</span>
+                    {task.completed_at && (
+                      <span className="text-[10px] text-muted-foreground/50 font-mono">
+                        {new Date(task.completed_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    )}
+                    {task.project && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold" style={{ backgroundColor: `${task.project.color}12`, color: task.project.color }}>
+                        {task.project.name}
+                      </span>
+                    )}
+
+                    {confirmDeleteId === task.id ? (
+                      <div className="flex items-center gap-1">
+                        <motion.button onClick={() => handleDelete(task.id)} whileTap={{ scale: 0.9 }} className="text-[10px] px-2 py-0.5 rounded bg-destructive text-destructive-foreground font-bold">
+                          Excluir
+                        </motion.button>
+                        <motion.button onClick={() => setConfirmDeleteId(null)} whileTap={{ scale: 0.9 }} className="text-muted-foreground/40 hover:text-foreground">
+                          <X className="w-3 h-3" />
+                        </motion.button>
+                      </div>
+                    ) : (
+                      <>
+                        <motion.button
+                          onClick={() => startEdit(task)}
+                          whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-primary transition-all"
+                          title="Editar tarefa"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </motion.button>
+                        <motion.button
+                          onClick={() => handleUncomplete(task.id)}
+                          whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-primary transition-all"
+                          title="Restaurar tarefa"
+                        >
+                          <Undo2 className="w-3.5 h-3.5" />
+                        </motion.button>
+                        <motion.button
+                          onClick={() => setConfirmDeleteId(task.id)}
+                          whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-destructive transition-all"
+                          title="Excluir tarefa"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </motion.button>
+                      </>
+                    )}
                   </>
                 )}
               </motion.div>
