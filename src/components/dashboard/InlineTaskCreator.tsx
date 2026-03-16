@@ -30,6 +30,13 @@ const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorP
     if (active) inputRef.current?.focus();
   }, [active]);
 
+  useImperativeHandle(ref, () => ({
+    activate: () => {
+      setActive(true);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    },
+  }));
+
   const handleCreate = async () => {
     if (!title.trim() || !user || creating) return;
     setCreating(true);
