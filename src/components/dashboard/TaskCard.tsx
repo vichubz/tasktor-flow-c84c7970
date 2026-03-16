@@ -175,7 +175,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     const deadlineStr = date ? format(date, "yyyy-MM-dd") : null;
     setSaving(true);
     const { error } = await supabase.from("tasks").update({ deadline: deadlineStr }).eq("id", task.id);
-    if (error) toast.error("Failed to change deadline");
+    if (error) toast.error("Falha ao alterar prazo");
     setSaving(false);
     onUpdate();
   };
