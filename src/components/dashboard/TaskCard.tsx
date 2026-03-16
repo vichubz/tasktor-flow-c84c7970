@@ -80,6 +80,40 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [highlighted, setHighlighted] = useState(!!(task as any).is_highlighted);
   const [descExpanded, setDescExpanded] = useState(false);
+  const [hasClipboard, setHasClipboard] = useState(!!subtaskClipboard);
+  const [pastingSubtasks, setPastingSubtasks] = useState(false);
+
+  // Listen for clipboard changes
+  useEffect(() => {
+    const listener = () => setHasClipboard(!!subtaskClipboard);
+    clipboardListeners.add(listener);
+    return () => { clipboardListeners.delete(listener); };
+  }, []);
+
+  const handleCopySubtasks = () => {
+    if (subtasks.length === 0) return;
+    setSubtaskClipboard({ titles: subtasks.map(s => s.title) });
+    toast.success(`${subtasks.length} subtask(s) copiadas`);
+  };
+
+  const handlePasteSubtasks = async () => {
+    if (!subtaskClipboard || pastingSubtasks) return;
+    setPastingSubtasks(true);
+    const startPos = subtasks.length;
+    const inserts = subtaskClipboard.titles.map((title, i) => ({
+      task_id: task.id,
+      title,
+      position: startPos + i,
+    }));
+    const { data, error } = await supabase.from("subtasks").insert(inserts).select();
+    if (error) { toast.error("Falha ao colar subtasks"); }
+    else if (data) {
+      setSubtasks(prev => [...prev, ...data]);
+      subtaskCache.delete(task.id);
+      toast.success(`${data.length} subtask(s) coladas`);
+    }
+    setPastingSubtasks(false);
+  };
 
   const handleToggleHighlight = async () => {
     const newVal = !highlighted;
