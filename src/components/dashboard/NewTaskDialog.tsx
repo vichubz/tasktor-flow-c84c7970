@@ -69,7 +69,7 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
       );
     }
 
-    toast.success("Task created!");
+    toast.success("Task criada!");
     setTitle("");
     setDescription("");
     setProjectId("");
