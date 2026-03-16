@@ -440,7 +440,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           <motion.button
             onClick={handleExpand}
             whileHover={{ scale: 1.15, backgroundColor: "rgba(14,165,195,0.08)" }}
-            className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg"
+            className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg"
           >
             <motion.div animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
               <ChevronRight className="w-4 h-4" />
@@ -450,7 +450,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           <motion.button
             onClick={handleDelete}
             whileHover={{ scale: 1.15, backgroundColor: "rgba(239,68,68,0.08)" }}
-            className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100"
+            className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100"
           >
             <Trash2 className="w-4 h-4" />
           </motion.button>
