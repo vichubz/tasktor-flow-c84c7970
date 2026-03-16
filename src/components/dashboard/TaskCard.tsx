@@ -356,7 +356,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
                 className="w-full bg-transparent text-foreground text-base outline-none border-b-2 border-primary/50 pb-0.5"
               />
             ) : (
-              <span onClick={() => setIsEditing(true)} className="text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-semibold">
+              <span onClick={() => setIsEditing(true)} className="text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-semibold" style={{ textShadow: isTop3 ? "0 0 20px rgba(14,165,195,0.1)" : undefined }}>
                 {task.title}
               </span>
             )}
