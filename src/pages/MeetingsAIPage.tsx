@@ -115,7 +115,7 @@ const MeetingsAIPage = () => {
       const data = await resp.json();
 
       if (!data.success) {
-        toast.error(data.error || "Failed to process transcription");
+        toast.error(data.error || "Falha ao processar transcrição");
         setProcessing(false);
         return;
       }
