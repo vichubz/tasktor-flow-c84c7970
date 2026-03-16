@@ -215,7 +215,7 @@ const Dashboard = () => {
           <div className="flex items-center gap-3">
             <h2 className="text-lg sm:text-xl font-extrabold text-tight font-display gradient-text flex items-center gap-2">
               <Zap className="w-4 sm:w-5 h-4 sm:h-5 text-primary" />
-              Tarefas
+              Tasks
             </h2>
             <motion.span
               key={filteredTasks.length}
