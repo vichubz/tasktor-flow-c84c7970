@@ -29,7 +29,7 @@ const Dashboard = () => {
   const skipRealtimeRef = useRef(false);
   const inlineCreatorRef = useRef<InlineTaskCreatorHandle>(null);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (retry = true) => {
     if (!user) return;
     const today = new Date().toISOString().split("T")[0];
     try {
@@ -48,13 +48,22 @@ const Dashboard = () => {
           .eq("is_completed", true)
           .gte("completed_at", `${today}T00:00:00`),
       ]);
+      if (tasksRes.error || projectsRes.error) {
+        throw new Error("fetch failed");
+      }
       if (tasksRes.data) setTasks(tasksRes.data as Task[]);
       if (projectsRes.data) setProjects(projectsRes.data);
       setTodayCompleted(completedRes.count ?? 0);
+      setLoading(false);
     } catch {
-      toast.error("Erro ao carregar dados");
+      if (retry) {
+        // Retry once after 2s on network failure
+        setTimeout(() => fetchData(false), 2000);
+      } else {
+        toast.error("Erro ao carregar dados. Tente recarregar a página.");
+        setLoading(false);
+      }
     }
-    setLoading(false);
   }, [user]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
