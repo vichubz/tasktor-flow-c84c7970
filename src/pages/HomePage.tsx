@@ -30,35 +30,6 @@ const HomePage = () => {
       {/* ═══ Animated Background ═══ */}
       <HomeBackground />
 
-      {/* ═══ LAYER 2: Glow orbs (subtle over overlay) ═══ */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 2 }}>
-        <motion.div
-          className="absolute rounded-full"
-          style={{
-            width: 450,
-            height: 450,
-            background: "radial-gradient(circle, rgba(14,165,195,0.08), transparent 70%)",
-            filter: "blur(80px)",
-            top: "-10%",
-            right: "-5%",
-          }}
-          animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute rounded-full"
-          style={{
-            width: 400,
-            height: 400,
-            background: "radial-gradient(circle, rgba(124,58,237,0.07), transparent 70%)",
-            filter: "blur(100px)",
-            bottom: "-5%",
-            left: "-8%",
-          }}
-          animate={{ scale: [1.2, 0.9, 1.2], opacity: [0.2, 0.45, 0.2] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
 
       {/* ═══ CLOCK — top right ═══ */}
       <motion.div
