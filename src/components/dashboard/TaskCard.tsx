@@ -186,7 +186,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     subtaskCache.delete(task.id);
     const { error } = await supabase.from("subtasks").update({ is_completed: !completed }).eq("id", subtaskId);
     if (error) {
-      toast.error("Failed to update subtask");
+      toast.error("Falha ao atualizar subtask");
       setSubtasks(prev => prev.map(s => s.id === subtaskId ? { ...s, is_completed: completed } : s));
     }
   };
