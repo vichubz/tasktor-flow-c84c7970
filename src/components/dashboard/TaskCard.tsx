@@ -349,7 +349,10 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                   autoFocus value={title}
                   onChange={(e) => handleTitleChange(e.target.value)}
                   onBlur={handleTitleBlur}
-                  onKeyDown={(e) => e.key === "Enter" && handleTitleBlur()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleTitleBlur();
+                    if (e.key === "Escape") { setTitle(task.title); setIsEditing(false); }
+                  }}
                   className="w-full bg-transparent text-foreground text-base font-bold outline-none border-b-2 border-primary/50 pb-0.5"
                 />
               ) : (
