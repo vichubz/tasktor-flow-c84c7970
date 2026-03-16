@@ -140,6 +140,7 @@ const Dashboard = () => {
   const handleDelete = async (taskId: string) => {
     const deletedTask = tasks.find(t => t.id === taskId);
     const prev = [...tasks];
+    // Remove immediately from UI
     setTasks(p => p.filter(t => t.id !== taskId));
     skipRealtimeRef.current = true;
 
@@ -147,25 +148,27 @@ const Dashboard = () => {
     if (error) {
       toast.error("Erro ao excluir tarefa");
       setTasks(prev);
-    } else {
-      toast("Tarefa excluída", {
-        action: deletedTask ? {
-          label: "Desfazer",
-          onClick: async () => {
-            const { error: restoreError } = await supabase.from("tasks").insert({
-              user_id: deletedTask.user_id,
-              title: deletedTask.title,
-              description: deletedTask.description,
-              project_id: deletedTask.project_id,
-              position: deletedTask.position,
-              deadline: deletedTask.deadline,
-            });
-            if (!restoreError) fetchData();
-          },
-        } : undefined,
-        duration: 5000,
-      });
+      return;
     }
+    toast("Tarefa excluída", {
+      action: deletedTask ? {
+        label: "Desfazer",
+        onClick: async () => {
+          skipRealtimeRef.current = true;
+          const { error: restoreError } = await supabase.from("tasks").insert({
+            user_id: deletedTask.user_id,
+            title: deletedTask.title,
+            description: deletedTask.description,
+            project_id: deletedTask.project_id,
+            position: deletedTask.position,
+            deadline: deletedTask.deadline,
+          });
+          if (!restoreError) fetchData();
+          else toast.error("Erro ao restaurar tarefa");
+        },
+      } : undefined,
+      duration: 5000,
+    });
   };
 
   return (
