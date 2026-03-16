@@ -57,25 +57,26 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
         <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-primary/[0.05] to-transparent pointer-events-none" />
 
         {/* Logo with spin effect */}
-        <div className="flex items-center justify-center px-3 py-5 border-b border-border/10 relative z-10">
-          {collapsed ? (
-            <div className="logo-icon-wrapper w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative">
-              <div className="logo-glow absolute inset-0 rounded-lg pointer-events-none" />
-              <img src={logoIcone} alt="Tasktor" className="w-8 h-8 object-contain logo-spin" />
-            </div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
-              className="flex items-center justify-center gap-2 logo-icon-wrapper"
-            >
-              <div className="relative flex-shrink-0">
-                <div className="logo-glow absolute inset-0 rounded-full pointer-events-none" />
-                <img src={logoIcone} alt="" className="w-8 h-8 object-contain logo-spin" />
-              </div>
-              <img src={logoCompleto} alt="Tasktor" className="h-6 object-contain" style={{ filter: "drop-shadow(0 0 12px rgba(14,165,195,0.2))" }} />
-            </motion.div>
+        <div className="flex items-center px-3 py-5 border-b border-border/10 relative z-10" style={{ justifyContent: collapsed ? "center" : "flex-start" }}>
+          <div className="logo-icon-wrapper relative flex-shrink-0">
+            <div className="logo-glow absolute -inset-2 rounded-full pointer-events-none" />
+            <img
+              src={logoIcone}
+              alt="Tasktor"
+              className="w-9 h-9 object-contain logo-float"
+              style={{ filter: "drop-shadow(0 0 14px hsl(192 80% 40% / 0.35))" }}
+            />
+          </div>
+          {!collapsed && (
+            <motion.img
+              src={logoText}
+              alt="Tasktor"
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.35 }}
+              className="h-5 object-contain ml-2.5"
+              style={{ filter: "drop-shadow(0 0 10px hsl(192 80% 40% / 0.15))" }}
+            />
           )}
         </div>
 
