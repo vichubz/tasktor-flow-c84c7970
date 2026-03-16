@@ -17,7 +17,15 @@ const CalendarPage = lazy(() => import("@/pages/CalendarPage"));
 const MeetingsPage = lazy(() => import("@/pages/MeetingsPage"));
 const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const PageTransition = ({ children }: { children: React.ReactNode }) => (
   <motion.div
