@@ -21,7 +21,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   if (!user) return <Navigate to="/" replace />;
 
   return (
-    <div className="flex min-h-screen mesh-gradient w-full ambient-bg dot-grid">
+    <div className="flex h-dvh mesh-gradient w-full ambient-bg dot-grid overflow-hidden">
       <div className="hidden md:block">
         <AppSidebar />
       </div>

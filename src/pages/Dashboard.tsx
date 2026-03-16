@@ -179,7 +179,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
+    <div className="flex-1 flex flex-col h-dvh md:h-auto md:min-h-0 overflow-hidden relative">
       {/* Ambient background orbs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
