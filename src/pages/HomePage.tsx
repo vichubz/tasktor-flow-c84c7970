@@ -96,9 +96,9 @@ const HomePage = () => {
           className="mb-10 sm:mb-14"
         >
           <p className="text-lg sm:text-xl md:text-2xl text-white/70 font-display font-medium leading-relaxed italic max-w-lg mx-auto">
-            "Discipline is choosing between what you want now and what you want most."
+            "{quote.text}"
           </p>
-          <p className="text-sm text-white/30 mt-4 font-body">— Abraham Lincoln</p>
+          <p className="text-sm text-white/30 mt-4 font-body">— {quote.author}</p>
         </motion.div>
 
         {/* CTA Button */}
