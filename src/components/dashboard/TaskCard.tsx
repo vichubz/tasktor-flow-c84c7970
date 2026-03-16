@@ -217,6 +217,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
   const handleComplete = useCallback(() => {
     setShowConfetti(true);
     setCompleting(true);
+    playCompletionSound();
     const msg = SUCCESS_MESSAGES[Math.floor(Math.random() * SUCCESS_MESSAGES.length)];
     toast.success(msg);
     setTimeout(() => {
