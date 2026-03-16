@@ -150,7 +150,7 @@ const GoogleCalendarCard = () => {
     <>
       <motion.div
         whileHover={{ y: -2 }}
-        className="stat-card-calendar rounded-xl px-4 py-3 flex flex-col gap-2 card-lift"
+        className="stat-card-calendar rounded-xl px-4 py-3 flex flex-col gap-2 card-lift h-full"
       >
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -158,7 +158,7 @@ const GoogleCalendarCard = () => {
             <div className="w-7 h-7 rounded-md bg-primary/15 flex items-center justify-center">
               <Calendar className="w-3.5 h-3.5 text-primary icon-pulse" />
             </div>
-            <span className="text-xs text-foreground/70 font-semibold uppercase tracking-wider">Agenda</span>
+            <span className="text-xs text-foreground/90 font-semibold uppercase tracking-wider">Agenda</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-xs font-mono font-bold text-primary neon-text-primary">{events.length}</span>

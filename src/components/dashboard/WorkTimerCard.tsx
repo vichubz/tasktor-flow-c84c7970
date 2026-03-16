@@ -181,7 +181,7 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
   return (
     <motion.div
       whileHover={{ y: -2 }}
-      className={`stat-card-timer rounded-xl px-4 py-3 flex flex-col gap-2 card-lift ${isRunning ? "animate-pulse-glow" : ""}`}
+      className={`stat-card-timer rounded-xl px-4 py-3 flex flex-col gap-2 card-lift h-full ${isRunning ? "animate-pulse-glow" : ""}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -192,7 +192,7 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
             </div>
             {isRunning && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-success animate-pulse" />}
           </div>
-          <span className="text-xs text-foreground/70 font-semibold uppercase tracking-wider">Timer</span>
+          <span className="text-xs text-foreground/90 font-semibold uppercase tracking-wider">Timer</span>
           <AnimatePresence>
             {showSync && (
               <motion.div

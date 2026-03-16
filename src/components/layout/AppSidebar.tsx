@@ -85,7 +85,7 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
             transition={{ duration: 0.3 }}
             className="px-4 py-3 border-b border-border/10"
           >
-            <p className="text-[11px] text-muted-foreground/50 font-medium">Olá,</p>
+            <p className="text-[11px] text-muted-foreground/70 font-medium">Olá,</p>
             <p className="text-sm font-medium text-foreground truncate">{profile.name || "Usuário"}</p>
           </motion.div>
         )}
@@ -101,7 +101,7 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 relative group ${
                   isActive
                     ? "text-foreground"
-                    : "text-muted-foreground/60 hover:text-foreground/90 hover:bg-foreground/[0.04]"
+                    : "text-muted-foreground/70 hover:text-foreground/90 hover:bg-foreground/[0.04]"
                 }`}
               >
                 <motion.div
@@ -151,7 +151,7 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 w-full group ${
               calendarOpen
                 ? "text-foreground bg-primary/[0.08]"
-                : "text-muted-foreground/60 hover:text-foreground/90 hover:bg-foreground/[0.04]"
+                : "text-muted-foreground/70 hover:text-foreground/90 hover:bg-foreground/[0.04]"
             }`}
           >
             <motion.div whileHover={{ scale: 1.1 }} className="flex-shrink-0">
@@ -163,7 +163,7 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
           {/* Projects */}
           <button
             onClick={() => setShowProjects(true)}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-muted-foreground/60 hover:text-foreground/90 hover:bg-foreground/[0.04] transition-all duration-200 w-full group"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-muted-foreground/70 hover:text-foreground/90 hover:bg-foreground/[0.04] transition-all duration-200 w-full group"
           >
             <motion.div whileHover={{ scale: 1.1 }} className="flex-shrink-0">
               <FolderKanban className="w-[17px] h-[17px] group-hover:text-primary transition-colors" />
@@ -178,11 +178,11 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
                 <motion.div
                   key={p.id}
                   whileHover={{ x: 4 }}
-                  className="flex items-center gap-2.5 px-3 py-1.5 text-[12px] text-muted-foreground/50 rounded-lg hover:text-muted-foreground/80 hover:bg-foreground/[0.02] transition-all duration-200 cursor-default"
+                  className="flex items-center gap-2.5 px-3 py-1.5 text-[12px] text-muted-foreground/60 rounded-lg hover:text-muted-foreground/80 hover:bg-foreground/[0.02] transition-all duration-200 cursor-default"
                 >
                   <span
-                    className="w-2 h-2 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: p.color, boxShadow: `0 0 8px ${p.color}40` }}
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: p.color, boxShadow: `0 0 10px ${p.color}50` }}
                   />
                   <span className="truncate">{p.name}</span>
                 </motion.div>

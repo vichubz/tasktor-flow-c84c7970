@@ -162,7 +162,7 @@ const MetricsPage = () => {
               >
                 {stat.value}
               </motion.p>
-              <p className="text-xs text-foreground/60 mt-1.5 font-medium uppercase tracking-wide">{stat.label}</p>
+              <p className="text-xs text-foreground/80 mt-1.5 font-medium uppercase tracking-wide">{stat.label}</p>
             </div>
           </motion.div>
         ))}

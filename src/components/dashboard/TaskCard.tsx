@@ -249,12 +249,12 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
         }
         className={`relative rounded-xl overflow-hidden transition-all duration-300 group ${
           isDragging ? "shadow-2xl z-50 ring-2 ring-primary/30" : ""
-        } ${isTop3 ? "top3-card" : ""}`}
+        } ${isTop3 ? "top3-card" : "task-card-hover"}`}
         style={{
           background: isTop3
             ? "linear-gradient(145deg, rgba(14,165,195,0.08), rgba(45,190,160,0.04), rgba(8,18,22,0.85))"
             : "var(--glass-bg)",
-          border: `1px solid ${isTop3 ? "transparent" : "var(--glass-border)"}`,
+          border: `1px solid ${isTop3 ? "transparent" : "rgba(14,165,195,0.08)"}`,
           backdropFilter: "blur(20px)",
         }}
       >
@@ -359,11 +359,11 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
               </span>
             )}
             {task.description && !expanded && (
-              <p className="text-xs text-muted-foreground/60 truncate mt-0.5">{task.description}</p>
+              <p className="text-xs text-muted-foreground/80 truncate mt-0.5">{task.description}</p>
             )}
             <div className="flex items-center gap-1 mt-0.5">
-              <Clock className="w-3 h-3 text-muted-foreground/30" />
-              <span className="text-[10px] text-muted-foreground/40">{getTaskAge(task.created_at)}</span>
+              <Clock className="w-3 h-3 text-muted-foreground/40" />
+              <span className="text-[10px] text-muted-foreground/50">{getTaskAge(task.created_at)}</span>
             </div>
           </div>
 
