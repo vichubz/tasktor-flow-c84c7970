@@ -144,12 +144,12 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
         {expanded && tasks.length > 0 && (
           confirmClearAll ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-destructive font-semibold">Delete all?</span>
+              <span className="text-xs text-destructive font-semibold">Excluir todas?</span>
               <motion.button onClick={handleClearAll} whileHover={{ scale: 1.05 }} className="px-3 py-1 rounded-lg bg-destructive text-destructive-foreground text-xs font-bold">
-                Confirm
+                Confirmar
               </motion.button>
               <motion.button onClick={() => setConfirmClearAll(false)} whileHover={{ scale: 1.05 }} className="px-3 py-1 rounded-lg bg-secondary text-foreground text-xs font-bold">
-                Cancel
+                Cancelar
               </motion.button>
             </div>
           ) : (
