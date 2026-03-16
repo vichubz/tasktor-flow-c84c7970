@@ -412,6 +412,7 @@ const Dashboard = () => {
                               onComplete={handleComplete}
                               onDelete={handleDelete}
                               onUpdate={fetchData}
+                              onMoveToTop={handleMoveToTop}
                               dragHandleProps={provided.dragHandleProps}
                             />
                           </div>
