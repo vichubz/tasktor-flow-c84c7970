@@ -233,7 +233,7 @@ const Dashboard = () => {
             <Select value={filterProject} onValueChange={setFilterProject}>
               <SelectTrigger className="flex-1 sm:flex-none sm:w-44 bg-secondary/40 border-border/30 h-9 backdrop-blur-sm hover:border-primary/30 transition-colors text-xs sm:text-sm">
                 <Filter className="w-3.5 h-3.5 mr-1.5 sm:mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Filtrar" />
+                <SelectValue placeholder="Filter" />
               </SelectTrigger>
               <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
                 <SelectItem value="all">Todos os projetos</SelectItem>
