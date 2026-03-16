@@ -128,7 +128,7 @@ const MetricsPage = () => {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-3"
       >
-        <h1 className="text-xl sm:text-2xl font-bold font-display text-tight gradient-text">Metrics & Reports</h1>
+        <h1 className="text-xl sm:text-2xl font-bold font-display text-tight gradient-text">Métricas & Relatórios</h1>
         <Select value={period} onValueChange={setPeriod}>
           <SelectTrigger className="w-full sm:w-40 bg-secondary/50 border-border/50 h-9 backdrop-blur-sm">
             <SelectValue />
