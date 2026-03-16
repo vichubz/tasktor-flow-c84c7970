@@ -358,6 +358,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                   {task.title}
                 </span>
               )}
+              <span className="text-[9px] text-muted-foreground/50 font-mono flex-shrink-0 hidden sm:inline">{getTaskAge(task.created_at)}</span>
             </div>
 
             {saving && (
