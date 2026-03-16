@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import ConfettiExplosion from "./ConfettiExplosion";
 import { format } from "date-fns";
+import { playCompletionSound } from "@/lib/sounds";
 
 type Task = Tables<"tasks"> & { subtasks?: Tables<"subtasks">[], project?: Tables<"projects"> };
 type Project = Tables<"projects">;
