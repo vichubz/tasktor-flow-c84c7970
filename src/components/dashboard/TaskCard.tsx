@@ -65,7 +65,6 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
   const [description, setDescription] = useState(task.description || "");
   const [showConfetti, setShowConfetti] = useState(false);
   const [completing, setCompleting] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const [saving, setSaving] = useState(false);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const [addingSubtask, setAddingSubtask] = useState(false);
