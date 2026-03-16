@@ -196,7 +196,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     setAddingSubtask(true);
     const position = subtasks.length;
     const { data, error } = await supabase.from("subtasks").insert({ task_id: task.id, title: newSubtaskTitle.trim(), position }).select().single();
-    if (error) { toast.error("Failed to add subtask"); }
+    if (error) { toast.error("Falha ao adicionar subtask"); }
     else if (data) { setSubtasks(prev => [...prev, data]); subtaskCache.delete(task.id); }
     setNewSubtaskTitle("");
     setAddingSubtask(false);
