@@ -71,11 +71,11 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
     const prev = [...tasks];
     setTasks(t => t.filter(x => x.id !== taskId));
     const { error } = await supabase.from("tasks").delete().eq("id", taskId);
-    if (error) { toast.error("Failed to delete task"); setTasks(prev); }
+    if (error) { toast.error("Falha ao excluir task"); setTasks(prev); }
     else {
-      toast("Task deleted", {
+      toast("Task excluída", {
         action: deletedTask ? {
-          label: "Undo",
+          label: "Desfazer",
           onClick: async () => {
             await supabase.from("tasks").insert({
               user_id: deletedTask.user_id,
