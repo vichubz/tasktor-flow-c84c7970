@@ -13,11 +13,9 @@ type Project = Tables<"projects">;
 
 interface AppSidebarProps {
   onProjectsChange?: () => void;
-  onCalendarToggle?: () => void;
-  calendarOpen?: boolean;
 }
 
-const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSidebarProps) => {
+const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
   const { user, profile, signOut } = useAuth();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
@@ -38,6 +36,7 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/metrics", icon: BarChart3, label: "Métricas" },
     { to: "/meetings-ai", icon: BrainCircuit, label: "Reuniões IA" },
+    { to: "/calendar", icon: Calendar, label: "Agenda" },
   ];
 
   return (
@@ -144,21 +143,6 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
               </NavLink>
             );
           })}
-
-          {/* Calendar */}
-          <button
-            onClick={onCalendarToggle}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 w-full group ${
-              calendarOpen
-                ? "text-foreground bg-primary/[0.08]"
-                : "text-muted-foreground/70 hover:text-foreground/90 hover:bg-foreground/[0.04]"
-            }`}
-          >
-            <motion.div whileHover={{ scale: 1.1 }} className="flex-shrink-0">
-              <Calendar className={`w-[17px] h-[17px] ${calendarOpen ? "text-primary" : "group-hover:text-primary transition-colors"}`} />
-            </motion.div>
-            {!collapsed && <span>{collapsed ? "" : "Calendário"}</span>}
-          </button>
 
           {/* Projects */}
           <button
