@@ -57,6 +57,8 @@ const MeetingsAIPage = () => {
   const [history, setHistory] = useState<MeetingSummary[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
 
   const fetchHistory = useCallback(async () => {
     if (!user) return;
