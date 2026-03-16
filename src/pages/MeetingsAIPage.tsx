@@ -226,7 +226,7 @@ const MeetingsAIPage = () => {
             <BrainCircuit className="w-5 h-5 text-primary-foreground" />
           </motion.div>
           <div>
-            <h1 className="text-xl font-extrabold font-display gradient-text">Reuniões IA</h1>
+            <h1 className="text-lg sm:text-xl font-extrabold font-display gradient-text">Reuniões IA</h1>
             <p className="text-xs text-muted-foreground/80">Cole uma transcrição e receba um resumo executivo + follow-up</p>
           </div>
         </div>
