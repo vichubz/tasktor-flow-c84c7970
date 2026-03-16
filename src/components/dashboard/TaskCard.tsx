@@ -323,18 +323,8 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
             {/* Position badge */}
             <motion.div
               whileHover={{ scale: 1.1 }}
-              className={`flex items-center justify-center min-w-[24px] sm:min-w-[28px] h-6 sm:h-7 rounded-md font-mono text-[10px] sm:text-xs font-bold relative overflow-hidden ${
-                isTop3 ? "text-primary-foreground" : "bg-secondary/60 text-muted-foreground"
-              }`}
-              style={isTop3 ? { background: "var(--gradient-primary)", boxShadow: "0 0 16px rgba(14,165,195,0.3)" } : {}}
+              className="flex items-center justify-center min-w-[24px] sm:min-w-[28px] h-6 sm:h-7 rounded-md font-mono text-[10px] sm:text-xs font-bold bg-secondary/60 text-muted-foreground"
             >
-              {isTop3 && (
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                  animate={{ x: ["-200%", "200%"] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                />
-              )}
               <span className="relative z-10">#{index + 1}</span>
             </motion.div>
 
