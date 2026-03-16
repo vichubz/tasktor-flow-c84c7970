@@ -159,7 +159,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
               </motion.div>
               {!collapsed && (
                 <>
-                  <span className="flex-1 text-left">Projects</span>
+                  <span className="flex-1 text-left">Projetos</span>
                   <div className="flex items-center gap-1">
                     <motion.button
                       onClick={(e) => { e.stopPropagation(); setShowProjects(true); }}
