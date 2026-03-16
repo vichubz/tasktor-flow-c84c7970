@@ -42,12 +42,12 @@ function getTaskAge(createdAt: string): string {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffHours < 1) return "now";
+  if (diffHours < 1) return "agora";
   if (diffHours < 24) return `${diffHours}h`;
   if (diffDays === 1) return "1d";
   if (diffDays < 7) return `${diffDays}d`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w`;
-  return `${Math.floor(diffDays / 30)}mo`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}sem`;
+  return `${Math.floor(diffDays / 30)}m`;
 }
 
 // Cache for subtasks
