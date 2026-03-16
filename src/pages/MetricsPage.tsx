@@ -134,9 +134,9 @@ const MetricsPage = () => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-card/95 backdrop-blur-xl border-border/50">
-            <SelectItem value="today">Today</SelectItem>
-            <SelectItem value="week">This Week</SelectItem>
-            <SelectItem value="month">This Month</SelectItem>
+            <SelectItem value="today">Hoje</SelectItem>
+            <SelectItem value="week">Esta Semana</SelectItem>
+            <SelectItem value="month">Este Mês</SelectItem>
           </SelectContent>
         </Select>
       </motion.div>
