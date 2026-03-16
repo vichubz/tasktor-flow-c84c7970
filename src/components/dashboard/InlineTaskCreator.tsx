@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +14,11 @@ interface InlineTaskCreatorProps {
   onCreated: () => void;
 }
 
-const InlineTaskCreator = ({ projects, onCreated }: InlineTaskCreatorProps) => {
+export interface InlineTaskCreatorHandle {
+  activate: () => void;
+}
+
+const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorProps>(({ projects, onCreated }, ref) => {
   const { user } = useAuth();
   const [active, setActive] = useState(false);
   const [title, setTitle] = useState("");
@@ -25,6 +29,13 @@ const InlineTaskCreator = ({ projects, onCreated }: InlineTaskCreatorProps) => {
   useEffect(() => {
     if (active) inputRef.current?.focus();
   }, [active]);
+
+  useImperativeHandle(ref, () => ({
+    activate: () => {
+      setActive(true);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    },
+  }));
 
   const handleCreate = async () => {
     if (!title.trim() || !user || creating) return;
@@ -90,9 +101,10 @@ const InlineTaskCreator = ({ projects, onCreated }: InlineTaskCreatorProps) => {
         <div className="w-8 h-8 rounded-full border-2 border-dashed border-muted-foreground/20 flex items-center justify-center group-hover:border-primary/40 transition-colors">
           <Plus className="w-4 h-4 text-muted-foreground/30 group-hover:text-primary/60 transition-colors" />
         </div>
-        <span className="text-sm text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors font-medium">
+        <span className="text-sm text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors font-medium flex-1">
           Adicionar tarefa...
         </span>
+        <kbd className="text-[10px] text-muted-foreground/30 bg-secondary/60 px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
       </motion.button>
     );
   }
@@ -166,6 +178,8 @@ const InlineTaskCreator = ({ projects, onCreated }: InlineTaskCreatorProps) => {
       </div>
     </motion.div>
   );
-};
+});
+
+InlineTaskCreator.displayName = "InlineTaskCreator";
 
 export default InlineTaskCreator;

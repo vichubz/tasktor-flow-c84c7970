@@ -7,7 +7,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import TaskCard from "@/components/dashboard/TaskCard";
 import NewTaskDialog from "@/components/dashboard/NewTaskDialog";
 import CompletedTasks from "@/components/dashboard/CompletedTasks";
-import InlineTaskCreator from "@/components/dashboard/InlineTaskCreator";
+import InlineTaskCreator, { type InlineTaskCreatorHandle } from "@/components/dashboard/InlineTaskCreator";
 import SkeletonTaskCard from "@/components/dashboard/SkeletonTaskCard";
 import { Plus, Filter, Inbox, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [todayCompleted, setTodayCompleted] = useState(0);
   const skipRealtimeRef = useRef(false);
+  const inlineCreatorRef = useRef<InlineTaskCreatorHandle>(null);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -58,12 +59,19 @@ const Dashboard = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Keyboard shortcut: N to open new task
+  // Keyboard shortcuts: N = new task modal, Cmd/Ctrl+K = inline creator
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "n" || e.key === "N") {
-        const tag = (e.target as HTMLElement)?.tagName;
-        if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) return;
+      const tag = (e.target as HTMLElement)?.tagName;
+      const isInput = tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable;
+
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        inlineCreatorRef.current?.activate();
+        return;
+      }
+
+      if ((e.key === "n" || e.key === "N") && !isInput) {
         e.preventDefault();
         setShowNewTask(true);
       }
@@ -277,7 +285,7 @@ const Dashboard = () => {
             {/* Inline task creator */}
             {projects.length > 0 && (
               <div className="mb-3">
-                <InlineTaskCreator projects={projects} onCreated={fetchData} />
+                <InlineTaskCreator ref={inlineCreatorRef} projects={projects} onCreated={fetchData} />
               </div>
             )}
 
