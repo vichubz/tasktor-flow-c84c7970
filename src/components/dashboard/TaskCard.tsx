@@ -28,11 +28,11 @@ interface TaskCardProps {
 }
 
 const SUCCESS_MESSAGES = [
-  "Task completed! Nice work! 🎉",
-  "Another one done! Keep going! 🚀",
-  "Done! You're on fire today! ✈️",
-  "Completed! Total focus! 🎯",
-  "Great! Next one! ⚡",
+  "Task concluída! Bom trabalho! 🎉",
+  "Mais uma feita! Continue assim! 🚀",
+  "Feito! Você está on fire hoje! ✈️",
+  "Concluída! Foco total! 🎯",
+  "Ótimo! Próxima! ⚡",
 ];
 
 function getTaskAge(createdAt: string): string {
