@@ -91,9 +91,9 @@ const HomePage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1, duration: 0.8 }}
-          className="mb-14"
+          className="mb-10 sm:mb-14"
         >
-          <p className="text-xl md:text-2xl text-white/70 font-display font-medium leading-relaxed italic max-w-lg mx-auto">
+          <p className="text-lg sm:text-xl md:text-2xl text-white/70 font-display font-medium leading-relaxed italic max-w-lg mx-auto">
             "Discipline is choosing between what you want now and what you want most."
           </p>
           <p className="text-sm text-white/30 mt-4 font-body">— Abraham Lincoln</p>
