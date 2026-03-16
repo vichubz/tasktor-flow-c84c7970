@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { ChevronDown, ArrowRight } from "lucide-react";
+import { ChevronDown, ArrowRight, RefreshCw } from "lucide-react";
 import logoCompleto from "@/assets/logo_completo_tasktor.png";
 import HomeBackground from "@/components/home/HomeBackground";
-import { getDailyQuote } from "@/lib/quotes";
+import { getDailyQuote, getRandomQuote } from "@/lib/quotes";
 
 const HomePage = () => {
   const { profile } = useAuth();
