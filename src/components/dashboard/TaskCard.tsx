@@ -39,17 +39,15 @@ function getTaskAge(createdAt: string): string {
   const created = new Date(createdAt);
   const now = new Date();
   const diffMs = now.getTime() - created.getTime();
+  const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
-  const diffWeeks = Math.floor(diffDays / 7);
-  const diffMonths = Math.floor(diffDays / 30);
 
-  if (diffDays === 0) return "Created today";
-  if (diffDays === 1) return "Created 1 day ago";
-  if (diffDays < 7) return `Created ${diffDays} days ago`;
-  if (diffWeeks === 1) return "Created 1 week ago";
-  if (diffWeeks < 4) return `Created ${diffWeeks} weeks ago`;
-  if (diffMonths === 1) return "Created 1 month ago";
-  return `Created ${diffMonths} months ago`;
+  if (diffHours < 1) return "now";
+  if (diffHours < 24) return `${diffHours}h`;
+  if (diffDays === 1) return "1d";
+  if (diffDays < 7) return `${diffDays}d`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w`;
+  return `${Math.floor(diffDays / 30)}mo`;
 }
 
 // Cache for subtasks
