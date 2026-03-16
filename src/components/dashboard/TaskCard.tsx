@@ -207,7 +207,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     setSubtasks(s => s.filter(x => x.id !== subtaskId));
     subtaskCache.delete(task.id);
     const { error } = await supabase.from("subtasks").delete().eq("id", subtaskId);
-    if (error) { toast.error("Failed to delete subtask"); setSubtasks(prev); }
+    if (error) { toast.error("Falha ao excluir subtask"); setSubtasks(prev); }
   };
 
   const handleEditSubtask = (sub: Tables<"subtasks">) => {
