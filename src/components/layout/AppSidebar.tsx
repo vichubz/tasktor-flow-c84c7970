@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, BarChart3, FolderKanban, LogOut, ChevronLeft, ChevronRight, Calendar, Rocket, BrainCircuit } from "lucide-react";
+import { LayoutDashboard, BarChart3, FolderKanban, LogOut, ChevronLeft, ChevronRight, Calendar, Rocket, BrainCircuit, Video, Settings } from "lucide-react";
 import logoIcone from "@/assets/tasktor_logo_icone.png";
 import logoCompleto from "@/assets/logo_completo_tasktor.png";
 import ProjectManager from "@/components/dashboard/ProjectManager";
