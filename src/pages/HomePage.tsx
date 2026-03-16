@@ -11,7 +11,11 @@ const HomePage = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
-  const quote = getDailyQuote();
+  const [quote, setQuote] = useState(getDailyQuote);
+
+  const rotateQuote = () => {
+    setQuote(prev => getRandomQuote(prev.text));
+  };
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
