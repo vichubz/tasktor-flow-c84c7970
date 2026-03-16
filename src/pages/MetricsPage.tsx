@@ -82,7 +82,7 @@ const MetricsPage = () => {
 
   const tasksByDay: Record<string, number> = {};
   completedTasks.forEach(t => {
-    const day = new Date(t.completed_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const day = new Date(t.completed_at).toLocaleDateString("pt-BR", { month: "short", day: "numeric" });
     tasksByDay[day] = (tasksByDay[day] || 0) + 1;
   });
   const tasksChartData = Object.entries(tasksByDay).map(([date, count]) => ({ date, count }));
