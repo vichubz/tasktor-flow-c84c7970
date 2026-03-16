@@ -367,47 +367,95 @@
 
   /* Stat card gradient */
   .stat-card {
-    background: linear-gradient(145deg, rgba(14, 165, 195, 0.06), rgba(8, 18, 22, 0.85));
-    border: 1px solid rgba(14, 165, 195, 0.12);
+    background: linear-gradient(145deg, rgba(14, 165, 195, 0.08), rgba(14, 165, 195, 0.03), rgba(8, 18, 22, 0.85));
+    border: 1px solid rgba(14, 165, 195, 0.15);
   }
 
   .stat-card:hover {
-    background: linear-gradient(145deg, rgba(14, 165, 195, 0.1), rgba(8, 18, 22, 0.9));
-    border-color: rgba(14, 165, 195, 0.2);
-    box-shadow: 0 0 30px rgba(14, 165, 195, 0.1);
+    background: linear-gradient(145deg, rgba(14, 165, 195, 0.12), rgba(14, 165, 195, 0.04), rgba(8, 18, 22, 0.9));
+    border-color: rgba(14, 165, 195, 0.25);
+    box-shadow: 0 0 30px rgba(14, 165, 195, 0.12);
+  }
+
+  /* ═══ Glow Card — Animated Rotating Border ═══ */
+  .glow-card {
+    position: relative;
+    overflow: hidden;
+    border: none !important;
+  }
+  .glow-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(from var(--border-angle, 0deg), var(--glow-c1, rgba(14,165,195,0.4)), transparent 30%, transparent 70%, var(--glow-c2, rgba(45,190,160,0.4)));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    animation: rotating-border 4s linear infinite;
+    will-change: transform;
+  }
+  .glow-card:hover::before {
+    background: conic-gradient(from var(--border-angle, 0deg), var(--glow-c1, rgba(14,165,195,0.6)), transparent 25%, transparent 75%, var(--glow-c2, rgba(45,190,160,0.6)));
+  }
+
+  .glow-card-cyan {
+    --glow-c1: rgba(14, 165, 195, 0.5);
+    --glow-c2: rgba(45, 190, 160, 0.35);
+  }
+  .glow-card-emerald {
+    --glow-c1: rgba(45, 190, 160, 0.5);
+    --glow-c2: rgba(16, 185, 129, 0.35);
+  }
+  .glow-card-purple {
+    --glow-c1: rgba(124, 58, 237, 0.5);
+    --glow-c2: rgba(14, 165, 195, 0.35);
   }
 
   /* Per-type metric card gradients */
   .stat-card-meeting {
-    background: linear-gradient(145deg, rgba(45, 190, 160, 0.06), rgba(45, 190, 160, 0.02), rgba(8, 18, 22, 0.85));
-    border: 1px solid rgba(45, 190, 160, 0.12);
+    background: linear-gradient(145deg, rgba(45, 190, 160, 0.08), rgba(45, 190, 160, 0.03), rgba(8, 18, 22, 0.85));
+    border: 1px solid rgba(45, 190, 160, 0.15);
   }
   .stat-card-meeting:hover {
-    border-color: rgba(45, 190, 160, 0.2);
-    box-shadow: 0 0 30px rgba(45, 190, 160, 0.1);
+    border-color: rgba(45, 190, 160, 0.25);
+    box-shadow: 0 0 30px rgba(45, 190, 160, 0.12);
   }
 
   .stat-card-calendar {
-    background: linear-gradient(145deg, rgba(14, 165, 195, 0.06), rgba(14, 165, 195, 0.02), rgba(8, 18, 22, 0.85));
-    border: 1px solid rgba(14, 165, 195, 0.12);
+    background: linear-gradient(145deg, rgba(14, 165, 195, 0.08), rgba(14, 165, 195, 0.03), rgba(8, 18, 22, 0.85));
+    border: 1px solid rgba(14, 165, 195, 0.15);
   }
   .stat-card-calendar:hover {
-    border-color: rgba(14, 165, 195, 0.2);
-    box-shadow: 0 0 30px rgba(14, 165, 195, 0.1);
+    border-color: rgba(14, 165, 195, 0.25);
+    box-shadow: 0 0 30px rgba(14, 165, 195, 0.12);
   }
 
   .stat-card-timer {
-    background: linear-gradient(145deg, rgba(124, 58, 237, 0.06), rgba(124, 58, 237, 0.02), rgba(8, 18, 22, 0.85));
-    border: 1px solid rgba(124, 58, 237, 0.12);
+    background: linear-gradient(145deg, rgba(124, 58, 237, 0.08), rgba(124, 58, 237, 0.03), rgba(8, 18, 22, 0.85));
+    border: 1px solid rgba(124, 58, 237, 0.15);
   }
   .stat-card-timer:hover {
-    border-color: rgba(124, 58, 237, 0.2);
-    box-shadow: 0 0 30px rgba(124, 58, 237, 0.1);
+    border-color: rgba(124, 58, 237, 0.25);
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.12);
   }
 
   /* Icon pulse — very subtle */
   .icon-pulse {
     animation: icon-breathe 3s ease-in-out infinite;
+  }
+
+  /* Task card hover glow */
+  .task-card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .task-card-hover:hover {
+    border-color: rgba(14, 165, 195, 0.25) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(14, 165, 195, 0.08);
+    transform: translateY(-1px);
   }
 }
 

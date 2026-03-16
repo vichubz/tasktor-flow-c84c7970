@@ -91,15 +91,15 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
           </div>
         </motion.div>
 
-        {/* Row 2: Metric cards */}
+        {/* Row 2: Metric cards — symmetric grid with glow borders */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glow-card glow-card-emerald rounded-xl h-full">
             <MeetingMetricsCard />
           </motion.div>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glow-card glow-card-cyan rounded-xl h-full">
             <GoogleCalendarCard />
           </motion.div>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glow-card glow-card-purple rounded-xl h-full">
             <WorkTimerCard projects={projects} />
           </motion.div>
         </div>

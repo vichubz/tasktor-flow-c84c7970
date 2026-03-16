@@ -227,7 +227,7 @@ const MeetingsAIPage = () => {
           </motion.div>
           <div>
             <h1 className="text-xl font-extrabold font-display gradient-text">Reuniões IA</h1>
-            <p className="text-xs text-muted-foreground/60">Cole uma transcrição e receba um resumo executivo + follow-up</p>
+            <p className="text-xs text-muted-foreground/80">Cole uma transcrição e receba um resumo executivo + follow-up</p>
           </div>
         </div>
       </motion.div>

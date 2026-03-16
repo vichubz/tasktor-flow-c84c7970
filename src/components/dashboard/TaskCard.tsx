@@ -359,11 +359,11 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
               </span>
             )}
             {task.description && !expanded && (
-              <p className="text-xs text-muted-foreground/60 truncate mt-0.5">{task.description}</p>
+              <p className="text-xs text-muted-foreground/80 truncate mt-0.5">{task.description}</p>
             )}
             <div className="flex items-center gap-1 mt-0.5">
-              <Clock className="w-3 h-3 text-muted-foreground/30" />
-              <span className="text-[10px] text-muted-foreground/40">{getTaskAge(task.created_at)}</span>
+              <Clock className="w-3 h-3 text-muted-foreground/40" />
+              <span className="text-[10px] text-muted-foreground/50">{getTaskAge(task.created_at)}</span>
             </div>
           </div>
 
