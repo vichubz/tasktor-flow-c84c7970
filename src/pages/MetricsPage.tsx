@@ -253,7 +253,7 @@ const MetricsPage = () => {
                 <span className="text-foreground truncate group-hover:text-primary transition-colors font-medium sm:font-normal">{task.title}</span>
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: task.project?.color, boxShadow: `0 0 6px ${task.project?.color}40` }} />
-                  <span className="text-muted-foreground truncate text-xs sm:text-sm">{task.project?.name || "No project"}</span>
+                  <span className="text-muted-foreground truncate text-xs sm:text-sm">{task.project?.name || "Sem projeto"}</span>
                 </span>
                 <span className="text-muted-foreground font-mono text-xs hidden sm:block">
                   {task.completed_at ? new Date(task.completed_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}
