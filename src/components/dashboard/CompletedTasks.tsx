@@ -102,9 +102,9 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
     setTasks([]);
     for (const id of ids) {
       const { error } = await supabase.from("tasks").delete().eq("id", id);
-      if (error) { toast.error("Failed to clear tasks"); setTasks(prev); return; }
+      if (error) { toast.error("Falha ao limpar tasks"); setTasks(prev); return; }
     }
-    toast.success("All completed tasks cleared");
+    toast.success("Todas as tasks concluídas foram removidas");
   };
 
   const startEdit = (task: Task) => {
