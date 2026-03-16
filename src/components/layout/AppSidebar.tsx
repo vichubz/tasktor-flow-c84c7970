@@ -74,7 +74,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.35 }}
-              className="h-5 object-contain ml-2.5"
+              className="h-[1.875rem] object-contain ml-2.5"
               style={{ filter: "drop-shadow(0 0 10px hsl(192 80% 40% / 0.15))" }}
             />
           )}
