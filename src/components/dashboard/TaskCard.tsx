@@ -308,6 +308,8 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
             className={`flex items-center justify-center min-w-[36px] h-9 rounded-lg font-mono text-sm font-bold relative overflow-hidden ${
               isTop3 ? "text-primary-foreground" : "bg-secondary/60 text-muted-foreground"
             }`}
+            style={isTop3 ? { background: "var(--gradient-primary)", boxShadow: "0 0 16px rgba(14,165,195,0.3)" } : {}}
+            }`}
             style={isTop3 ? { background: "var(--gradient-primary)" } : {}}
           >
             {isTop3 && (
