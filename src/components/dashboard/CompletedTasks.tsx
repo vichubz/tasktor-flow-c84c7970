@@ -61,8 +61,8 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
     const prev = [...tasks];
     setTasks(t => t.filter(x => x.id !== taskId));
     const { error } = await supabase.from("tasks").update({ is_completed: false, completed_at: null }).eq("id", taskId);
-    if (error) { toast.error("Failed to restore task"); setTasks(prev); }
-    else { toast.success("Task restored to active list"); onTaskRestored?.(); }
+    if (error) { toast.error("Falha ao restaurar task"); setTasks(prev); }
+    else { toast.success("Task restaurada para lista ativa"); onTaskRestored?.(); }
   };
 
   const handleDelete = async (taskId: string) => {
