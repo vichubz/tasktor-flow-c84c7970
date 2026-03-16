@@ -12,6 +12,7 @@ import remarkGfm from "remark-gfm";
 
 interface MeetingSummary {
   id: string;
+  title: string | null;
   client: string | null;
   meeting_date: string | null;
   participants: string | null;
@@ -20,6 +21,28 @@ interface MeetingSummary {
   result: string;
   created_at: string;
 }
+
+const generateTitle = (client: string, objective: string, transcription: string): string => {
+  if (client && objective) {
+    const shortObj = objective.split(/\s+/).slice(0, 2).join(" ");
+    return `${client} — ${shortObj}`;
+  }
+  if (client) return `${client} — Reunião`;
+  if (objective) return objective.length > 40 ? objective.slice(0, 40) + "…" : objective;
+  const words = transcription.trim().split(/\s+/).filter(w => w.length > 2).slice(0, 4);
+  return words.length > 0 ? words.join(" ") : "Reunião sem título";
+};
+
+const formatHistoryDate = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const itemDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffDays = Math.floor((today.getTime() - itemDate.getTime()) / 86400000);
+  if (diffDays === 0) return "Hoje";
+  if (diffDays === 1) return "Ontem";
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
+};
 
 const MeetingsAIPage = () => {
   const { user } = useAuth();
