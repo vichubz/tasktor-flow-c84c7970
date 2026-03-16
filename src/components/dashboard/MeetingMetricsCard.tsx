@@ -76,15 +76,14 @@ const MeetingMetricsCard = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="stat-card rounded-xl px-4 py-3 flex flex-col gap-2 card-lift"
+      whileHover={{ y: -2 }}
+      className="stat-card-meeting rounded-xl px-4 py-3 flex flex-col gap-2 card-lift"
     >
       <div className="flex items-center gap-2">
         <div className="w-7 h-7 rounded-md bg-accent/15 flex items-center justify-center">
-          <Video className="w-3.5 h-3.5 text-accent" />
+          <Video className="w-3.5 h-3.5 text-accent icon-pulse" />
         </div>
-        <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Reuniões Hoje</span>
+        <span className="text-xs text-foreground/70 font-semibold uppercase tracking-wider">Reuniões Hoje</span>
       </div>
 
       <div className="flex items-center justify-between gap-3">

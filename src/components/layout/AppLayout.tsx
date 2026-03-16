@@ -23,13 +23,13 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   if (!user) return <Navigate to="/" replace />;
 
   return (
-    <div className="flex min-h-screen mesh-gradient w-full ambient-bg">
+    <div className="flex min-h-screen mesh-gradient w-full ambient-bg dot-grid">
       <AppSidebar
         onCalendarToggle={() => setCalendarOpen(prev => !prev)}
         calendarOpen={calendarOpen}
       />
       <CalendarPanel open={calendarOpen} onClose={() => setCalendarOpen(false)} />
-      <div className="relative z-10 flex-1 flex flex-col">
+      <div className="relative z-10 flex-1 flex flex-col gradient-line-top">
         {children}
       </div>
     </div>

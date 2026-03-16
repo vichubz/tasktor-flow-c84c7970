@@ -29,6 +29,7 @@ const DigitalClock = memo(() => {
               initial={{ y: -8, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               className="font-display text-3xl font-extrabold inline-block gradient-text"
+              style={{ textShadow: "0 0 20px rgba(14, 165, 195, 0.3)" }}
             >
               {digit}
             </motion.span>
@@ -36,7 +37,7 @@ const DigitalClock = memo(() => {
         </div>
 
         <motion.span
-          animate={{ opacity: [1, 0, 1] }}
+          animate={{ opacity: [1, 0.3, 1] }}
           transition={{ duration: 1, repeat: Infinity }}
           className="text-2xl font-bold text-primary mx-0.5"
         >
@@ -50,19 +51,16 @@ const DigitalClock = memo(() => {
               initial={{ y: -8, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               className="font-display text-3xl font-extrabold inline-block gradient-text"
+              style={{ textShadow: "0 0 20px rgba(14, 165, 195, 0.3)" }}
             >
               {digit}
             </motion.span>
           ))}
         </div>
 
-        <motion.span
-          className="font-mono text-lg text-primary/40 ml-1"
-          animate={{ opacity: [1, 0.2, 1] }}
-          transition={{ duration: 1, repeat: Infinity }}
-        >
-          :{seconds}
-        </motion.span>
+        <span className="font-mono text-base text-muted-foreground ml-1.5">
+          {seconds}
+        </span>
       </div>
       <span className="text-xs text-muted-foreground capitalize font-body mt-0.5">{dateStr}</span>
     </div>
