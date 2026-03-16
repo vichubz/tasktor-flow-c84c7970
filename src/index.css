@@ -437,3 +437,93 @@
     opacity: 0;
   }
 }
+
+/* Prose styles for meeting AI markdown */
+.prose-meeting {
+  color: hsl(var(--foreground));
+  line-height: 1.7;
+}
+.prose-meeting h1 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.prose-meeting h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: hsl(var(--primary));
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.15);
+}
+.prose-meeting h3 {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: hsl(var(--accent));
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+}
+.prose-meeting p {
+  font-size: 0.8125rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.5rem;
+}
+.prose-meeting strong {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+.prose-meeting ul, .prose-meeting ol {
+  padding-left: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+.prose-meeting li {
+  font-size: 0.8125rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.25rem;
+}
+.prose-meeting li::marker {
+  color: hsl(var(--primary) / 0.5);
+}
+.prose-meeting hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border) / 0.12);
+  margin: 1rem 0;
+}
+.prose-meeting table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  font-size: 0.8125rem;
+}
+.prose-meeting th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.06);
+  border-bottom: 1px solid hsl(var(--primary) / 0.15);
+}
+.prose-meeting td {
+  padding: 0.5rem 0.75rem;
+  color: hsl(var(--muted-foreground));
+  border-bottom: 1px solid hsl(var(--border) / 0.08);
+}
+.prose-meeting tr:hover td {
+  background: hsl(var(--primary) / 0.03);
+}
+.prose-meeting blockquote {
+  border-left: 3px solid hsl(var(--primary) / 0.3);
+  padding-left: 1rem;
+  margin: 0.75rem 0;
+  color: hsl(var(--muted-foreground) / 0.8);
+  font-style: italic;
+}
