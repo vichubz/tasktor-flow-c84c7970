@@ -224,11 +224,9 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
     }, 700);
   }, [task.id, onComplete]);
 
-  // Inline delete — immediate, no animation lock
-  const handleConfirmDelete = () => {
-    setConfirmDelete(false);
+  const handleDelete = useCallback(() => {
     onDelete(task.id);
-  };
+  }, [task.id, onDelete]);
 
   const daysUntilDeadline = task.deadline
     ? Math.ceil((new Date(task.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))

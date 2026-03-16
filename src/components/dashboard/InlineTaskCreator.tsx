@@ -11,7 +11,7 @@ type Project = Tables<"projects">;
 
 interface InlineTaskCreatorProps {
   projects: Project[];
-  onCreated: () => void;
+  onCreated: () => Promise<void>;
 }
 
 export interface InlineTaskCreatorHandle {
