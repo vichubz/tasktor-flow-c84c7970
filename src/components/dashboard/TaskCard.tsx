@@ -310,7 +310,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
           />
 
           {/* Main row — compact single line */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-4 py-2 pl-3 sm:pl-5">
+          <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 pl-3 sm:pl-4">
             <div
               {...dragHandleProps}
               className="flex-shrink-0 cursor-grab touch-none active:cursor-grabbing"
