@@ -121,8 +121,10 @@ const MeetingsAIPage = () => {
       setResult(data.result);
 
       // Save to history
+      const title = generateTitle(client, objective, transcription);
       await supabase.from("meeting_summaries").insert({
         user_id: user.id,
+        title,
         client: client || null,
         meeting_date: meetingDate || null,
         participants: participants || null,
