@@ -122,7 +122,7 @@ const Dashboard = () => {
       });
       if (error) throw error;
     } catch {
-      toast.error("Erro ao reordenar tarefas");
+      toast.error("Failed to reorder tasks");
       fetchData();
     }
   };
