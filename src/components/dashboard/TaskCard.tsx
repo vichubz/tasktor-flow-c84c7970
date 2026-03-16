@@ -219,8 +219,9 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
     await supabase.from("subtasks").update({ title: editingSubtaskTitle.trim() }).eq("id", subtaskId);
   };
 
-  // Completion with celebration
+  // Completion with celebration — double-click protection
   const handleComplete = useCallback(() => {
+    if (completing) return;
     setShowConfetti(true);
     setCompleting(true);
     playCompletionSound();
@@ -229,11 +230,18 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
     setTimeout(() => {
       onComplete(task.id);
     }, 700);
-  }, [task.id, onComplete]);
+  }, [task.id, onComplete, completing]);
 
   const handleDelete = useCallback(() => {
-    onDelete(task.id);
-  }, [task.id, onDelete]);
+    if (confirmDelete) {
+      setConfirmDelete(false);
+      onDelete(task.id);
+    } else {
+      setConfirmDelete(true);
+      // Auto-dismiss confirmation after 3 seconds
+      setTimeout(() => setConfirmDelete(false), 3000);
+    }
+  }, [task.id, onDelete, confirmDelete]);
 
   const daysUntilDeadline = task.deadline
     ? Math.ceil((new Date(task.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
