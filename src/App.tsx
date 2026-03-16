@@ -14,6 +14,8 @@ const MetricsPage = lazy(() => import("@/pages/MetricsPage"));
 const HomePage = lazy(() => import("@/pages/HomePage"));
 const MeetingsAIPage = lazy(() => import("@/pages/MeetingsAIPage"));
 const CalendarPage = lazy(() => import("@/pages/CalendarPage"));
+const MeetingsPage = lazy(() => import("@/pages/MeetingsPage"));
+const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
 
 const queryClient = new QueryClient();
 
@@ -35,49 +37,29 @@ const LoadingFallback = () => (
   </div>
 );
 
+const WrappedLazy = ({ children }: { children: React.ReactNode }) => (
+  <AppLayout>
+    <PageTransition>
+      <Suspense fallback={<LoadingFallback />}>
+        {children}
+      </Suspense>
+    </PageTransition>
+  </AppLayout>
+);
+
 const AnimatedRoutes = () => {
   const location = useLocation();
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><AuthPage /></PageTransition>} />
-        <Route path="/home" element={
-          <AppLayout>
-            <PageTransition>
-              <Suspense fallback={<LoadingFallback />}>
-                <HomePage />
-              </Suspense>
-            </PageTransition>
-          </AppLayout>
-        } />
+        <Route path="/home" element={<WrappedLazy><HomePage /></WrappedLazy>} />
         <Route path="/dashboard" element={<AppLayout><PageTransition><Dashboard /></PageTransition></AppLayout>} />
-        <Route path="/metrics" element={
-          <AppLayout>
-            <PageTransition>
-              <Suspense fallback={<LoadingFallback />}>
-                <MetricsPage />
-              </Suspense>
-            </PageTransition>
-          </AppLayout>
-        } />
-        <Route path="/meetings-ai" element={
-          <AppLayout>
-            <PageTransition>
-              <Suspense fallback={<LoadingFallback />}>
-                <MeetingsAIPage />
-              </Suspense>
-            </PageTransition>
-          </AppLayout>
-        } />
-        <Route path="/calendar" element={
-          <AppLayout>
-            <PageTransition>
-              <Suspense fallback={<LoadingFallback />}>
-                <CalendarPage />
-              </Suspense>
-            </PageTransition>
-          </AppLayout>
-        } />
+        <Route path="/metrics" element={<WrappedLazy><MetricsPage /></WrappedLazy>} />
+        <Route path="/meetings-ai" element={<WrappedLazy><MeetingsAIPage /></WrappedLazy>} />
+        <Route path="/meetings" element={<WrappedLazy><MeetingsPage /></WrappedLazy>} />
+        <Route path="/calendar" element={<WrappedLazy><CalendarPage /></WrappedLazy>} />
+        <Route path="/settings" element={<WrappedLazy><SettingsPage /></WrappedLazy>} />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>
