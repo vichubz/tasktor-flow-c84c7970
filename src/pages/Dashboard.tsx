@@ -24,6 +24,7 @@ const Dashboard = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filterProject, setFilterProject] = useState<string>("all");
   const [filterDifficulty, setFilterDifficulty] = useState<string>("all");
+  const [showNewTask, setShowNewTask] = useState(false);
   const [loading, setLoading] = useState(true);
   const [todayCompleted, setTodayCompleted] = useState(0);
   const skipRealtimeRef = useRef(false);
