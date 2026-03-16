@@ -455,7 +455,18 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
             <Trash2 className="w-4 h-4" />
           </motion.button>
         </div>
-                  <div className="px-5 pb-5 pt-2 ml-[76px] border-t border-border/15 relative">
+
+        {/* Expanded content */}
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="px-5 pb-5 pt-2 ml-[76px] border-t border-border/15 relative">
                     <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent pointer-events-none" />
 
                     {/* Description */}
