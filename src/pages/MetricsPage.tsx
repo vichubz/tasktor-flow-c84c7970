@@ -155,7 +155,7 @@ const MetricsPage = () => {
             <div className="relative z-10">
               <stat.icon className={`w-5 h-5 ${stat.color} mb-3 icon-pulse`} />
               <motion.p
-                className="text-2xl font-bold text-foreground font-mono neon-text-primary"
+                className="text-xl sm:text-2xl font-bold text-foreground font-mono neon-text-primary"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: i * 0.08 + 0.2 }}
