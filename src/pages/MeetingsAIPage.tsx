@@ -12,6 +12,7 @@ import remarkGfm from "remark-gfm";
 
 interface MeetingSummary {
   id: string;
+  title: string | null;
   client: string | null;
   meeting_date: string | null;
   participants: string | null;
@@ -20,6 +21,28 @@ interface MeetingSummary {
   result: string;
   created_at: string;
 }
+
+const generateTitle = (client: string, objective: string, transcription: string): string => {
+  if (client && objective) {
+    const shortObj = objective.split(/\s+/).slice(0, 2).join(" ");
+    return `${client} — ${shortObj}`;
+  }
+  if (client) return `${client} — Reunião`;
+  if (objective) return objective.length > 40 ? objective.slice(0, 40) + "…" : objective;
+  const words = transcription.trim().split(/\s+/).filter(w => w.length > 2).slice(0, 4);
+  return words.length > 0 ? words.join(" ") : "Reunião sem título";
+};
+
+const formatHistoryDate = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const itemDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffDays = Math.floor((today.getTime() - itemDate.getTime()) / 86400000);
+  if (diffDays === 0) return "Hoje";
+  if (diffDays === 1) return "Ontem";
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
+};
 
 const MeetingsAIPage = () => {
   const { user } = useAuth();
@@ -98,8 +121,10 @@ const MeetingsAIPage = () => {
       setResult(data.result);
 
       // Save to history
+      const title = generateTitle(client, objective, transcription);
       await supabase.from("meeting_summaries").insert({
         user_id: user.id,
+        title,
         client: client || null,
         meeting_date: meetingDate || null,
         participants: participants || null,
@@ -306,7 +331,7 @@ const MeetingsAIPage = () => {
                   <FileText className="w-3.5 h-3.5" />
                   Histórico
                 </h3>
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   {history.map((item, i) => (
                     <motion.div
                       key={item.id}
@@ -314,25 +339,29 @@ const MeetingsAIPage = () => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.05 }}
                       onClick={() => handleLoadHistory(item)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer group transition-all hover:bg-primary/[0.05]"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer group transition-all hover:bg-primary/[0.06]"
                       style={{
                         background: "var(--glass-bg)",
                         border: "1px solid var(--glass-border)",
                       }}
                     >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-foreground/80 truncate font-medium">
-                          {item.client || item.objective || "Reunião sem título"}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground/40 font-mono">
-                          {new Date(item.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                        </p>
-                      </div>
+                      <span
+                        className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md shrink-0"
+                        style={{
+                          background: "hsl(var(--primary) / 0.1)",
+                          color: "hsl(var(--primary))",
+                        }}
+                      >
+                        {formatHistoryDate(item.created_at)}
+                      </span>
+                      <p className="flex-1 text-sm text-foreground/90 truncate font-semibold">
+                        {item.title || item.client || item.objective || "Reunião sem título"}
+                      </p>
                       <motion.button
                         onClick={e => { e.stopPropagation(); handleDeleteHistory(item.id); }}
                         whileHover={{ scale: 1.15 }}
                         whileTap={{ scale: 0.9 }}
-                        className="opacity-0 group-hover:opacity-100 text-muted-foreground/30 hover:text-destructive transition-all w-7 h-7 rounded-lg flex items-center justify-center"
+                        className="opacity-0 group-hover:opacity-100 text-muted-foreground/30 hover:text-destructive transition-all w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </motion.button>
