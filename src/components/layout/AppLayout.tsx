@@ -25,7 +25,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
       <div className="hidden md:block">
         <AppSidebar />
       </div>
-      <div className="relative z-10 flex-1 flex flex-col gradient-line-top pb-16 md:pb-0">
+      <div className="relative z-10 flex-1 flex flex-col min-h-0 gradient-line-top pb-16 md:pb-0 overflow-hidden">
         {children}
       </div>
       <MobileBottomNav />
