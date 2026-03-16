@@ -236,7 +236,7 @@ const MetricsPage = () => {
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="glass-gradient rounded-xl p-4 sm:p-6">
-        <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Task History</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Histórico de Tasks</h3>
         {completedTasks.length > 0 ? (
           <div className="space-y-1">
             <div className="hidden sm:grid grid-cols-4 text-xs text-foreground/50 font-medium px-3 pb-2 uppercase tracking-wider">
