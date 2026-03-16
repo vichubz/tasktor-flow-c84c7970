@@ -79,6 +79,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   const [showSubtaskDropdown, setShowSubtaskDropdown] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [highlighted, setHighlighted] = useState(!!(task as any).is_highlighted);
+  const [difficulty, setDifficulty] = useState<number>((task as any).difficulty ?? 0);
   const [descExpanded, setDescExpanded] = useState(false);
   const [hasClipboard, setHasClipboard] = useState(!!subtaskClipboard);
   const [pastingSubtasks, setPastingSubtasks] = useState(false);
