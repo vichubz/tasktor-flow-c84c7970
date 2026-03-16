@@ -1,10 +1,7 @@
-import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
+import { useMemo, useEffect } from "react";
 
-/* ═══════════════════════════════════════════
-   Layer 4 — Floating Particles (CSS-only)
-   Generated once, animated via CSS keyframes
-   ═══════════════════════════════════════════ */
+/* ═══ Particles ═══ */
 const PARTICLE_COLORS = [
   "rgba(14,165,195,0.3)",
   "rgba(124,58,237,0.25)",
@@ -17,7 +14,7 @@ function generateParticles(count: number) {
     const size = 2 + Math.random() * 3;
     const left = Math.random() * 100;
     const delay = Math.random() * 20;
-    const duration = 18 + Math.random() * 22; // 18-40s — slower = further away
+    const duration = 18 + Math.random() * 22;
     const opacity = 0.1 + Math.random() * 0.3;
     const color = PARTICLE_COLORS[i % PARTICLE_COLORS.length];
     const driftX = -30 + Math.random() * 60;
@@ -25,91 +22,118 @@ function generateParticles(count: number) {
   });
 }
 
-/* ═══ Orb config ═══ */
+/* ═══ Orbs ═══ */
 const ORBS = [
-  { color: "#0ea5c3", size: 400, blur: 100, pos: { top: "-5%", left: "-5%" }, opRange: [0.05, 0.15], scaleRange: [0.8, 1.2], dur: 8, drift: [40, 30] },
-  { color: "#7c3aed", size: 500, blur: 120, pos: { bottom: "-8%", right: "-8%" }, opRange: [0.04, 0.12], scaleRange: [0.9, 1.3], dur: 10, drift: [50, 40] },
-  { color: "#10b981", size: 350, blur: 90, pos: { top: "40%", left: "-3%" }, opRange: [0.03, 0.10], scaleRange: [0.85, 1.15], dur: 12, drift: [60, 50] },
-  { color: "#ec4899", size: 300, blur: 100, pos: { top: "-3%", left: "40%" }, opRange: [0.02, 0.08], scaleRange: [0.9, 1.1], dur: 14, drift: [35, 25] },
+  { color: "#0ea5c3", size: 400, blur: 100, pos: { top: "-5%", left: "-5%" }, opRange: [0.05, 0.15], scaleRange: [0.8, 1.2], dur: 8, drift: [50, 40], parallax: 0.03 },
+  { color: "#7c3aed", size: 500, blur: 120, pos: { bottom: "-8%", right: "-8%" }, opRange: [0.04, 0.12], scaleRange: [0.9, 1.3], dur: 10, drift: [60, 50], parallax: 0.05 },
+  { color: "#10b981", size: 350, blur: 90, pos: { top: "40%", left: "-3%" }, opRange: [0.03, 0.10], scaleRange: [0.85, 1.15], dur: 12, drift: [70, 60], parallax: 0.04 },
+  { color: "#ec4899", size: 300, blur: 100, pos: { top: "-3%", left: "40%" }, opRange: [0.02, 0.08], scaleRange: [0.9, 1.1], dur: 14, drift: [45, 35], parallax: 0.02 },
 ];
 
-/* ═══ Aurora bands ═══ */
+/* ═══ Auroras ═══ */
 const AURORAS = [
-  { color: "rgba(124,58,237,0.08)", w: "130vw", h: "50vh", dur: 35, rotDur: 45, startX: -100, startY: -80 },
-  { color: "rgba(14,165,195,0.06)", w: "140vw", h: "45vh", dur: 28, rotDur: 55, startX: 60, startY: 100 },
-  { color: "rgba(16,185,129,0.05)", w: "120vw", h: "55vh", dur: 32, rotDur: 60, startX: -80, startY: 60 },
-  { color: "rgba(236,72,153,0.04)", w: "150vw", h: "40vh", dur: 40, rotDur: 50, startX: 100, startY: -60 },
+  { color: "rgba(124,58,237,0.08)", w: "130vw", h: "50vh", dur: 20, rotDur: 30, startX: -120, startY: -100, parallax: 0.06 },
+  { color: "rgba(14,165,195,0.06)", w: "140vw", h: "45vh", dur: 18, rotDur: 35, startX: 80, startY: 120, parallax: 0.04 },
+  { color: "rgba(16,185,129,0.05)", w: "120vw", h: "55vh", dur: 22, rotDur: 40, startX: -100, startY: 80, parallax: 0.05 },
+  { color: "rgba(236,72,153,0.04)", w: "150vw", h: "40vh", dur: 25, rotDur: 32, startX: 120, startY: -80, parallax: 0.03 },
 ];
 
 const HomeBackground = () => {
   const particles = useMemo(() => generateParticles(40), []);
 
+  // Mouse parallax
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 30, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 30, damping: 20 });
+
+  useEffect(() => {
+    const handleMove = (e: MouseEvent) => {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      mouseX.set((e.clientX - cx) / cx);
+      mouseY.set((e.clientY - cy) / cy);
+    };
+    window.addEventListener("mousemove", handleMove);
+    return () => window.removeEventListener("mousemove", handleMove);
+  }, [mouseX, mouseY]);
+
   return (
-    <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-      {/* ─── Layer 1: Mesh Gradient Base ─── */}
+    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+      {/* Layer 1: Mesh Gradient */}
       <div className="absolute inset-0 home-mesh-gradient" style={{ zIndex: 0, willChange: "transform" }} />
 
-      {/* ─── Layer 2: Aurora Bands ─── */}
+      {/* Layer 2: Aurora Bands with parallax */}
       <div className="absolute inset-0 overflow-hidden" style={{ zIndex: 1 }}>
-        {AURORAS.map((a, i) => (
-          <motion.div
-            key={`aurora-${i}`}
-            className="absolute rounded-full"
-            style={{
-              width: a.w,
-              height: a.h,
-              background: `radial-gradient(ellipse at center, ${a.color}, transparent 70%)`,
-              filter: `blur(${80 + i * 10}px)`,
-              left: "50%",
-              top: "50%",
-              willChange: "transform, opacity",
-            }}
-            animate={{
-              x: [a.startX, -a.startX, a.startX],
-              y: [a.startY, -a.startY, a.startY],
-              rotate: [0, 180, 360],
-              opacity: [0.6, 1, 0.6],
-            }}
-            transition={{
-              duration: a.dur,
-              repeat: Infinity,
-              ease: "easeInOut",
-              rotate: { duration: a.rotDur, repeat: Infinity, ease: "linear" },
-            }}
-          />
-        ))}
+        {AURORAS.map((a, i) => {
+          const px = useTransform(springX, v => a.startX + v * a.parallax * 200);
+          const py = useTransform(springY, v => a.startY + v * a.parallax * 200);
+          return (
+            <motion.div
+              key={`aurora-${i}`}
+              className="absolute rounded-full"
+              style={{
+                width: a.w,
+                height: a.h,
+                background: `radial-gradient(ellipse at center, ${a.color}, transparent 70%)`,
+                filter: `blur(${80 + i * 10}px)`,
+                left: "50%",
+                top: "50%",
+                willChange: "transform, opacity",
+                x: px,
+                y: py,
+              }}
+              animate={{
+                x: [a.startX, -a.startX, a.startX],
+                y: [a.startY, -a.startY, a.startY],
+                rotate: [0, 180, 360],
+                opacity: [0.6, 1, 0.6],
+              }}
+              transition={{
+                duration: a.dur,
+                repeat: Infinity,
+                ease: "easeInOut",
+                rotate: { duration: a.rotDur, repeat: Infinity, ease: "linear" },
+              }}
+            />
+          );
+        })}
       </div>
 
-      {/* ─── Layer 3: Pulsing Orbs ─── */}
+      {/* Layer 3: Pulsing Orbs with parallax */}
       <div className="absolute inset-0" style={{ zIndex: 2 }}>
-        {ORBS.map((orb, i) => (
-          <motion.div
-            key={`orb-${i}`}
-            className="absolute rounded-full"
-            style={{
-              width: orb.size,
-              height: orb.size,
-              background: `radial-gradient(circle, ${orb.color}, transparent 70%)`,
-              filter: `blur(${orb.blur}px)`,
-              willChange: "transform, opacity",
-              ...orb.pos,
-            }}
-            animate={{
-              scale: [orb.scaleRange[0], orb.scaleRange[1], orb.scaleRange[0]],
-              opacity: [orb.opRange[0], orb.opRange[1], orb.opRange[0]],
-              x: [0, orb.drift[0], -orb.drift[0] / 2, 0],
-              y: [0, -orb.drift[1], orb.drift[1] / 2, 0],
-            }}
-            transition={{
-              duration: orb.dur,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
+        {ORBS.map((orb, i) => {
+          const ox = useTransform(springX, v => v * orb.parallax * 300);
+          const oy = useTransform(springY, v => v * orb.parallax * 300);
+          return (
+            <motion.div
+              key={`orb-${i}`}
+              className="absolute rounded-full"
+              style={{
+                width: orb.size,
+                height: orb.size,
+                background: `radial-gradient(circle, ${orb.color}, transparent 70%)`,
+                filter: `blur(${orb.blur}px)`,
+                willChange: "transform, opacity",
+                x: ox,
+                y: oy,
+                ...orb.pos,
+              }}
+              animate={{
+                scale: [orb.scaleRange[0], orb.scaleRange[1], orb.scaleRange[0]],
+                opacity: [orb.opRange[0], orb.opRange[1], orb.opRange[0]],
+              }}
+              transition={{
+                duration: orb.dur,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          );
+        })}
       </div>
 
-      {/* ─── Layer 4: Floating Particles (CSS-only) ─── */}
+      {/* Layer 4: Floating Particles */}
       <div className="absolute inset-0 overflow-hidden" style={{ zIndex: 3 }}>
         {particles.map((p, i) => (
           <span
@@ -128,7 +152,7 @@ const HomeBackground = () => {
         ))}
       </div>
 
-      {/* ─── Layer 5: Noise Texture ─── */}
+      {/* Layer 5: Noise Texture */}
       <div
         className="absolute inset-0"
         style={{
@@ -141,7 +165,7 @@ const HomeBackground = () => {
         }}
       />
 
-      {/* ─── Layer 6: Vignette ─── */}
+      {/* Layer 6: Vignette */}
       <div
         className="absolute inset-0"
         style={{

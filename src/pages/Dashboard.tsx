@@ -332,7 +332,7 @@ const Dashboard = () => {
           </motion.div>
         )}
 
-        <CompletedTasks />
+        <CompletedTasks onTaskRestored={fetchData} />
       </div>
 
       <NewTaskDialog open={showNewTask} onOpenChange={setShowNewTask} projects={projects} onCreated={fetchData} />

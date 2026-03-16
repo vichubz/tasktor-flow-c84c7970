@@ -2,26 +2,26 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
+const SYMBOLS = ["$", "$", "💰", "$", "R$", "$"];
 const COLORS = [
-  "hsl(192 80% 50%)",
-  "hsl(270 70% 60%)",
-  "hsl(150 60% 50%)",
-  "hsl(45 93% 55%)",
-  "hsl(339 90% 60%)",
-  "hsl(210 100% 60%)",
+  "#FFD700",
+  "#10b981",
+  "#0ea5c3",
+  "#ffffff",
+  "#f59e0b",
+  "#22d3ee",
 ];
 
 interface ConfettiExplosionProps {
-  /** If true, renders full-screen via portal */
   fullScreen?: boolean;
   count?: number;
 }
 
-const ConfettiExplosion = ({ count = 36, fullScreen = false }: ConfettiExplosionProps) => {
+const ConfettiExplosion = ({ count = 32, fullScreen = false }: ConfettiExplosionProps) => {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const t = setTimeout(() => setVisible(false), 2000);
+    const t = setTimeout(() => setVisible(false), 2200);
     return () => clearTimeout(t);
   }, []);
 
@@ -29,15 +29,19 @@ const ConfettiExplosion = ({ count = 36, fullScreen = false }: ConfettiExplosion
 
   const particles = Array.from({ length: count }, (_, i) => {
     const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
-    const distance = fullScreen ? 150 + Math.random() * 350 : 60 + Math.random() * 100;
+    const distance = fullScreen ? 120 + Math.random() * 400 : 60 + Math.random() * 100;
     const x = Math.cos(angle) * distance;
-    const y = Math.sin(angle) * distance - (fullScreen ? 100 : 30);
-    const gravity = fullScreen ? 80 + Math.random() * 200 : 40 + Math.random() * 60;
-    const size = fullScreen ? 4 + Math.random() * 8 : 3 + Math.random() * 5;
+    const y = Math.sin(angle) * distance - (fullScreen ? 120 : 30);
+    const gravity = fullScreen ? 100 + Math.random() * 250 : 40 + Math.random() * 60;
+    const size = fullScreen ? 16 + Math.random() * 24 : 12 + Math.random() * 14;
     const rotation = Math.random() * 720 - 360;
-    const isRect = Math.random() > 0.4;
 
-    return { x, y, gravity, size, rotation, color: COLORS[i % COLORS.length], delay: Math.random() * 0.15, isRect };
+    return {
+      x, y, gravity, size, rotation,
+      color: COLORS[i % COLORS.length],
+      symbol: SYMBOLS[i % SYMBOLS.length],
+      delay: Math.random() * 0.2,
+    };
   });
 
   const content = (
@@ -49,39 +53,40 @@ const ConfettiExplosion = ({ count = 36, fullScreen = false }: ConfettiExplosion
         zIndex: fullScreen ? 9999 : 50,
       }}
     >
-      {/* Center origin for full screen */}
       <div
         style={{
           position: "absolute",
           left: "50%",
-          top: fullScreen ? "50%" : "50%",
+          top: "50%",
         }}
       >
         {particles.map((p, i) => (
-          <motion.div
+          <motion.span
             key={i}
-            className="absolute"
+            className="absolute font-bold select-none"
             style={{
-              width: p.isRect ? p.size * 1.5 : p.size,
-              height: p.size,
-              borderRadius: p.isRect ? "2px" : "50%",
-              backgroundColor: p.color,
+              fontSize: p.size,
+              color: p.color,
+              textShadow: `0 0 12px ${p.color}80, 0 0 4px ${p.color}40`,
+              lineHeight: 1,
             }}
             initial={{ x: 0, y: 0, scale: 0, opacity: 1, rotate: 0 }}
             animate={{
               x: p.x,
               y: [p.y, p.y + p.gravity],
-              scale: [0, 1.5, 1, 0],
-              opacity: [1, 1, 0.8, 0],
+              scale: [0, 1.4, 1, 0],
+              opacity: [1, 1, 0.7, 0],
               rotate: p.rotation,
             }}
             transition={{
-              duration: 1.8,
+              duration: 2,
               delay: p.delay,
               ease: "easeOut",
-              y: { duration: 1.8, ease: [0.25, 0.1, 0.25, 1] },
+              y: { duration: 2, ease: [0.25, 0.1, 0.25, 1] },
             }}
-          />
+          >
+            {p.symbol}
+          </motion.span>
         ))}
       </div>
     </div>

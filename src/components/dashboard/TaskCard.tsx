@@ -324,7 +324,9 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           <>
             {/* Main row */}
             <div className="flex items-center gap-4 px-5 py-4 pl-6">
-              <GripVertical className="w-5 h-5 text-muted-foreground/20 flex-shrink-0 cursor-grab hover:text-muted-foreground/50 transition-colors" />
+              <div {...dragHandleProps} className="flex-shrink-0 cursor-grab active:cursor-grabbing">
+                <GripVertical className="w-5 h-5 text-muted-foreground/20 hover:text-muted-foreground/50 transition-colors" />
+              </div>
 
               {/* Position badge */}
               <motion.div
