@@ -58,7 +58,7 @@ const MetricsPage = () => {
         if (timeRes.data) setTimeEntries(timeRes.data);
         if (meetingRes.data) setMeetingLogs(meetingRes.data);
       } catch {
-        toast.error("Failed to load metrics");
+        toast.error("Falha ao carregar métricas");
       }
       setLoading(false);
     };
