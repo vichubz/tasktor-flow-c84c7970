@@ -177,6 +177,8 @@ const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorP
       </div>
     </motion.div>
   );
-};
+});
+
+InlineTaskCreator.displayName = "InlineTaskCreator";
 
 export default InlineTaskCreator;
