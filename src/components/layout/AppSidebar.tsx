@@ -37,6 +37,7 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
     { to: "/home", icon: Rocket, label: "Início" },
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/metrics", icon: BarChart3, label: "Métricas" },
+    { to: "/meetings-ai", icon: BrainCircuit, label: "Reuniões IA" },
   ];
 
   return (

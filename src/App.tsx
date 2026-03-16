@@ -59,6 +59,15 @@ const AnimatedRoutes = () => {
             </PageTransition>
           </AppLayout>
         } />
+        <Route path="/meetings-ai" element={
+          <AppLayout>
+            <PageTransition>
+              <Suspense fallback={<LoadingFallback />}>
+                <MeetingsAIPage />
+              </Suspense>
+            </PageTransition>
+          </AppLayout>
+        } />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>
