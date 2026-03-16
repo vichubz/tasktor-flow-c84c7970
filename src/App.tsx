@@ -12,6 +12,7 @@ import NotFound from "@/pages/NotFound";
 
 const MetricsPage = lazy(() => import("@/pages/MetricsPage"));
 const HomePage = lazy(() => import("@/pages/HomePage"));
+const MeetingsAIPage = lazy(() => import("@/pages/MeetingsAIPage"));
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,15 @@ const AnimatedRoutes = () => {
             <PageTransition>
               <Suspense fallback={<LoadingFallback />}>
                 <MetricsPage />
+              </Suspense>
+            </PageTransition>
+          </AppLayout>
+        } />
+        <Route path="/meetings-ai" element={
+          <AppLayout>
+            <PageTransition>
+              <Suspense fallback={<LoadingFallback />}>
+                <MeetingsAIPage />
               </Suspense>
             </PageTransition>
           </AppLayout>
