@@ -1,0 +1,1 @@
+CREATE POLICY "Users can update own summaries" ON public.meeting_summaries FOR UPDATE USING (auth.uid() = user_id);
