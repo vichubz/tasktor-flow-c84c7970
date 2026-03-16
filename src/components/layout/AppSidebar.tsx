@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { LayoutDashboard, BarChart3, FolderKanban, LogOut, ChevronLeft, ChevronRight, ChevronDown, Calendar, Rocket, BrainCircuit, Video, Settings, Plus } from "lucide-react";
 import logoIcone from "@/assets/tasktor_logo_icone.png";
-import logoCompleto from "@/assets/logo_completo_tasktor.png";
+import logoText from "@/assets/tasktor_logo_text.png";
 import ProjectManager from "@/components/dashboard/ProjectManager";
 import type { Tables } from "@/integrations/supabase/types";
 
