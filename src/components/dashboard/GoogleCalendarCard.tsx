@@ -46,8 +46,9 @@ const GoogleCalendarCard = () => {
       if (res.error) throw res.error;
       setConnected(res.data.connected);
       setEvents(res.data.events || []);
-    } catch (err) {
-      console.error("Error fetching calendar events:", err);
+    } catch {
+      // Silently handle - calendar may not be connected
+      setConnected(false);
     } finally {
       setLoading(false);
     }
