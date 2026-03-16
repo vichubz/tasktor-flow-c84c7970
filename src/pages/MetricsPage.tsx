@@ -239,7 +239,7 @@ const MetricsPage = () => {
         <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Histórico de Tarefas</h3>
         {completedTasks.length > 0 ? (
           <div className="space-y-1">
-            <div className="grid grid-cols-4 text-xs text-foreground/50 font-medium px-3 pb-2 uppercase tracking-wider">
+            <div className="hidden sm:grid grid-cols-4 text-xs text-foreground/50 font-medium px-3 pb-2 uppercase tracking-wider">
               <span>Título</span><span>Projeto</span><span>Concluída em</span><span>Criada em</span>
             </div>
             {completedTasks.slice(0, 20).map((task: any, i: number) => (
