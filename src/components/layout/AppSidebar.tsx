@@ -33,12 +33,12 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
   useEffect(() => { fetchProjects(); }, [user]);
 
   const links = [
-    { to: "/home", icon: Rocket, label: "Home" },
+    { to: "/home", icon: Rocket, label: "Início" },
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { to: "/calendar", icon: Calendar, label: "Calendar" },
-    { to: "/meetings-ai", icon: BrainCircuit, label: "Meet Agent" },
-    { to: "/meetings", icon: Video, label: "Meetings" },
-    { to: "/metrics", icon: BarChart3, label: "Metrics" },
+    { to: "/calendar", icon: Calendar, label: "Calendário" },
+    { to: "/meetings-ai", icon: BrainCircuit, label: "Agente IA" },
+    { to: "/meetings", icon: Video, label: "Reuniões" },
+    { to: "/metrics", icon: BarChart3, label: "Métricas" },
   ];
 
   return (
