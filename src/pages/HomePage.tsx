@@ -2,16 +2,20 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { ChevronDown, ArrowRight } from "lucide-react";
+import { ChevronDown, ArrowRight, RefreshCw } from "lucide-react";
 import logoCompleto from "@/assets/logo_completo_tasktor.png";
 import HomeBackground from "@/components/home/HomeBackground";
-import { getDailyQuote } from "@/lib/quotes";
+import { getDailyQuote, getRandomQuote } from "@/lib/quotes";
 
 const HomePage = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
-  const quote = getDailyQuote();
+  const [quote, setQuote] = useState(getDailyQuote);
+
+  const rotateQuote = () => {
+    setQuote(prev => getRandomQuote(prev.text));
+  };
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -95,10 +99,19 @@ const HomePage = () => {
           transition={{ delay: 1, duration: 0.8 }}
           className="mb-10 sm:mb-14"
         >
-          <p className="text-lg sm:text-xl md:text-2xl text-white/70 font-display font-medium leading-relaxed italic max-w-lg mx-auto">
-            "{quote.text}"
-          </p>
-          <p className="text-sm text-white/30 mt-4 font-body">— {quote.author}</p>
+          <motion.div key={quote.text} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <p className="text-lg sm:text-xl md:text-2xl text-white/70 font-display font-medium leading-relaxed italic max-w-lg mx-auto">
+              "{quote.text}"
+            </p>
+            <p className="text-sm text-white/30 mt-4 font-body">— {quote.author}</p>
+          </motion.div>
+          <button
+            onClick={rotateQuote}
+            className="mt-4 p-2 rounded-full text-white/20 hover:text-white/50 hover:bg-white/5 transition-all duration-300"
+            aria-label="Trocar frase"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
         </motion.div>
 
         {/* CTA Button */}
