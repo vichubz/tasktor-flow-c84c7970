@@ -265,7 +265,7 @@ const MetricsPage = () => {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground text-sm text-center py-8">No tasks completed in this period</p>
+          <p className="text-muted-foreground text-sm text-center py-8">Nenhuma task concluída neste período</p>
         )}
       </motion.div>
     </div>
