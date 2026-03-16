@@ -68,6 +68,42 @@ export type Database = {
         }
         Relationships: []
       }
+      meeting_summaries: {
+        Row: {
+          client: string | null
+          created_at: string
+          id: string
+          meeting_date: string | null
+          objective: string | null
+          participants: string | null
+          result: string
+          transcription: string
+          user_id: string
+        }
+        Insert: {
+          client?: string | null
+          created_at?: string
+          id?: string
+          meeting_date?: string | null
+          objective?: string | null
+          participants?: string | null
+          result: string
+          transcription: string
+          user_id: string
+        }
+        Update: {
+          client?: string | null
+          created_at?: string
+          id?: string
+          meeting_date?: string | null
+          objective?: string | null
+          participants?: string | null
+          result?: string
+          transcription?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
