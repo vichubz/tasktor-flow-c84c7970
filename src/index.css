@@ -458,15 +458,23 @@
     transform: translateY(-1px);
   }
 
+  /* Marquee track */
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 20s linear infinite;
+  }
 
-  /* Hide scrollbar for project filter bar */
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  .marquee-content {
+    display: flex;
+    gap: 0.75rem;
+    padding-right: 0.75rem;
   }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
+}
+
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 /* ═══ Keyframes ═══ */
