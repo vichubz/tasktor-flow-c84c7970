@@ -285,7 +285,7 @@ const Dashboard = () => {
             {/* Inline task creator */}
             {projects.length > 0 && (
               <div className="mb-3">
-                <InlineTaskCreator projects={projects} onCreated={fetchData} />
+                <InlineTaskCreator ref={inlineCreatorRef} projects={projects} onCreated={fetchData} />
               </div>
             )}
 
