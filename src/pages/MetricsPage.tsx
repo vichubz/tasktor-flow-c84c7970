@@ -44,21 +44,21 @@ const MetricsPage = () => {
 
       try {
         const [tasksRes, projectsRes, timeRes, meetingRes] = await Promise.all([
-          supabase.from("tasks").select("id, title, completed_at, project_id, project:projects(name, color)").eq("user_id", user.id).eq("is_completed", true).gte("completed_at", startStr).order("completed_at", { ascending: false }),
+          supabase.from("tasks").select("id, title, completed_at, created_at, project_id, project:projects(name, color)").eq("user_id", user.id).eq("is_completed", true).gte("completed_at", startStr).order("completed_at", { ascending: false }),
           supabase.from("projects").select("id, name, color").eq("user_id", user.id),
           supabase.from("time_entries").select("id, project_id, date, duration_seconds").eq("user_id", user.id).gte("date", startDate.toISOString().split("T")[0]),
           supabase.from("meeting_logs").select("id, date, hours, meeting_count").eq("user_id", user.id).gte("date", startDate.toISOString().split("T")[0]),
         ]);
 
         if (tasksRes.error || projectsRes.error || timeRes.error || meetingRes.error) {
-          toast.error("Erro ao carregar métricas");
+          toast.error("Failed to load metrics");
         }
         if (tasksRes.data) setCompletedTasks(tasksRes.data);
         if (projectsRes.data) setProjects(projectsRes.data);
         if (timeRes.data) setTimeEntries(timeRes.data);
         if (meetingRes.data) setMeetingLogs(meetingRes.data);
       } catch {
-        toast.error("Erro ao carregar métricas");
+        toast.error("Failed to load metrics");
       }
       setLoading(false);
     };
@@ -82,14 +82,14 @@ const MetricsPage = () => {
 
   const tasksByDay: Record<string, number> = {};
   completedTasks.forEach(t => {
-    const day = new Date(t.completed_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+    const day = new Date(t.completed_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     tasksByDay[day] = (tasksByDay[day] || 0) + 1;
   });
   const tasksChartData = Object.entries(tasksByDay).map(([date, count]) => ({ date, count }));
 
   const timeByDay: Record<string, number> = {};
   timeEntries.forEach(e => {
-    const day = new Date(e.date).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+    const day = new Date(e.date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     timeByDay[day] = (timeByDay[day] || 0) + e.duration_seconds / 3600;
   });
   const timeChartData = Object.entries(timeByDay).map(([date, hours]) => ({ date, hours: Number(hours.toFixed(1)) }));
@@ -105,11 +105,11 @@ const MetricsPage = () => {
     : "—";
 
   const statCards = [
-    { icon: CheckCircle2, label: "Tarefas Concluídas", value: animatedCompleted.toString(), color: "text-success", glow: "from-success/10" },
-    { icon: Clock, label: "Tempo Trabalhado", value: formatHours(totalWorkSeconds), color: "text-primary", glow: "from-primary/10" },
-    { icon: CalendarDays, label: "Horas em Reunião", value: `${totalMeetingHours.toFixed(1)}h`, color: "text-accent", glow: "from-accent/10" },
-    { icon: TrendingUp, label: "Média Tarefas/Dia", value: avgTasksPerDay, color: "text-primary", glow: "from-primary/10" },
-    { icon: Award, label: "Projeto + Trabalhado", value: mostWorked, color: "text-accent", glow: "from-accent/10" },
+    { icon: CheckCircle2, label: "Tasks Completed", value: animatedCompleted.toString(), color: "text-success", glow: "from-success/10" },
+    { icon: Clock, label: "Time Worked", value: formatHours(totalWorkSeconds), color: "text-primary", glow: "from-primary/10" },
+    { icon: CalendarDays, label: "Meeting Hours", value: `${totalMeetingHours.toFixed(1)}h`, color: "text-accent", glow: "from-accent/10" },
+    { icon: TrendingUp, label: "Avg Tasks/Day", value: avgTasksPerDay, color: "text-primary", glow: "from-primary/10" },
+    { icon: Award, label: "Most Worked", value: mostWorked, color: "text-accent", glow: "from-accent/10" },
   ];
 
   const tooltipStyle = {
@@ -128,15 +128,15 @@ const MetricsPage = () => {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-3"
       >
-        <h1 className="text-xl sm:text-2xl font-bold font-display text-tight gradient-text">Métricas & Relatórios</h1>
+        <h1 className="text-xl sm:text-2xl font-bold font-display text-tight gradient-text">Metrics & Reports</h1>
         <Select value={period} onValueChange={setPeriod}>
           <SelectTrigger className="w-full sm:w-40 bg-secondary/50 border-border/50 h-9 backdrop-blur-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-card/95 backdrop-blur-xl border-border/50">
-            <SelectItem value="today">Hoje</SelectItem>
-            <SelectItem value="week">Esta Semana</SelectItem>
-            <SelectItem value="month">Este Mês</SelectItem>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="week">This Week</SelectItem>
+            <SelectItem value="month">This Month</SelectItem>
           </SelectContent>
         </Select>
       </motion.div>
@@ -170,7 +170,7 @@ const MetricsPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-gradient rounded-xl p-4 sm:p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tarefas Concluídas por Dia</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tasks Completed by Day</h3>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={tasksChartData}>
               <defs>
@@ -188,7 +188,7 @@ const MetricsPage = () => {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="glass-gradient rounded-xl p-4 sm:p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tempo por Projeto</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Time by Project</h3>
           {projectTimeData.length > 0 ? (
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <ResponsiveContainer width="100%" height={180} className="sm:max-w-[60%]">
@@ -212,13 +212,13 @@ const MetricsPage = () => {
               </div>
             </div>
           ) : (
-            <div className="h-[180px] flex items-center justify-center text-muted-foreground text-sm">Sem dados de tempo</div>
+            <div className="h-[180px] flex items-center justify-center text-muted-foreground text-sm">No time data</div>
           )}
         </motion.div>
       </div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-gradient rounded-xl p-4 sm:p-6 mb-6 sm:mb-8">
-        <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tempo Trabalhado por Dia</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Time Worked by Day</h3>
         <ResponsiveContainer width="100%" height={180}>
           <AreaChart data={timeChartData}>
             <defs>
@@ -236,11 +236,11 @@ const MetricsPage = () => {
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="glass-gradient rounded-xl p-4 sm:p-6">
-        <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Histórico de Tarefas</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Task History</h3>
         {completedTasks.length > 0 ? (
           <div className="space-y-1">
             <div className="hidden sm:grid grid-cols-4 text-xs text-foreground/50 font-medium px-3 pb-2 uppercase tracking-wider">
-              <span>Título</span><span>Projeto</span><span>Concluída em</span><span>Criada em</span>
+              <span>Title</span><span>Project</span><span>Completed</span><span>Created</span>
             </div>
             {completedTasks.slice(0, 20).map((task: any, i: number) => (
               <motion.div
@@ -253,19 +253,19 @@ const MetricsPage = () => {
                 <span className="text-foreground truncate group-hover:text-primary transition-colors font-medium sm:font-normal">{task.title}</span>
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: task.project?.color, boxShadow: `0 0 6px ${task.project?.color}40` }} />
-                  <span className="text-muted-foreground truncate text-xs sm:text-sm">{task.project?.name || "Sem projeto"}</span>
+                  <span className="text-muted-foreground truncate text-xs sm:text-sm">{task.project?.name || "No project"}</span>
                 </span>
                 <span className="text-muted-foreground font-mono text-xs hidden sm:block">
-                  {task.completed_at ? new Date(task.completed_at).toLocaleDateString("pt-BR") : "—"}
+                  {task.completed_at ? new Date(task.completed_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}
                 </span>
                 <span className="text-muted-foreground font-mono text-xs hidden sm:block">
-                  {new Date(task.created_at).toLocaleDateString("pt-BR")}
+                  {new Date(task.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 </span>
               </motion.div>
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground text-sm text-center py-8">Nenhuma tarefa concluída no período</p>
+          <p className="text-muted-foreground text-sm text-center py-8">No tasks completed in this period</p>
         )}
       </motion.div>
     </div>

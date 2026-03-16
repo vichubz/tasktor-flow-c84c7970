@@ -35,10 +35,9 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !title) return;
+    if (!user || !title.trim()) return;
     setLoading(true);
 
-    // Get max position
     const { data: lastTask } = await supabase
       .from("tasks")
       .select("position")
@@ -52,26 +51,25 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
     const { data: task, error } = await supabase.from("tasks").insert({
       user_id: user.id,
       project_id: (projectId && projectId !== "none") ? projectId : null,
-      title,
+      title: title.trim(),
       description: description || null,
       position,
       deadline: deadline ? format(deadline, "yyyy-MM-dd") : null,
     }).select().single();
 
     if (error) {
-      toast.error("Erro ao criar tarefa");
+      toast.error("Failed to create task");
       setLoading(false);
       return;
     }
 
-    // Create subtasks
     if (task && subtasks.length > 0) {
       await supabase.from("subtasks").insert(
         subtasks.map((s, i) => ({ task_id: task.id, title: s, position: i }))
       );
     }
 
-    toast.success("Tarefa criada!");
+    toast.success("Task created!");
     setTitle("");
     setDescription("");
     setProjectId("");
@@ -93,7 +91,7 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card border-border max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-foreground text-tight">Nova Tarefa</DialogTitle>
+          <DialogTitle className="text-foreground text-tight">New Task</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -101,7 +99,7 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Título da tarefa"
+              placeholder="Task title"
               className="bg-secondary border-border h-11"
               required
             />
@@ -109,11 +107,11 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
 
           <Select value={projectId} onValueChange={setProjectId}>
             <SelectTrigger className="bg-secondary border-border h-11">
-              <SelectValue placeholder="Projeto (opcional)" />
+              <SelectValue placeholder="Project (optional)" />
             </SelectTrigger>
             <SelectContent className="bg-card border-border">
               <SelectItem value="none">
-                <span className="text-muted-foreground">Sem projeto</span>
+                <span className="text-muted-foreground">No project</span>
               </SelectItem>
               {projects.map(p => (
                 <SelectItem key={p.id} value={p.id}>
@@ -129,7 +127,7 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
           <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Descrição (opcional)"
+            placeholder="Description (optional)"
             className="bg-secondary border-border min-h-[80px]"
           />
 
@@ -140,7 +138,7 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
                 className={cn("w-full justify-start text-left h-11 bg-secondary border-border", !deadline && "text-muted-foreground")}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {deadline ? format(deadline, "dd/MM/yyyy") : "Prazo (opcional)"}
+                {deadline ? format(deadline, "MMM dd, yyyy") : "Deadline (optional)"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
@@ -159,7 +157,7 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
               <Input
                 value={newSubtask}
                 onChange={(e) => setNewSubtask(e.target.value)}
-                placeholder="Adicionar subtarefa"
+                placeholder="Add subtask"
                 className="bg-secondary border-border h-9 text-sm"
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSubtask())}
               />
@@ -180,10 +178,10 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
 
           <Button
             type="submit"
-            disabled={loading || !title}
+            disabled={loading || !title.trim()}
             className="w-full gradient-primary text-primary-foreground h-11 font-semibold"
           >
-            {loading ? "Criando..." : "Criar Tarefa"}
+            {loading ? "Creating..." : "Create Task"}
           </Button>
         </form>
       </DialogContent>

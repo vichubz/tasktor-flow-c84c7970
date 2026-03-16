@@ -72,6 +72,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
   const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
   const [editingSubtaskTitle, setEditingSubtaskTitle] = useState("");
   const [showSubtaskDropdown, setShowSubtaskDropdown] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const titleDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const descDebounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -218,8 +219,9 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
     await supabase.from("subtasks").update({ title: editingSubtaskTitle.trim() }).eq("id", subtaskId);
   };
 
-  // Completion with celebration
+  // Completion with celebration — double-click protection
   const handleComplete = useCallback(() => {
+    if (completing) return;
     setShowConfetti(true);
     setCompleting(true);
     playCompletionSound();
@@ -228,11 +230,18 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
     setTimeout(() => {
       onComplete(task.id);
     }, 700);
-  }, [task.id, onComplete]);
+  }, [task.id, onComplete, completing]);
 
   const handleDelete = useCallback(() => {
-    onDelete(task.id);
-  }, [task.id, onDelete]);
+    if (confirmDelete) {
+      setConfirmDelete(false);
+      onDelete(task.id);
+    } else {
+      setConfirmDelete(true);
+      // Auto-dismiss confirmation after 3 seconds
+      setTimeout(() => setConfirmDelete(false), 3000);
+    }
+  }, [task.id, onDelete, confirmDelete]);
 
   const daysUntilDeadline = task.deadline
     ? Math.ceil((new Date(task.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
@@ -426,14 +435,24 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
               <Sparkles className="w-3.5 h-3.5" />
             </motion.button>
 
-            {/* Delete button (visible on hover) */}
-            <motion.button
-              onClick={handleDelete}
-              whileHover={{ scale: 1.15, backgroundColor: "rgba(239,68,68,0.08)" }}
-              className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </motion.button>
+            {/* Delete button with confirmation */}
+            {confirmDelete ? (
+              <motion.button
+                onClick={handleDelete}
+                initial={{ scale: 0.8 }} animate={{ scale: 1 }}
+                className="text-destructive text-[10px] font-bold px-2 py-0.5 rounded-md bg-destructive/10 border border-destructive/20 flex-shrink-0"
+              >
+                Confirm?
+              </motion.button>
+            ) : (
+              <motion.button
+                onClick={handleDelete}
+                whileHover={{ scale: 1.15, backgroundColor: "rgba(239,68,68,0.08)" }}
+                className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </motion.button>
+            )}
           </div>
 
           {/* Subtask dropdown panel — appears below the card row */}
