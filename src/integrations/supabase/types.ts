@@ -77,6 +77,7 @@ export type Database = {
           objective: string | null
           participants: string | null
           result: string
+          title: string | null
           transcription: string
           user_id: string
         }
@@ -88,6 +89,7 @@ export type Database = {
           objective?: string | null
           participants?: string | null
           result: string
+          title?: string | null
           transcription: string
           user_id: string
         }
@@ -99,6 +101,7 @@ export type Database = {
           objective?: string | null
           participants?: string | null
           result?: string
+          title?: string | null
           transcription?: string
           user_id?: string
         }

@@ -1,0 +1,1 @@
+ALTER TABLE public.meeting_summaries ADD COLUMN IF NOT EXISTS title TEXT;
