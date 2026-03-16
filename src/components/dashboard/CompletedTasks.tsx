@@ -135,7 +135,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
           <motion.div animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
             <ChevronRight className="w-4 h-4" />
           </motion.div>
-          <span>Completed today</span>
+          <span>Concluídas hoje</span>
           {hasFetched && tasks.length > 0 && (
             <span className="text-xs font-mono bg-success/10 text-success px-2 py-0.5 rounded-md">{tasks.length}</span>
           )}
