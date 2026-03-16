@@ -93,7 +93,11 @@ const Dashboard = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user, fetchData]);
 
-  const filteredTasks = filterProject === "all" ? tasks : tasks.filter(t => t.project_id === filterProject);
+  const filteredTasks = tasks.filter(t => {
+    if (filterProject !== "all" && t.project_id !== filterProject) return false;
+    if (filterDifficulty !== "all" && (t as any).difficulty !== Number(filterDifficulty)) return false;
+    return true;
+  });
 
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination || !user) return;
