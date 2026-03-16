@@ -207,17 +207,17 @@
   .electric-border::before {
     content: '';
     position: absolute;
-    inset: -2px;
-    border-radius: 14px;
+    inset: -1px;
+    border-radius: 13px;
     background: conic-gradient(
       from var(--border-angle, 0deg),
-      transparent 60%,
-      #0EA5C3 75%,
-      #2DBEA0 85%,
-      #7C3AED 95%,
-      transparent 100%
+      hsl(var(--primary) / 0.15) 0%,
+      hsl(var(--primary) / 0.35) 25%,
+      hsl(var(--accent) / 0.2) 50%,
+      hsl(var(--primary) / 0.35) 75%,
+      hsl(var(--primary) / 0.15) 100%
     );
-    animation: rotating-border 3s linear infinite;
+    animation: rotating-border 4s linear infinite;
     z-index: -2;
   }
 
