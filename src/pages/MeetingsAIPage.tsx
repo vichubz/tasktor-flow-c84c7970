@@ -377,9 +377,35 @@ const MeetingsAIPage = () => {
                       >
                         {formatHistoryDate(item.created_at)}
                       </span>
-                      <p className="flex-1 text-sm text-foreground/90 truncate font-semibold">
-                        {item.title || item.client || item.objective || "Reunião sem título"}
-                      </p>
+                      {editingId === item.id ? (
+                        <div className="flex-1 flex items-center gap-1.5 min-w-0" onClick={e => e.stopPropagation()}>
+                          <Input
+                            value={editingTitle}
+                            onChange={e => setEditingTitle(e.target.value)}
+                            onKeyDown={e => { if (e.key === "Enter") handleSaveTitle(e as any, item.id); if (e.key === "Escape") setEditingId(null); }}
+                            className="h-7 text-sm bg-secondary/40 border-border/30 px-2"
+                            autoFocus
+                          />
+                          <motion.button onClick={e => handleSaveTitle(e, item.id)} whileTap={{ scale: 0.9 }} className="text-primary hover:text-primary/80 w-6 h-6 flex items-center justify-center shrink-0">
+                            <Check className="w-3.5 h-3.5" />
+                          </motion.button>
+                          <motion.button onClick={handleCancelEdit} whileTap={{ scale: 0.9 }} className="text-muted-foreground/50 hover:text-foreground w-6 h-6 flex items-center justify-center shrink-0">
+                            <X className="w-3.5 h-3.5" />
+                          </motion.button>
+                        </div>
+                      ) : (
+                        <p className="flex-1 text-sm text-foreground/90 truncate font-semibold">
+                          {item.title || item.client || item.objective || "Reunião sem título"}
+                        </p>
+                      )}
+                      <motion.button
+                        onClick={e => handleStartEdit(e, item)}
+                        whileHover={{ scale: 1.15 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="opacity-0 group-hover:opacity-100 text-muted-foreground/30 hover:text-primary transition-all w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </motion.button>
                       <motion.button
                         onClick={e => { e.stopPropagation(); handleDeleteHistory(item.id); }}
                         whileHover={{ scale: 1.15 }}
