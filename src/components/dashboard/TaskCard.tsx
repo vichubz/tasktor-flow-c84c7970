@@ -270,16 +270,15 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
         }
         className={`relative overflow-visible transition-all duration-300 group ${
           isDragging ? "shadow-2xl z-50 ring-2 ring-primary/30" : ""
-        } ${isTop3 ? "electric-border" : ""}`}
+        } ${highlighted ? "task-highlighted" : ""}`}
       >
-        {/* Electric border wrapper for top 3 */}
         <div
           className="rounded-xl overflow-hidden relative"
           style={{
-            background: isTop3
-              ? "linear-gradient(145deg, rgba(14,165,195,0.08), rgba(45,190,160,0.04), rgba(8,18,22,0.85))"
+            background: highlighted
+              ? "linear-gradient(145deg, hsl(var(--primary) / 0.06), hsl(var(--accent) / 0.03), hsl(var(--card)))"
               : "var(--glass-bg)",
-            border: `1px solid ${isTop3 ? "transparent" : "rgba(14,165,195,0.08)"}`,
+            border: `1px solid ${highlighted ? "transparent" : "hsl(var(--primary) / 0.08)"}`,
             backdropFilter: "blur(20px)",
           }}
         >
