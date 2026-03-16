@@ -419,7 +419,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           {task.deadline && (
             <motion.span
               whileHover={{ scale: 1.05 }}
-              className={`text-xs font-mono flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg ${
+              className={`text-[10px] sm:text-xs font-mono flex-shrink-0 items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg hidden sm:flex ${
                 isOverdue
                   ? "text-destructive bg-destructive/10 border border-destructive/20"
                   : daysUntilDeadline !== null && daysUntilDeadline <= 2
@@ -429,10 +429,10 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
             >
               {isOverdue ? (
                 <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 0.5, repeat: Infinity }}>
-                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <AlertTriangle className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
                 </motion.div>
-              ) : <Clock className="w-3.5 h-3.5" />}
-              {isOverdue && <span className="text-[10px] font-bold mr-1">Atrasado</span>}
+              ) : <Clock className="w-3 sm:w-3.5 h-3 sm:h-3.5" />}
+              {isOverdue && <span className="text-[9px] sm:text-[10px] font-bold mr-1">Atrasado</span>}
               {new Date(task.deadline).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
             </motion.span>
           )}
