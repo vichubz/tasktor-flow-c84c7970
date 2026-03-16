@@ -13,11 +13,9 @@ type Project = Tables<"projects">;
 
 interface AppSidebarProps {
   onProjectsChange?: () => void;
-  onCalendarToggle?: () => void;
-  calendarOpen?: boolean;
 }
 
-const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSidebarProps) => {
+const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
   const { user, profile, signOut } = useAuth();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
