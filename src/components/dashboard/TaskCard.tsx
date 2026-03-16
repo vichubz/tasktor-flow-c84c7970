@@ -71,6 +71,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   const [showSubtaskDropdown, setShowSubtaskDropdown] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [highlighted, setHighlighted] = useState(!!(task as any).is_highlighted);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   const handleToggleHighlight = async () => {
     const newVal = !highlighted;
