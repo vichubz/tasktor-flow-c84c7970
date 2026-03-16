@@ -145,7 +145,7 @@ const MeetingsAIPage = () => {
   const handleCopy = async (text: string, field: string) => {
     await navigator.clipboard.writeText(text);
     setCopiedField(field);
-    toast.success("Copied to clipboard!");
+    toast.success("Copiado para a área de transferência!");
     setTimeout(() => setCopiedField(null), 2000);
   };
 
