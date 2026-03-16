@@ -254,7 +254,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           background: isTop3
             ? "linear-gradient(145deg, rgba(14,165,195,0.08), rgba(45,190,160,0.04), rgba(8,18,22,0.85))"
             : "var(--glass-bg)",
-          border: `1px solid ${isTop3 ? "rgba(14,165,195,0.15)" : "var(--glass-border)"}`,
+          border: `1px solid ${isTop3 ? "transparent" : "var(--glass-border)"}`,
           backdropFilter: "blur(20px)",
         }}
       >
