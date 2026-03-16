@@ -217,9 +217,9 @@ const MetricsPage = () => {
         </motion.div>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-gradient rounded-xl p-6 mb-8">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-gradient rounded-xl p-4 sm:p-6 mb-6 sm:mb-8">
         <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tempo Trabalhado por Dia</h3>
-        <ResponsiveContainer width="100%" height={220}>
+        <ResponsiveContainer width="100%" height={180}>
           <AreaChart data={timeChartData}>
             <defs>
               <linearGradient id="colorHours" x1="0" y1="0" x2="0" y2="1">
