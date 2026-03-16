@@ -122,15 +122,15 @@ const MetricsPage = () => {
   };
 
   return (
-    <div className="flex-1 h-screen overflow-y-auto px-6 py-6">
+    <div className="flex-1 h-screen overflow-y-auto px-3 sm:px-6 py-4 sm:py-6">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between mb-8"
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-3"
       >
-        <h1 className="text-2xl font-bold font-display text-tight gradient-text">Métricas & Relatórios</h1>
+        <h1 className="text-xl sm:text-2xl font-bold font-display text-tight gradient-text">Métricas & Relatórios</h1>
         <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-40 bg-secondary/50 border-border/50 h-9 backdrop-blur-sm">
+          <SelectTrigger className="w-full sm:w-40 bg-secondary/50 border-border/50 h-9 backdrop-blur-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-card/95 backdrop-blur-xl border-border/50">
@@ -141,7 +141,7 @@ const MetricsPage = () => {
         </Select>
       </motion.div>
 
-      <div className="grid grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
         {statCards.map((stat, i) => (
           <motion.div
             key={stat.label}
@@ -149,13 +149,13 @@ const MetricsPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08, ease: "easeOut" }}
             whileHover={{ y: -2 }}
-            className="stat-card rounded-xl p-5 card-lift relative overflow-hidden"
+            className="stat-card rounded-xl p-4 sm:p-5 card-lift relative overflow-hidden"
           >
             <div className={`absolute inset-0 bg-gradient-to-br ${stat.glow} to-transparent opacity-50 pointer-events-none`} />
             <div className="relative z-10">
               <stat.icon className={`w-5 h-5 ${stat.color} mb-3 icon-pulse`} />
               <motion.p
-                className="text-2xl font-bold text-foreground font-mono neon-text-primary"
+                className="text-xl sm:text-2xl font-bold text-foreground font-mono neon-text-primary"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: i * 0.08 + 0.2 }}
@@ -168,10 +168,10 @@ const MetricsPage = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-6 mb-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-gradient rounded-xl p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-gradient rounded-xl p-4 sm:p-6">
           <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tarefas Concluídas por Dia</h3>
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={180}>
             <BarChart data={tasksChartData}>
               <defs>
                 <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
@@ -187,13 +187,13 @@ const MetricsPage = () => {
           </ResponsiveContainer>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="glass-gradient rounded-xl p-6">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="glass-gradient rounded-xl p-4 sm:p-6">
           <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tempo por Projeto</h3>
           {projectTimeData.length > 0 ? (
-            <div className="flex items-center gap-4">
-              <ResponsiveContainer width="60%" height={220}>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <ResponsiveContainer width="100%" height={180} className="sm:max-w-[60%]">
                 <PieChart>
-                  <Pie data={projectTimeData} innerRadius={50} outerRadius={80} paddingAngle={4} dataKey="value">
+                  <Pie data={projectTimeData} innerRadius={40} outerRadius={70} paddingAngle={4} dataKey="value">
                     {projectTimeData.map((entry, i) => (
                       <Cell key={i} fill={entry.color} stroke="transparent" />
                     ))}
@@ -212,14 +212,14 @@ const MetricsPage = () => {
               </div>
             </div>
           ) : (
-            <div className="h-[220px] flex items-center justify-center text-muted-foreground text-sm">Sem dados de tempo</div>
+            <div className="h-[180px] flex items-center justify-center text-muted-foreground text-sm">Sem dados de tempo</div>
           )}
         </motion.div>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-gradient rounded-xl p-6 mb-8">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-gradient rounded-xl p-4 sm:p-6 mb-6 sm:mb-8">
         <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tempo Trabalhado por Dia</h3>
-        <ResponsiveContainer width="100%" height={220}>
+        <ResponsiveContainer width="100%" height={180}>
           <AreaChart data={timeChartData}>
             <defs>
               <linearGradient id="colorHours" x1="0" y1="0" x2="0" y2="1">
@@ -235,11 +235,11 @@ const MetricsPage = () => {
         </ResponsiveContainer>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="glass-gradient rounded-xl p-6">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="glass-gradient rounded-xl p-4 sm:p-6">
         <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Histórico de Tarefas</h3>
         {completedTasks.length > 0 ? (
           <div className="space-y-1">
-            <div className="grid grid-cols-4 text-xs text-foreground/50 font-medium px-3 pb-2 uppercase tracking-wider">
+            <div className="hidden sm:grid grid-cols-4 text-xs text-foreground/50 font-medium px-3 pb-2 uppercase tracking-wider">
               <span>Título</span><span>Projeto</span><span>Concluída em</span><span>Criada em</span>
             </div>
             {completedTasks.slice(0, 20).map((task: any, i: number) => (
@@ -248,17 +248,17 @@ const MetricsPage = () => {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.03 }}
-                className="grid grid-cols-4 text-sm px-3 py-2.5 rounded-lg hover:bg-primary/5 transition-all group"
+                className="grid grid-cols-1 sm:grid-cols-4 text-sm px-3 py-2.5 rounded-lg hover:bg-primary/5 transition-all group gap-1 sm:gap-0"
               >
-                <span className="text-foreground truncate group-hover:text-primary transition-colors">{task.title}</span>
+                <span className="text-foreground truncate group-hover:text-primary transition-colors font-medium sm:font-normal">{task.title}</span>
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: task.project?.color, boxShadow: `0 0 6px ${task.project?.color}40` }} />
-                  <span className="text-muted-foreground truncate">{task.project?.name || "Sem projeto"}</span>
+                  <span className="text-muted-foreground truncate text-xs sm:text-sm">{task.project?.name || "Sem projeto"}</span>
                 </span>
-                <span className="text-muted-foreground font-mono text-xs">
+                <span className="text-muted-foreground font-mono text-xs hidden sm:block">
                   {task.completed_at ? new Date(task.completed_at).toLocaleDateString("pt-BR") : "—"}
                 </span>
-                <span className="text-muted-foreground font-mono text-xs">
+                <span className="text-muted-foreground font-mono text-xs hidden sm:block">
                   {new Date(task.created_at).toLocaleDateString("pt-BR")}
                 </span>
               </motion.div>

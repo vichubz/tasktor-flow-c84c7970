@@ -122,8 +122,8 @@ const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorP
         backdropFilter: "blur(20px)",
       }}
     >
-      <div className="flex items-center gap-3 px-5 py-3">
-        <div className="w-8 h-8 rounded-full border-2 border-primary/30 flex items-center justify-center flex-shrink-0">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 px-3 sm:px-5 py-3">
+        <div className="hidden sm:flex w-8 h-8 rounded-full border-2 border-primary/30 items-center justify-center flex-shrink-0">
           <Plus className="w-4 h-4 text-primary/50" />
         </div>
         <input
@@ -135,24 +135,25 @@ const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorP
           className="flex-1 bg-transparent text-foreground text-sm outline-none placeholder:text-muted-foreground/40"
           disabled={creating}
         />
-        <Select value={projectId} onValueChange={setProjectId}>
-          <SelectTrigger className="w-36 h-8 bg-secondary/40 border-border/30 text-xs">
-            <SelectValue placeholder="Projeto" />
-          </SelectTrigger>
-          <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
-            <SelectItem value="none">
-              <span className="text-muted-foreground">Sem projeto</span>
-            </SelectItem>
-            {projects.map(p => (
-              <SelectItem key={p.id} value={p.id}>
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-                  {p.name}
-                </span>
+        <div className="flex items-center gap-2">
+          <Select value={projectId} onValueChange={setProjectId}>
+            <SelectTrigger className="flex-1 sm:flex-none sm:w-36 h-8 bg-secondary/40 border-border/30 text-xs">
+              <SelectValue placeholder="Projeto" />
+            </SelectTrigger>
+            <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
+              <SelectItem value="none">
+                <span className="text-muted-foreground">Sem projeto</span>
               </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              {projects.map(p => (
+                <SelectItem key={p.id} value={p.id}>
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                    {p.name}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         <motion.button
           onClick={handleCreate}
           disabled={!title.trim() || creating}
@@ -170,8 +171,9 @@ const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorP
         >
           <X className="w-4 h-4" />
         </motion.button>
+        </div>
       </div>
-      <div className="px-5 pb-2">
+      <div className="px-3 sm:px-5 pb-2">
         <p className="text-[10px] text-muted-foreground/30">
           <kbd className="bg-secondary/60 px-1 py-0.5 rounded text-[9px] font-mono">Enter</kbd> criar · <kbd className="bg-secondary/60 px-1 py-0.5 rounded text-[9px] font-mono">Esc</kbd> cancelar
         </p>

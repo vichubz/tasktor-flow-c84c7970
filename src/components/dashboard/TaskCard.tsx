@@ -293,19 +293,19 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
         />
 
         {/* Main row */}
-        <div className="flex items-center gap-4 px-5 py-4 pl-6">
+        <div className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-3 sm:py-4 pl-4 sm:pl-6">
           <div
             {...dragHandleProps}
             className="flex-shrink-0 cursor-grab touch-none active:cursor-grabbing"
             title="Arrastar tarefa"
           >
-            <GripVertical className="w-5 h-5 text-muted-foreground/20 hover:text-muted-foreground/60 transition-colors" />
+            <GripVertical className="w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground/20 hover:text-muted-foreground/60 transition-colors" />
           </div>
 
           {/* Position badge */}
           <motion.div
             whileHover={{ scale: 1.1, rotate: 3 }}
-            className={`flex items-center justify-center min-w-[36px] h-9 rounded-lg font-mono text-sm font-bold relative overflow-hidden ${
+            className={`flex items-center justify-center min-w-[28px] sm:min-w-[36px] h-7 sm:h-9 rounded-lg font-mono text-xs sm:text-sm font-bold relative overflow-hidden ${
               isTop3 ? "text-primary-foreground" : "bg-secondary/60 text-muted-foreground"
             }`}
             style={isTop3 ? { background: "var(--gradient-primary)", boxShadow: "0 0 16px rgba(14,165,195,0.3)" } : {}}
@@ -321,7 +321,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           </motion.div>
 
           {isTop3 && (
-            <motion.div animate={{ rotate: [0, -15, 15, 0], scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+            <motion.div animate={{ rotate: [0, -15, 15, 0], scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="hidden sm:block">
               <Flame className="w-5 h-5 text-primary flex-shrink-0 drop-shadow-[0_0_8px_rgba(14,165,195,0.6)]" />
             </motion.div>
           )}
@@ -332,7 +332,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
               onClick={handleComplete}
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.85 }}
-              className="w-8 h-8 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center hover:border-success transition-all flex-shrink-0 group/btn relative overflow-hidden"
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center hover:border-success transition-all flex-shrink-0 group/btn relative overflow-hidden"
             >
               <motion.div
                 className="absolute inset-0 rounded-full"
@@ -351,10 +351,10 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
                 onChange={(e) => handleTitleChange(e.target.value)}
                 onBlur={handleTitleBlur}
                 onKeyDown={(e) => e.key === "Enter" && handleTitleBlur()}
-                className="w-full bg-transparent text-foreground text-base outline-none border-b-2 border-primary/50 pb-0.5"
+                className="w-full bg-transparent text-foreground text-sm sm:text-base outline-none border-b-2 border-primary/50 pb-0.5"
               />
             ) : (
-              <span onClick={() => setIsEditing(true)} className="text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-semibold" style={{ textShadow: isTop3 ? "0 0 20px rgba(14,165,195,0.1)" : undefined }}>
+              <span onClick={() => setIsEditing(true)} className="text-sm sm:text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-semibold" style={{ textShadow: isTop3 ? "0 0 20px rgba(14,165,195,0.1)" : undefined }}>
                 {task.title}
               </span>
             )}
@@ -400,7 +400,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           {task.project ? (
             <motion.span
               whileHover={{ scale: 1.08, y: -1 }}
-              className="text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0 cursor-default relative overflow-hidden"
+              className="text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg flex-shrink-0 cursor-default relative overflow-hidden hidden sm:inline-flex"
               style={{
                 background: `linear-gradient(135deg, ${task.project.color}20, ${task.project.color}08)`,
                 color: task.project.color,
@@ -411,7 +411,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
               {task.project.name}
             </motion.span>
           ) : (
-            <span className="text-xs font-medium px-2.5 py-1 rounded-lg flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/30">
+            <span className="text-[10px] sm:text-xs font-medium px-2 sm:px-2.5 py-1 rounded-lg flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/30 hidden sm:inline-flex">
               Sem projeto
             </span>
           )}
@@ -419,7 +419,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           {task.deadline && (
             <motion.span
               whileHover={{ scale: 1.05 }}
-              className={`text-xs font-mono flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg ${
+              className={`text-[10px] sm:text-xs font-mono flex-shrink-0 items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg hidden sm:flex ${
                 isOverdue
                   ? "text-destructive bg-destructive/10 border border-destructive/20"
                   : daysUntilDeadline !== null && daysUntilDeadline <= 2
@@ -429,10 +429,10 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
             >
               {isOverdue ? (
                 <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 0.5, repeat: Infinity }}>
-                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <AlertTriangle className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
                 </motion.div>
-              ) : <Clock className="w-3.5 h-3.5" />}
-              {isOverdue && <span className="text-[10px] font-bold mr-1">Atrasado</span>}
+              ) : <Clock className="w-3 sm:w-3.5 h-3 sm:h-3.5" />}
+              {isOverdue && <span className="text-[9px] sm:text-[10px] font-bold mr-1">Atrasado</span>}
               {new Date(task.deadline).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
             </motion.span>
           )}
@@ -440,7 +440,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           <motion.button
             onClick={handleExpand}
             whileHover={{ scale: 1.15, backgroundColor: "rgba(14,165,195,0.08)" }}
-            className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg"
+            className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg"
           >
             <motion.div animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
               <ChevronRight className="w-4 h-4" />
@@ -450,7 +450,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           <motion.button
             onClick={handleDelete}
             whileHover={{ scale: 1.15, backgroundColor: "rgba(239,68,68,0.08)" }}
-            className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100"
+            className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100"
           >
             <Trash2 className="w-4 h-4" />
           </motion.button>
@@ -466,7 +466,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               className="overflow-hidden"
             >
-              <div className="px-5 pb-5 pt-2 ml-[76px] border-t border-border/15 relative">
+              <div className="px-3 sm:px-5 pb-5 pt-2 ml-0 sm:ml-[76px] border-t border-border/15 relative">
                     <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent pointer-events-none" />
 
                     {/* Description */}

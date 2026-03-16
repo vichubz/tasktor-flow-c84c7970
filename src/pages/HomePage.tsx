@@ -36,26 +36,26 @@ const HomePage = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
-        className="absolute top-6 right-8 text-right"
+        className="absolute top-4 right-4 sm:top-6 sm:right-8 text-right"
         style={{ zIndex: 10 }}
       >
-        <div className="font-mono text-sm text-white/40 tracking-wider">
+        <div className="font-mono text-xs sm:text-sm text-white/40 tracking-wider">
           {hours}
           <span className="animate-pulse">:</span>
           {minutes}
           <span className="text-white/20">:{seconds}</span>
         </div>
-        <p className="text-[11px] text-white/20 capitalize mt-0.5">{dateStr}</p>
+        <p className="text-[10px] sm:text-[11px] text-white/20 capitalize mt-0.5 hidden sm:block">{dateStr}</p>
       </motion.div>
 
       {/* ═══ CENTRAL CONTENT ═══ */}
-      <div className="relative flex flex-col items-center text-center px-6 max-w-2xl" style={{ zIndex: 10 }}>
+      <div className="relative flex flex-col items-center text-center px-4 sm:px-6 max-w-2xl" style={{ zIndex: 10 }}>
         {/* Greeting */}
         <motion.p
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.8 }}
-          className="text-lg text-white/60 font-display mb-8"
+          className="text-base sm:text-lg text-white/60 font-display mb-6 sm:mb-8"
         >
           Bem-vindo de volta, <span className="text-white/80 font-semibold">{profile?.name || "Usuário"}</span>
         </motion.p>
@@ -70,7 +70,7 @@ const HomePage = () => {
           <img
             src={logoCompleto}
             alt="Tasktor"
-            className="h-20 md:h-24 object-contain drop-shadow-[0_0_40px_rgba(14,165,195,0.3)]"
+            className="h-16 sm:h-20 md:h-24 object-contain drop-shadow-[0_0_40px_rgba(14,165,195,0.3)]"
           />
         </motion.div>
 
@@ -79,7 +79,7 @@ const HomePage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 1 }}
-          className="mb-12"
+          className="mb-8 sm:mb-12"
         >
           <p className="text-[10px] uppercase tracking-[0.35em] text-white/25 font-mono">
             Produtividade Premium
@@ -91,9 +91,9 @@ const HomePage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1, duration: 0.8 }}
-          className="mb-14"
+          className="mb-10 sm:mb-14"
         >
-          <p className="text-xl md:text-2xl text-white/70 font-display font-medium leading-relaxed italic max-w-lg mx-auto">
+          <p className="text-lg sm:text-xl md:text-2xl text-white/70 font-display font-medium leading-relaxed italic max-w-lg mx-auto">
             "Discipline is choosing between what you want now and what you want most."
           </p>
           <p className="text-sm text-white/30 mt-4 font-body">— Abraham Lincoln</p>
@@ -107,7 +107,7 @@ const HomePage = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => navigate("/dashboard")}
-          className="relative group px-10 py-4 rounded-2xl font-display font-bold text-lg text-white overflow-hidden"
+          className="relative group px-8 sm:px-10 py-3 sm:py-4 rounded-2xl font-display font-bold text-base sm:text-lg text-white overflow-hidden"
           style={{
             background: "linear-gradient(135deg, hsl(192 80% 40%), hsl(172 66% 45%))",
             boxShadow: "0 0 40px rgba(14,165,195,0.35), 0 8px 32px rgba(0,0,0,0.4)",

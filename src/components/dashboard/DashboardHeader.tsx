@@ -40,23 +40,23 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
       {/* Bottom gradient border */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
-      <div className="glass px-4 py-3 relative z-10 border-0" style={{ backdropFilter: "blur(32px)" }}>
+      <div className="glass px-3 sm:px-4 py-3 relative z-10 border-0" style={{ backdropFilter: "blur(32px)" }}>
         {/* Row 1: Clock + Completed + History */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="flex items-center justify-between mb-3"
+          className="flex items-center justify-between mb-3 gap-2"
         >
           <DigitalClock />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Completed today */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               whileHover={{ scale: 1.04, y: -2 }}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 cursor-default stat-card"
+              className="flex items-center gap-1.5 sm:gap-2 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 cursor-default stat-card"
             >
               <div className="w-7 h-7 rounded-md flex items-center justify-center"
                 style={{ background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05))" }}>

@@ -22,13 +22,13 @@ const DigitalClock = memo(() => {
   return (
     <div className="flex flex-col">
       <div className="flex items-baseline gap-0.5">
-        <div className="flex gap-1">
+        <div className="flex gap-0.5 sm:gap-1">
           {hours.split("").map((digit, i) => (
             <motion.span
               key={`h-${i}-${digit}`}
               initial={{ y: -8, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              className="font-display text-3xl font-extrabold inline-block gradient-text"
+              className="font-display text-xl sm:text-3xl font-extrabold inline-block gradient-text"
               style={{ textShadow: "0 0 20px rgba(14, 165, 195, 0.3)" }}
             >
               {digit}
@@ -39,18 +39,18 @@ const DigitalClock = memo(() => {
         <motion.span
           animate={{ opacity: [1, 0.3, 1] }}
           transition={{ duration: 1, repeat: Infinity }}
-          className="text-2xl font-bold text-primary mx-0.5"
+          className="text-lg sm:text-2xl font-bold text-primary mx-0.5"
         >
           :
         </motion.span>
 
-        <div className="flex gap-1">
+        <div className="flex gap-0.5 sm:gap-1">
           {minutes.split("").map((digit, i) => (
             <motion.span
               key={`m-${i}-${digit}`}
               initial={{ y: -8, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              className="font-display text-3xl font-extrabold inline-block gradient-text"
+              className="font-display text-xl sm:text-3xl font-extrabold inline-block gradient-text"
               style={{ textShadow: "0 0 20px rgba(14, 165, 195, 0.3)" }}
             >
               {digit}
@@ -58,11 +58,11 @@ const DigitalClock = memo(() => {
           ))}
         </div>
 
-        <span className="font-mono text-base text-muted-foreground ml-1.5">
+        <span className="font-mono text-xs sm:text-base text-muted-foreground ml-1 sm:ml-1.5">
           {seconds}
         </span>
       </div>
-      <span className="text-xs text-muted-foreground capitalize font-body mt-0.5">{dateStr}</span>
+      <span className="text-[10px] sm:text-xs text-muted-foreground capitalize font-body mt-0.5 hidden sm:block">{dateStr}</span>
     </div>
   );
 });
