@@ -190,7 +190,7 @@ const MeetingsAIPage = () => {
     setHistory(h => h.map(x => x.id === id ? { ...x, title: editingTitle.trim() } : x));
     setEditingId(null);
     const { error } = await supabase.from("meeting_summaries").update({ title: editingTitle.trim() }).eq("id", id);
-    if (error) { toast.error("Failed to save title"); setHistory(prev); }
+    if (error) { toast.error("Falha ao salvar título"); setHistory(prev); }
   };
 
   const handleCancelEdit = (e: React.MouseEvent) => {
