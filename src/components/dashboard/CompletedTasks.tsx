@@ -8,7 +8,11 @@ import { toast } from "sonner";
 
 type Task = Tables<"tasks"> & { project?: Tables<"projects"> };
 
-const CompletedTasks = () => {
+interface CompletedTasksProps {
+  onTaskRestored?: () => void;
+}
+
+const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
   const { user } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
