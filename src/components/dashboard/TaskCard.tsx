@@ -309,8 +309,6 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
               isTop3 ? "text-primary-foreground" : "bg-secondary/60 text-muted-foreground"
             }`}
             style={isTop3 ? { background: "var(--gradient-primary)", boxShadow: "0 0 16px rgba(14,165,195,0.3)" } : {}}
-            }`}
-            style={isTop3 ? { background: "var(--gradient-primary)" } : {}}
           >
             {isTop3 && (
               <motion.div
