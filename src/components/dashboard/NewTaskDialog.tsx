@@ -77,9 +77,9 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
     setProjectId("");
     setDeadline(undefined);
     setSubtasks([]);
+    await onCreated();
     setLoading(false);
     onOpenChange(false);
-    onCreated();
   };
 
   const addSubtask = () => {

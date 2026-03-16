@@ -617,8 +617,6 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
                 </motion.div>
               )}
             </AnimatePresence>
-          </>
-        )}
       </motion.div>
     </AnimatePresence>
   );
