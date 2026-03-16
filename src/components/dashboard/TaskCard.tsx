@@ -19,7 +19,6 @@ type Project = Tables<"projects">;
 interface TaskCardProps {
   task: Task;
   index: number;
-  isTop3: boolean;
   isDragging: boolean;
   projects: Project[];
   onComplete: (id: string) => void;
