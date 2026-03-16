@@ -326,8 +326,8 @@ const Dashboard = () => {
             >
               <Sparkles className="w-10 h-10 text-primary/60" />
             </motion.div>
-            <p className="text-lg mb-2 font-display font-extrabold gradient-text">Crie seu primeiro projeto para começar</p>
-            <p className="text-sm">Use o menu lateral para gerenciar seus projetos</p>
+            <p className="text-lg mb-2 font-display font-extrabold gradient-text">Create your first project to get started</p>
+            <p className="text-sm">Use the sidebar to manage your projects</p>
           </motion.div>
         )}
 
