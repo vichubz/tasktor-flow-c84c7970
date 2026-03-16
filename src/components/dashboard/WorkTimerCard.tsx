@@ -112,7 +112,7 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
 
   const handleStart = async () => {
     if (!user || !selectedProject) {
-      if (!selectedProject) toast.error("Select a project first");
+      if (!selectedProject) toast.error("Selecione um projeto primeiro");
       return;
     }
     try {
