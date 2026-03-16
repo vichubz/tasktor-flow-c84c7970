@@ -139,7 +139,7 @@ const Dashboard = () => {
     }).eq("id", taskId);
 
     if (error) {
-      toast.error("Erro ao concluir tarefa");
+      toast.error("Failed to complete task");
       setTasks(prev);
       setTodayCompleted(p => p - 1);
     }
