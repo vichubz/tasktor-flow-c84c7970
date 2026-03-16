@@ -163,9 +163,9 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
     if (activeEntryId) {
       const { error } = await supabase.from("time_entries").update({ ended_at: new Date().toISOString(), duration_seconds: prevSeconds }).eq("id", activeEntryId);
       if (error) {
-        toast.error("Failed to save time");
+        toast.error("Falha ao salvar tempo");
       } else {
-        toast.success("Time saved!");
+        toast.success("Tempo salvo!");
       }
     }
     setActiveEntryId(null);

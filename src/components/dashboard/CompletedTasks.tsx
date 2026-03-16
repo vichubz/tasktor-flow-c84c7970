@@ -120,8 +120,8 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
     setTasks(t => t.map(x => x.id === taskId ? { ...x, title: editTitle.trim(), project_id: newProjectId } : x));
     setEditingId(null);
     const { error } = await supabase.from("tasks").update({ title: editTitle.trim(), project_id: newProjectId }).eq("id", taskId);
-    if (error) { toast.error("Failed to save"); setTasks(prev); }
-    else { toast.success("Task updated"); fetchCompleted(); }
+    if (error) { toast.error("Falha ao salvar"); setTasks(prev); }
+    else { toast.success("Task atualizada"); fetchCompleted(); }
   };
 
   return (
