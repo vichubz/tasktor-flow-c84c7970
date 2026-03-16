@@ -157,9 +157,9 @@ const Dashboard = () => {
       setTasks(prev);
       return;
     }
-    toast("Tarefa excluída", {
+    toast("Task deleted", {
       action: deletedTask ? {
-        label: "Desfazer",
+        label: "Undo",
         onClick: async () => {
           skipRealtimeRef.current = true;
           const { error: restoreError } = await supabase.from("tasks").insert({
