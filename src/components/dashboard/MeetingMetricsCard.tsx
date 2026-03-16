@@ -17,23 +17,22 @@ const MeetingMetricsCard = () => {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("meeting_logs")
-          .select("id, hours, meeting_count")
-          .eq("user_id", user.id)
-          .eq("date", today)
-          .maybeSingle();
-        if (error) throw error;
-        if (data) {
-          const totalMinutes = Math.round(Number(data.hours) * 60);
-          setHours(Math.floor(totalMinutes / 60));
-          setMinutes(totalMinutes % 60);
-          setCount(data.meeting_count);
-          setLogId(data.id);
-        }
-      } catch {
-        toast.error("Erro ao carregar reuniões");
+      const { data, error } = await supabase
+        .from("meeting_logs")
+        .select("id, hours, meeting_count")
+        .eq("user_id", user.id)
+        .eq("date", today)
+        .maybeSingle();
+      if (error) {
+        console.warn("Meeting logs load error:", error.message);
+        return;
+      }
+      if (data) {
+        const totalMinutes = Math.round(Number(data.hours) * 60);
+        setHours(Math.floor(totalMinutes / 60));
+        setMinutes(totalMinutes % 60);
+        setCount(data.meeting_count);
+        setLogId(data.id);
       }
     };
     load();
