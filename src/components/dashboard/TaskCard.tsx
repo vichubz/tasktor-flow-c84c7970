@@ -439,7 +439,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                   ? "text-amber-400"
                   : "text-muted-foreground/20 hover:text-amber-400/60 opacity-0 group-hover:opacity-100"
               }`}
-              title={highlighted ? "Remove highlight" : "Highlight task"}
+              title={highlighted ? "Remover destaque" : "Destacar task"}
             >
               <Star className={`w-3.5 h-3.5 ${highlighted ? "fill-amber-400" : ""}`} />
             </motion.button>
