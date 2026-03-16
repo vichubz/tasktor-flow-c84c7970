@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Trash2, GripVertical, ChevronDown, AlertTriangle, Clock, Sparkles, Plus, X, Loader2, CalendarIcon } from "lucide-react";
+import { Check, Trash2, GripVertical, ChevronDown, AlertTriangle, Clock, Sparkles, Plus, X, Loader2, CalendarIcon, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,6 @@ type Project = Tables<"projects">;
 interface TaskCardProps {
   task: Task;
   index: number;
-  isTop3: boolean;
   isDragging: boolean;
   projects: Project[];
   onComplete: (id: string) => void;
@@ -56,7 +55,7 @@ function getTaskAge(createdAt: string): string {
 // Cache for subtasks
 const subtaskCache = new Map<string, Tables<"subtasks">[]>();
 
-const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDelete, onUpdate, dragHandleProps }: TaskCardProps) => {
+const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onUpdate, dragHandleProps }: TaskCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
@@ -73,6 +72,13 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
   const [editingSubtaskTitle, setEditingSubtaskTitle] = useState("");
   const [showSubtaskDropdown, setShowSubtaskDropdown] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [highlighted, setHighlighted] = useState(!!(task as any).is_highlighted);
+
+  const handleToggleHighlight = async () => {
+    const newVal = !highlighted;
+    setHighlighted(newVal);
+    await supabase.from("tasks").update({ is_highlighted: newVal } as any).eq("id", task.id);
+  };
 
   const titleDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const descDebounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -264,16 +270,15 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
         }
         className={`relative overflow-visible transition-all duration-300 group ${
           isDragging ? "shadow-2xl z-50 ring-2 ring-primary/30" : ""
-        } ${isTop3 ? "electric-border" : ""}`}
+        } ${highlighted ? "task-highlighted" : ""}`}
       >
-        {/* Electric border wrapper for top 3 */}
         <div
           className="rounded-xl overflow-hidden relative"
           style={{
-            background: isTop3
-              ? "linear-gradient(145deg, rgba(14,165,195,0.08), rgba(45,190,160,0.04), rgba(8,18,22,0.85))"
+            background: highlighted
+              ? "linear-gradient(145deg, hsl(var(--primary) / 0.06), hsl(var(--accent) / 0.03), hsl(var(--card)))"
               : "var(--glass-bg)",
-            border: `1px solid ${isTop3 ? "transparent" : "rgba(14,165,195,0.08)"}`,
+            border: `1px solid ${highlighted ? "transparent" : "hsl(var(--primary) / 0.08)"}`,
             backdropFilter: "blur(20px)",
           }}
         >
@@ -318,18 +323,8 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
             {/* Position badge */}
             <motion.div
               whileHover={{ scale: 1.1 }}
-              className={`flex items-center justify-center min-w-[24px] sm:min-w-[28px] h-6 sm:h-7 rounded-md font-mono text-[10px] sm:text-xs font-bold relative overflow-hidden ${
-                isTop3 ? "text-primary-foreground" : "bg-secondary/60 text-muted-foreground"
-              }`}
-              style={isTop3 ? { background: "var(--gradient-primary)", boxShadow: "0 0 16px rgba(14,165,195,0.3)" } : {}}
+              className="flex items-center justify-center min-w-[24px] sm:min-w-[28px] h-6 sm:h-7 rounded-md font-mono text-[10px] sm:text-xs font-bold bg-secondary/60 text-muted-foreground"
             >
-              {isTop3 && (
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                  animate={{ x: ["-200%", "200%"] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                />
-              )}
               <span className="relative z-10">#{index + 1}</span>
             </motion.div>
 
@@ -359,7 +354,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
                   className="w-full bg-transparent text-foreground text-base font-bold outline-none border-b-2 border-primary/50 pb-0.5"
                 />
               ) : (
-                <span onClick={() => setIsEditing(true)} className="text-sm sm:text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-bold" style={{ textShadow: isTop3 ? "0 0 20px rgba(14,165,195,0.1)" : undefined }}>
+                <span onClick={() => setIsEditing(true)} className="text-sm sm:text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-bold">
                   {task.title}
                 </span>
               )}
@@ -435,7 +430,21 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
               <Sparkles className="w-3.5 h-3.5" />
             </motion.button>
 
-            {/* Delete button with confirmation */}
+            {/* Highlight toggle */}
+            <motion.button
+              onClick={handleToggleHighlight}
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.9 }}
+              className={`flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md transition-all ${
+                highlighted
+                  ? "text-amber-400"
+                  : "text-muted-foreground/20 hover:text-amber-400/60 opacity-0 group-hover:opacity-100"
+              }`}
+              title={highlighted ? "Remove highlight" : "Highlight task"}
+            >
+              <Star className={`w-3.5 h-3.5 ${highlighted ? "fill-amber-400" : ""}`} />
+            </motion.button>
+
             {confirmDelete ? (
               <motion.button
                 onClick={handleDelete}

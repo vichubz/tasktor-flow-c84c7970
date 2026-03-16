@@ -355,7 +355,6 @@ const Dashboard = () => {
                             <TaskCard
                               task={task}
                               index={index}
-                              isTop3={index < 3}
                               isDragging={snapshot.isDragging}
                               projects={projects}
                               onComplete={handleComplete}

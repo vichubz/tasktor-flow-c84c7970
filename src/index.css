@@ -198,30 +198,27 @@
     animation: pulse-glow 2s ease-in-out infinite;
   }
 
-  /* ═══ Electric Border — Top 3 Tasks ═══ */
-  .electric-border {
+  /* ═══ Highlighted Task Glow ═══ */
+  .task-highlighted {
     position: relative;
     z-index: 0;
   }
 
-  .electric-border::before {
+  .task-highlighted::before {
     content: '';
     position: absolute;
     inset: -1px;
     border-radius: 13px;
-    background: conic-gradient(
-      from var(--border-angle, 0deg),
-      hsl(var(--primary) / 0.15) 0%,
-      hsl(var(--primary) / 0.35) 25%,
-      hsl(var(--accent) / 0.2) 50%,
-      hsl(var(--primary) / 0.35) 75%,
-      hsl(var(--primary) / 0.15) 100%
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.25),
+      hsl(var(--accent) / 0.15),
+      hsl(var(--primary) / 0.2)
     );
-    animation: rotating-border 4s linear infinite;
     z-index: -2;
   }
 
-  .electric-border::after {
+  .task-highlighted::after {
     content: '';
     position: absolute;
     inset: 0;
