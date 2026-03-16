@@ -11,6 +11,7 @@ const HomePage = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
+  const quote = getDailyQuote();
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
