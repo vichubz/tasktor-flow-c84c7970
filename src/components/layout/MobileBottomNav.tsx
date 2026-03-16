@@ -5,11 +5,11 @@ const MobileBottomNav = () => {
   const location = useLocation();
 
   const links = [
-    { to: "/home", icon: Rocket, label: "Home" },
+    { to: "/home", icon: Rocket, label: "Início" },
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { to: "/calendar", icon: Calendar, label: "Calendar" },
-    { to: "/meetings-ai", icon: BrainCircuit, label: "Meet Agent" },
-    { to: "/meetings", icon: Video, label: "Meetings" },
+    { to: "/calendar", icon: Calendar, label: "Calendário" },
+    { to: "/meetings-ai", icon: BrainCircuit, label: "Agente IA" },
+    { to: "/meetings", icon: Video, label: "Reuniões" },
   ];
 
   return (

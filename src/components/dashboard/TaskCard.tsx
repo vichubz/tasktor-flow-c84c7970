@@ -450,7 +450,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 initial={{ scale: 0.8 }} animate={{ scale: 1 }}
                 className="text-destructive text-[10px] font-bold px-2 py-0.5 rounded-md bg-destructive/10 border border-destructive/20 flex-shrink-0"
               >
-                Confirm?
+                Confirmar?
               </motion.button>
             ) : (
               <motion.button
