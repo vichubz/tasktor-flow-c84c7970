@@ -385,3 +385,55 @@
   0%, 100% { opacity: 0.5; transform: scale(1); }
   50% { opacity: 0.8; transform: scale(1.02); }
 }
+
+/* ═══ Home Background — Mesh Gradient ═══ */
+.home-mesh-gradient {
+  background:
+    radial-gradient(ellipse 50% 50% at 20% 20%, rgba(26,5,51,0.8), transparent),
+    radial-gradient(ellipse 45% 45% at 80% 30%, rgba(12,20,69,0.7), transparent),
+    radial-gradient(ellipse 50% 50% at 60% 80%, rgba(5,26,32,0.8), transparent),
+    radial-gradient(ellipse 40% 40% at 30% 70%, rgba(14,165,195,0.05), transparent),
+    #050510;
+  background-size: 200% 200%;
+  animation: home-mesh-shift 20s ease-in-out infinite;
+}
+
+@keyframes home-mesh-shift {
+  0%   { background-position: 0% 0%; }
+  25%  { background-position: 50% 30%; }
+  50%  { background-position: 100% 60%; }
+  75%  { background-position: 30% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+/* ═══ Home Background — Floating Particles ═══ */
+.home-particle {
+  position: absolute;
+  bottom: -10px;
+  left: var(--p-left);
+  width: var(--p-size);
+  height: var(--p-size);
+  border-radius: 50%;
+  background: var(--p-color);
+  opacity: var(--p-opacity);
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: home-particle-float var(--p-duration) linear var(--p-delay) infinite;
+}
+
+@keyframes home-particle-float {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--p-opacity);
+  }
+  90% {
+    opacity: var(--p-opacity);
+  }
+  100% {
+    transform: translateY(-110vh) translateX(var(--p-drift));
+    opacity: 0;
+  }
+}
