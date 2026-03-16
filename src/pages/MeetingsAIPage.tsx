@@ -137,7 +137,7 @@ const MeetingsAIPage = () => {
       toast.success("Transcrição processada com sucesso!");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to process transcription");
+      toast.error("Falha ao processar transcrição");
     }
     setProcessing(false);
   };
