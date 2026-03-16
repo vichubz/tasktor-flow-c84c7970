@@ -102,7 +102,7 @@ const MeetingsAIPage = () => {
       );
 
       if (resp.status === 429) {
-        toast.error("Rate limit exceeded. Try again in a few minutes.");
+        toast.error("Limite de requisições excedido. Tente novamente em alguns minutos.");
         setProcessing(false);
         return;
       }
