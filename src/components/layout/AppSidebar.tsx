@@ -163,7 +163,7 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
           {/* Projects */}
           <button
             onClick={() => setShowProjects(true)}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-muted-foreground/60 hover:text-foreground/90 hover:bg-foreground/[0.04] transition-all duration-200 w-full group"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-muted-foreground/70 hover:text-foreground/90 hover:bg-foreground/[0.04] transition-all duration-200 w-full group"
           >
             <motion.div whileHover={{ scale: 1.1 }} className="flex-shrink-0">
               <FolderKanban className="w-[17px] h-[17px] group-hover:text-primary transition-colors" />
