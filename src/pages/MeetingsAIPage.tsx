@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BrainCircuit, Sparkles, Copy, ClipboardCheck, Trash2, ChevronDown, ChevronUp, Loader2, RotateCcw, FileText } from "lucide-react";
+import { BrainCircuit, Sparkles, Copy, ClipboardCheck, Trash2, ChevronDown, ChevronUp, Loader2, RotateCcw, FileText, Pencil, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
