@@ -30,7 +30,6 @@ const GoogleCalendarCard = () => {
   const [schedDate, setSchedDate] = useState(new Date().toISOString().split("T")[0]);
   const [schedStart, setSchedStart] = useState("09:00");
   const [schedEnd, setSchedEnd] = useState("10:00");
-  const [schedLink, setSchedLink] = useState("");
   const [schedDesc, setSchedDesc] = useState("");
 
   const fetchEvents = useCallback(async () => {
@@ -47,7 +46,6 @@ const GoogleCalendarCard = () => {
       setConnected(res.data.connected);
       setEvents(res.data.events || []);
     } catch {
-      // Silently handle - calendar may not be connected
       setConnected(false);
     } finally {
       setLoading(false);
@@ -63,7 +61,7 @@ const GoogleCalendarCard = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("calendar") === "connected") {
-      toast.success("Google Calendar conectado!");
+      toast.success("Google Calendar connected!");
       window.history.replaceState({}, "", "/dashboard");
       fetchEvents();
     }
@@ -81,7 +79,7 @@ const GoogleCalendarCard = () => {
       if (res.error) throw res.error;
       if (res.data?.url) window.location.href = res.data.url;
     } catch (err: any) {
-      toast.error("Erro ao conectar: " + (err.message || "tente novamente"));
+      toast.error("Connection error: " + (err.message || "try again"));
     }
   };
 
@@ -90,7 +88,7 @@ const GoogleCalendarCard = () => {
     await supabase.from("google_tokens").delete().eq("user_id", user.id);
     setConnected(false);
     setEvents([]);
-    toast.success("Google Calendar desconectado");
+    toast.success("Google Calendar disconnected");
   };
 
   const handleSchedule = async (e: React.FormEvent) => {
@@ -101,18 +99,17 @@ const GoogleCalendarCard = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
       const res = await supabase.functions.invoke("google-calendar-create-event", {
-        body: { title: schedTitle, date: schedDate, startTime: schedStart, endTime: schedEnd, description: schedDesc || undefined, meetLink: schedLink || undefined },
+        body: { title: schedTitle, date: schedDate, startTime: schedStart, endTime: schedEnd, description: schedDesc || undefined },
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.error) throw res.error;
-      toast.success("Reunião agendada!");
+      toast.success("Meeting scheduled! Google Meet link created automatically.");
       setShowSchedule(false);
       setSchedTitle("");
       setSchedDesc("");
-      setSchedLink("");
       fetchEvents();
     } catch (err: any) {
-      toast.error("Erro ao agendar: " + (err.message || "tente novamente"));
+      toast.error("Scheduling error: " + (err.message || "try again"));
     } finally {
       setScheduling(false);
     }
@@ -141,7 +138,7 @@ const GoogleCalendarCard = () => {
       >
         <Calendar className="w-4 h-4 text-primary group-hover:text-accent transition-colors" />
         <span className="text-xs font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
-          Conectar Calendar
+          Connect Calendar
         </span>
       </motion.button>
     );
@@ -159,11 +156,11 @@ const GoogleCalendarCard = () => {
             <div className="w-7 h-7 rounded-md bg-primary/15 flex items-center justify-center">
               <Calendar className="w-3.5 h-3.5 text-primary icon-pulse" />
             </div>
-            <span className="text-xs text-foreground/90 font-semibold uppercase tracking-wider">Agenda</span>
+            <span className="text-xs text-foreground/90 font-semibold uppercase tracking-wider">Calendar</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-xs font-mono font-bold text-primary neon-text-primary">{events.length}</span>
-            <span className="text-[9px] text-muted-foreground">hoje</span>
+            <span className="text-[9px] text-muted-foreground">today</span>
             <motion.button onClick={() => setShowSchedule(true)} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
               className="w-5 h-5 rounded bg-primary/15 flex items-center justify-center text-primary ml-1">
               <Plus className="w-3 h-3" />
@@ -181,7 +178,7 @@ const GoogleCalendarCard = () => {
             <>
               <span className="text-xs text-foreground font-semibold truncate flex-1">{nextEvent.title}</span>
               <span className="text-[10px] text-primary font-mono flex-shrink-0 neon-text-primary">
-                {new Date(nextEvent.start).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                {new Date(nextEvent.start).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
               </span>
               {callLink && (
                 <motion.a href={callLink} target="_blank" rel="noopener noreferrer"
@@ -193,48 +190,48 @@ const GoogleCalendarCard = () => {
               )}
             </>
           ) : (
-            <span className="text-xs text-muted-foreground/60">Sem reuniões agendadas</span>
+            <span className="text-xs text-muted-foreground/60">No upcoming meetings</span>
           )}
         </div>
       </motion.div>
 
-      {/* Schedule Dialog */}
+      {/* Schedule Dialog — no manual link field, Meet link auto-generated */}
       {showSchedule && (
         <Dialog open={showSchedule} onOpenChange={setShowSchedule}>
           <DialogContent className="bg-card/95 backdrop-blur-xl border-border/30 max-w-md">
             <DialogHeader>
-              <DialogTitle className="font-display gradient-text">Agendar Reunião</DialogTitle>
+              <DialogTitle className="font-display gradient-text">Schedule Meeting</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSchedule} className="space-y-4">
               <div className="input-glow rounded-lg">
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Título *</label>
-                <Input value={schedTitle} onChange={e => setSchedTitle(e.target.value)} placeholder="Nome da reunião" className="bg-secondary/60 border-border/30" required />
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Title *</label>
+                <Input value={schedTitle} onChange={e => setSchedTitle(e.target.value)} placeholder="Meeting name" className="bg-secondary/60 border-border/30" required />
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div className="input-glow rounded-lg">
-                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Data *</label>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Date *</label>
                   <Input type="date" value={schedDate} onChange={e => setSchedDate(e.target.value)} className="bg-secondary/60 border-border/30" required />
                 </div>
                 <div className="input-glow rounded-lg">
-                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Início *</label>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Start *</label>
                   <Input type="time" value={schedStart} onChange={e => setSchedStart(e.target.value)} className="bg-secondary/60 border-border/30" required />
                 </div>
                 <div className="input-glow rounded-lg">
-                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Fim *</label>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">End *</label>
                   <Input type="time" value={schedEnd} onChange={e => setSchedEnd(e.target.value)} className="bg-secondary/60 border-border/30" required />
                 </div>
               </div>
-              <div className="input-glow rounded-lg">
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Link da call</label>
-                <Input value={schedLink} onChange={e => setSchedLink(e.target.value)} placeholder="https://meet.google.com/..." className="bg-secondary/60 border-border/30" />
+              <div className="rounded-lg px-3 py-2 text-xs text-primary/80 flex items-center gap-2" style={{ background: "rgba(14,165,195,0.08)", border: "1px solid rgba(14,165,195,0.15)" }}>
+                <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />
+                A Google Meet link will be created automatically
               </div>
               <div className="input-glow rounded-lg">
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Descrição</label>
-                <Textarea value={schedDesc} onChange={e => setSchedDesc(e.target.value)} placeholder="Opcional" className="bg-secondary/60 border-border/30 h-20 resize-none" />
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Description</label>
+                <Textarea value={schedDesc} onChange={e => setSchedDesc(e.target.value)} placeholder="Optional" className="bg-secondary/60 border-border/30 h-20 resize-none" />
               </div>
               <Button type="submit" disabled={scheduling} className="w-full font-bold" style={{ background: "var(--gradient-primary)", boxShadow: "0 0 20px rgba(14,165,195,0.3)" }}>
                 {scheduling ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                {scheduling ? "Agendando..." : "Agendar Reunião"}
+                {scheduling ? "Scheduling..." : "Schedule Meeting"}
               </Button>
             </form>
           </DialogContent>

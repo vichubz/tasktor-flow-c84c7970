@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
 
     // Create event
     const body = await req.json();
-    const { title, date, startTime, endTime, description, meetLink } = body;
+    const { title, date, startTime, endTime, description } = body;
 
     if (!title || !date || !startTime || !endTime) {
       throw new Error("title, date, startTime, and endTime are required");
@@ -74,17 +74,26 @@ Deno.serve(async (req) => {
     const startDateTime = `${date}T${startTime}:00`;
     const endDateTime = `${date}T${endTime}:00`;
 
+    const requestId = crypto.randomUUID();
+
     const eventBody: any = {
       summary: title,
       start: { dateTime: startDateTime, timeZone: "America/Sao_Paulo" },
       end: { dateTime: endDateTime, timeZone: "America/Sao_Paulo" },
+      conferenceData: {
+        createRequest: {
+          requestId: requestId,
+          conferenceSolutionKey: {
+            type: "hangoutsMeet",
+          },
+        },
+      },
     };
 
     if (description) eventBody.description = description;
-    if (meetLink) eventBody.location = meetLink;
 
     const calendarRes = await fetch(
-      "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+      "https://www.googleapis.com/calendar/v3/calendars/primary/events?conferenceDataVersion=1",
       {
         method: "POST",
         headers: {
