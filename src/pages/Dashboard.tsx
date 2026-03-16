@@ -60,7 +60,7 @@ const Dashboard = () => {
         // Retry once after 2s on network failure
         setTimeout(() => fetchData(false), 2000);
       } else {
-        toast.error("Erro ao carregar dados. Tente recarregar a página.");
+        toast.error("Failed to load data. Please reload the page.");
         setLoading(false);
       }
     }
@@ -122,7 +122,7 @@ const Dashboard = () => {
       });
       if (error) throw error;
     } catch {
-      toast.error("Erro ao reordenar tarefas");
+      toast.error("Failed to reorder tasks");
       fetchData();
     }
   };
@@ -139,7 +139,7 @@ const Dashboard = () => {
     }).eq("id", taskId);
 
     if (error) {
-      toast.error("Erro ao concluir tarefa");
+      toast.error("Failed to complete task");
       setTasks(prev);
       setTodayCompleted(p => p - 1);
     }
@@ -153,13 +153,13 @@ const Dashboard = () => {
 
     const { error } = await supabase.from("tasks").delete().eq("id", taskId);
     if (error) {
-      toast.error("Erro ao excluir tarefa");
+      toast.error("Failed to delete task");
       setTasks(prev);
       return;
     }
-    toast("Tarefa excluída", {
+    toast("Task deleted", {
       action: deletedTask ? {
-        label: "Desfazer",
+        label: "Undo",
         onClick: async () => {
           skipRealtimeRef.current = true;
           const { error: restoreError } = await supabase.from("tasks").insert({
@@ -171,7 +171,7 @@ const Dashboard = () => {
             deadline: deletedTask.deadline,
           });
           if (!restoreError) fetchData();
-          else toast.error("Erro ao restaurar tarefa");
+          else toast.error("Failed to restore task");
         },
       } : undefined,
       duration: 5000,
@@ -215,7 +215,7 @@ const Dashboard = () => {
           <div className="flex items-center gap-3">
             <h2 className="text-lg sm:text-xl font-extrabold text-tight font-display gradient-text flex items-center gap-2">
               <Zap className="w-4 sm:w-5 h-4 sm:h-5 text-primary" />
-              Tarefas
+              Tasks
             </h2>
             <motion.span
               key={filteredTasks.length}
@@ -226,17 +226,17 @@ const Dashboard = () => {
                 border: "1px solid rgba(14,165,195,0.1)",
               }}
             >
-              {filteredTasks.length} pendentes
+              {filteredTasks.length} pending
             </motion.span>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <Select value={filterProject} onValueChange={setFilterProject}>
               <SelectTrigger className="flex-1 sm:flex-none sm:w-44 bg-secondary/40 border-border/30 h-9 backdrop-blur-sm hover:border-primary/30 transition-colors text-xs sm:text-sm">
                 <Filter className="w-3.5 h-3.5 mr-1.5 sm:mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Filtrar" />
+                <SelectValue placeholder="Filter" />
               </SelectTrigger>
               <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
-                <SelectItem value="all">Todos os projetos</SelectItem>
+                <SelectItem value="all">All projects</SelectItem>
                 {projects.map(p => (
                   <SelectItem key={p.id} value={p.id}>
                     <span className="flex items-center gap-2">
@@ -262,8 +262,8 @@ const Dashboard = () => {
                   transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                 />
                 <Plus className="w-4 h-4 relative z-10" />
-                <span className="relative z-10 hidden sm:inline">Nova Tarefa</span>
-                <span className="relative z-10 sm:hidden">Nova</span>
+                <span className="relative z-10 hidden sm:inline">New Task</span>
+                <span className="relative z-10 sm:hidden">New</span>
                 <kbd className="relative z-10 ml-1 text-[10px] bg-white/10 px-1.5 py-0.5 rounded font-mono hidden sm:inline">N</kbd>
               </Button>
             </motion.div>
@@ -326,8 +326,8 @@ const Dashboard = () => {
             >
               <Sparkles className="w-10 h-10 text-primary/60" />
             </motion.div>
-            <p className="text-lg mb-2 font-display font-extrabold gradient-text">Crie seu primeiro projeto para começar</p>
-            <p className="text-sm">Use o menu lateral para gerenciar seus projetos</p>
+            <p className="text-lg mb-2 font-display font-extrabold gradient-text">Create your first project to get started</p>
+            <p className="text-sm">Use the sidebar to manage your projects</p>
           </motion.div>
         )}
 
@@ -388,8 +388,8 @@ const Dashboard = () => {
             >
               <Inbox className="w-10 h-10 text-success/50" />
             </motion.div>
-            <p className="text-lg font-display font-extrabold gradient-text">Nenhuma tarefa pendente</p>
-            <p className="text-sm mt-1">Clique em "Nova Tarefa" para começar</p>
+            <p className="text-lg font-display font-extrabold gradient-text">No pending tasks</p>
+            <p className="text-sm mt-1">Click "New Task" to get started</p>
           </motion.div>
         )}
 

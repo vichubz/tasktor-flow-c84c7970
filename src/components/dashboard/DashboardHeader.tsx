@@ -63,7 +63,7 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
                 <CheckCircle2 className="w-3.5 h-3.5 text-success icon-pulse" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[9px] text-foreground/60 leading-none font-medium uppercase tracking-wider">Concluídas</span>
+                <span className="text-[9px] text-foreground/60 leading-none font-medium uppercase tracking-wider">Completed</span>
                 <motion.span
                   key={todayCompleted}
                   initial={{ opacity: 0, scale: 2 }}
@@ -86,15 +86,15 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
               className="flex items-center gap-1.5 rounded-lg px-3 py-2 stat-card text-muted-foreground hover:text-foreground transition-colors"
             >
               <History className="w-4 h-4" />
-              <span className="text-xs font-semibold hidden sm:inline">Histórico</span>
+              <span className="text-xs font-semibold hidden sm:inline">History</span>
             </motion.button>
           </div>
         </motion.div>
 
-        {/* Row 2: Metric cards — symmetric grid with glow borders */}
+        {/* Row 2: Metric cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glow-card glow-card-emerald rounded-xl h-full">
-            <MeetingMetricsCard />
+            <MeetingMetricsCard projects={projects} />
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glow-card glow-card-cyan rounded-xl h-full">
             <GoogleCalendarCard />
