@@ -20,6 +20,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [showProjects, setShowProjects] = useState(false);
+  const [projectsExpanded, setProjectsExpanded] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
 
   const fetchProjects = async () => {
