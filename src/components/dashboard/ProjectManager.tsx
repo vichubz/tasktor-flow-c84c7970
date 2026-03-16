@@ -21,20 +21,26 @@ import { toast } from "sonner";
 type Project = Tables<"projects">;
 
 const COLORS = [
-  // Roxos & Violetas
-  "#7C3AED", "#8B5CF6", "#6366F1", "#A855F7", "#C084FC",
-  // Azuis
-  "#3B82F6", "#2563EB", "#06B6D4", "#0EA5E9", "#38BDF8",
-  // Verdes
-  "#10B981", "#059669", "#22C55E", "#34D399", "#2DD4A0",
-  // Vermelhos & Laranjas
-  "#EF4444", "#F97316", "#FB923C", "#DC2626",
-  // Amarelos
-  "#F59E0B", "#EAB308", "#FBBF24",
-  // Rosas
-  "#EC4899", "#F472B6", "#DB2777",
-  // Neutros
-  "#6B7280", "#78716C", "#64748B",
+  "#EF4444", // vermelho
+  "#3B82F6", // azul
+  "#22C55E", // verde
+  "#F59E0B", // amarelo
+  "#8B5CF6", // roxo
+  "#06B6D4", // ciano
+  "#F97316", // laranja
+  "#EC4899", // rosa
+  "#14B8A6", // teal
+  "#6366F1", // índigo
+  "#84CC16", // lima
+  "#DC2626", // vermelho escuro
+  "#0EA5E9", // azul claro
+  "#A855F7", // violeta
+  "#D946EF", // magenta
+  "#64748B", // cinza
+  "#78350F", // marrom
+  "#065F46", // verde escuro
+  "#1E3A5F", // azul marinho
+  "#BE185D", // rosa escuro
 ];
 
 interface ProjectManagerProps {
