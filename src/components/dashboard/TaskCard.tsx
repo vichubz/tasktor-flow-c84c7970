@@ -249,12 +249,12 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
         }
         className={`relative rounded-xl overflow-hidden transition-all duration-300 group ${
           isDragging ? "shadow-2xl z-50 ring-2 ring-primary/30" : ""
-        } ${isTop3 ? "top3-card" : ""}`}
+        } ${isTop3 ? "top3-card" : "task-card-hover"}`}
         style={{
           background: isTop3
             ? "linear-gradient(145deg, rgba(14,165,195,0.08), rgba(45,190,160,0.04), rgba(8,18,22,0.85))"
             : "var(--glass-bg)",
-          border: `1px solid ${isTop3 ? "transparent" : "var(--glass-border)"}`,
+          border: `1px solid ${isTop3 ? "transparent" : "rgba(14,165,195,0.08)"}`,
           backdropFilter: "blur(20px)",
         }}
       >
