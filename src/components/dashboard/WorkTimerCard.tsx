@@ -151,9 +151,9 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
     pausedSecondsRef.current = seconds;
     if (activeEntryId) {
       const { error } = await supabase.from("time_entries").update({ duration_seconds: seconds }).eq("id", activeEntryId);
-      if (error) toast.error("Failed to pause timer");
+      if (error) toast.error("Falha ao pausar timer");
     }
-    toast("Timer paused", { icon: "⏸️" });
+    toast("Timer pausado", { icon: "⏸️" });
   };
 
   const handleStop = async () => {
