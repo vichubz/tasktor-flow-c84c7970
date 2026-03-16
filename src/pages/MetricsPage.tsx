@@ -212,7 +212,7 @@ const MetricsPage = () => {
               </div>
             </div>
           ) : (
-            <div className="h-[220px] flex items-center justify-center text-muted-foreground text-sm">Sem dados de tempo</div>
+            <div className="h-[180px] flex items-center justify-center text-muted-foreground text-sm">Sem dados de tempo</div>
           )}
         </motion.div>
       </div>
