@@ -254,7 +254,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           background: isTop3
             ? "linear-gradient(145deg, rgba(14,165,195,0.08), rgba(45,190,160,0.04), rgba(8,18,22,0.85))"
             : "var(--glass-bg)",
-          border: `1px solid ${isTop3 ? "rgba(14,165,195,0.15)" : "var(--glass-border)"}`,
+          border: `1px solid ${isTop3 ? "transparent" : "var(--glass-border)"}`,
           backdropFilter: "blur(20px)",
         }}
       >
@@ -299,7 +299,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
             className="flex-shrink-0 cursor-grab touch-none active:cursor-grabbing"
             title="Arrastar tarefa"
           >
-            <GripVertical className="w-5 h-5 text-muted-foreground/20 hover:text-muted-foreground/50 transition-colors" />
+            <GripVertical className="w-5 h-5 text-muted-foreground/20 hover:text-muted-foreground/60 transition-colors" />
           </div>
 
           {/* Position badge */}
@@ -308,7 +308,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
             className={`flex items-center justify-center min-w-[36px] h-9 rounded-lg font-mono text-sm font-bold relative overflow-hidden ${
               isTop3 ? "text-primary-foreground" : "bg-secondary/60 text-muted-foreground"
             }`}
-            style={isTop3 ? { background: "var(--gradient-primary)" } : {}}
+            style={isTop3 ? { background: "var(--gradient-primary)", boxShadow: "0 0 16px rgba(14,165,195,0.3)" } : {}}
           >
             {isTop3 && (
               <motion.div
@@ -354,7 +354,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
                 className="w-full bg-transparent text-foreground text-base outline-none border-b-2 border-primary/50 pb-0.5"
               />
             ) : (
-              <span onClick={() => setIsEditing(true)} className="text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-semibold">
+              <span onClick={() => setIsEditing(true)} className="text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-semibold" style={{ textShadow: isTop3 ? "0 0 20px rgba(14,165,195,0.1)" : undefined }}>
                 {task.title}
               </span>
             )}

@@ -32,29 +32,38 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
       />
 
       {/* Dot pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
+      <div className="absolute inset-0 opacity-[0.04]" style={{
         backgroundImage: "radial-gradient(circle, hsl(var(--primary)) 1px, transparent 1px)",
         backgroundSize: "20px 20px",
       }} />
 
-      <div className="glass px-4 py-3 relative z-10 border-0">
+      {/* Bottom gradient border */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+
+      <div className="glass px-4 py-3 relative z-10 border-0" style={{ backdropFilter: "blur(32px)" }}>
         {/* Row 1: Clock + Completed + History */}
-        <div className="flex items-center justify-between mb-3">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex items-center justify-between mb-3"
+        >
           <DigitalClock />
           <div className="flex items-center gap-3">
             {/* Completed today */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.04 }}
+              transition={{ delay: 0.1 }}
+              whileHover={{ scale: 1.04, y: -2 }}
               className="flex items-center gap-2 rounded-lg px-3 py-2 cursor-default stat-card"
             >
               <div className="w-7 h-7 rounded-md flex items-center justify-center"
                 style={{ background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05))" }}>
-                <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-success icon-pulse" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[9px] text-muted-foreground leading-none font-medium uppercase tracking-wider">Concluídas</span>
+                <span className="text-[9px] text-foreground/60 leading-none font-medium uppercase tracking-wider">Concluídas</span>
                 <motion.span
                   key={todayCompleted}
                   initial={{ opacity: 0, scale: 2 }}
@@ -69,7 +78,10 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
             {/* History button */}
             <motion.button
               onClick={() => setShowHistory(true)}
-              whileHover={{ scale: 1.08 }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              whileHover={{ scale: 1.08, y: -1 }}
               whileTap={{ scale: 0.95 }}
               className="flex items-center gap-1.5 rounded-lg px-3 py-2 stat-card text-muted-foreground hover:text-foreground transition-colors"
             >
@@ -77,13 +89,19 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
               <span className="text-xs font-semibold hidden sm:inline">Histórico</span>
             </motion.button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Row 2: Metric cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <MeetingMetricsCard />
-          <GoogleCalendarCard />
-          <WorkTimerCard projects={projects} />
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <MeetingMetricsCard />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+            <GoogleCalendarCard />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <WorkTimerCard projects={projects} />
+          </motion.div>
         </div>
       </div>
 

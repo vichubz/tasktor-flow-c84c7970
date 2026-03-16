@@ -36,7 +36,6 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
   const startedAtRef = useRef<string | null>(null);
   const secondsRef = useRef(0);
 
-  // Keep ref in sync with state
   useEffect(() => { secondsRef.current = seconds; }, [seconds]);
 
   const today = new Date().toISOString().split("T")[0];
@@ -96,7 +95,6 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
     return () => clearInterval(interval);
   }, [isRunning]);
 
-  // Sync interval — created once when isRunning changes, reads from ref
   useEffect(() => {
     if (!isRunning || !activeEntryId) {
       if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
@@ -182,22 +180,19 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-      className={`stat-card rounded-xl px-4 py-3 flex flex-col gap-2 card-lift ${isRunning ? "animate-pulse-glow" : ""}`}
+      whileHover={{ y: -2 }}
+      className={`stat-card-timer rounded-xl px-4 py-3 flex flex-col gap-2 card-lift ${isRunning ? "animate-pulse-glow" : ""}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="relative">
-            <div className="w-7 h-7 rounded-md bg-primary/15 flex items-center justify-center">
-              <Timer className="w-3.5 h-3.5 text-primary" />
+            <div className="w-7 h-7 rounded-md bg-[rgba(124,58,237,0.15)] flex items-center justify-center">
+              <Timer className="w-3.5 h-3.5 text-[#8B5CF6] icon-pulse" />
             </div>
             {isRunning && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-success animate-pulse" />}
           </div>
-          <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Timer</span>
-          {/* Sync indicator */}
+          <span className="text-xs text-foreground/70 font-semibold uppercase tracking-wider">Timer</span>
           <AnimatePresence>
             {showSync && (
               <motion.div
@@ -235,7 +230,7 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
         </Select>
 
         <span className={`font-mono text-lg font-bold min-w-[80px] text-center ${isRunning ? "neon-text-primary" : ""}`}
-          style={{ color: activeProject?.color }}>
+          style={{ color: activeProject?.color, textShadow: isRunning ? `0 0 20px ${activeProject?.color || "rgba(14,165,195,0.3)"}` : undefined }}>
           {formatTime(seconds)}
         </span>
 

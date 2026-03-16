@@ -123,7 +123,7 @@ const GoogleCalendarCard = () => {
 
   if (loading) {
     return (
-      <div className="stat-card rounded-xl px-4 py-3 flex items-center gap-2">
+      <div className="stat-card-calendar rounded-xl px-4 py-3 flex items-center gap-2">
         <Loader2 className="w-4 h-4 animate-spin text-primary" />
         <span className="text-xs text-muted-foreground">Calendar...</span>
       </div>
@@ -134,9 +134,9 @@ const GoogleCalendarCard = () => {
     return (
       <motion.button
         onClick={handleConnect}
-        whileHover={{ scale: 1.02 }}
+        whileHover={{ scale: 1.02, y: -2 }}
         whileTap={{ scale: 0.98 }}
-        className="stat-card rounded-xl px-4 py-3 flex items-center justify-center gap-2 cursor-pointer group"
+        className="stat-card-calendar rounded-xl px-4 py-3 flex items-center justify-center gap-2 cursor-pointer group"
       >
         <Calendar className="w-4 h-4 text-primary group-hover:text-accent transition-colors" />
         <span className="text-xs font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
@@ -149,18 +149,16 @@ const GoogleCalendarCard = () => {
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="stat-card rounded-xl px-4 py-3 flex flex-col gap-2 card-lift"
+        whileHover={{ y: -2 }}
+        className="stat-card-calendar rounded-xl px-4 py-3 flex flex-col gap-2 card-lift"
       >
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-md bg-primary/15 flex items-center justify-center">
-              <Calendar className="w-3.5 h-3.5 text-primary" />
+              <Calendar className="w-3.5 h-3.5 text-primary icon-pulse" />
             </div>
-            <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Agenda</span>
+            <span className="text-xs text-foreground/70 font-semibold uppercase tracking-wider">Agenda</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-xs font-mono font-bold text-primary neon-text-primary">{events.length}</span>
@@ -181,7 +179,7 @@ const GoogleCalendarCard = () => {
           {nextEvent ? (
             <>
               <span className="text-xs text-foreground font-semibold truncate flex-1">{nextEvent.title}</span>
-              <span className="text-[10px] text-primary font-mono flex-shrink-0">
+              <span className="text-[10px] text-primary font-mono flex-shrink-0 neon-text-primary">
                 {new Date(nextEvent.start).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
               </span>
               {callLink && (

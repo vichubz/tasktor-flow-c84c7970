@@ -116,14 +116,18 @@ const MetricsPage = () => {
     background: "hsl(200 22% 7% / 0.95)",
     border: "1px solid hsl(200 12% 14%)",
     borderRadius: "10px",
-    color: "hsl(185 30% 95%)",
+    color: "hsl(210 40% 98%)",
     boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(14, 165, 195, 0.08)",
     backdropFilter: "blur(12px)",
   };
 
   return (
     <div className="flex-1 h-screen overflow-y-auto px-6 py-6">
-      <div className="flex items-center justify-between mb-8">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between mb-8"
+      >
         <h1 className="text-2xl font-bold font-display text-tight gradient-text">Métricas & Relatórios</h1>
         <Select value={period} onValueChange={setPeriod}>
           <SelectTrigger className="w-40 bg-secondary/50 border-border/50 h-9 backdrop-blur-sm">
@@ -135,7 +139,7 @@ const MetricsPage = () => {
             <SelectItem value="month">Este Mês</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-5 gap-4 mb-8">
         {statCards.map((stat, i) => (
@@ -144,20 +148,21 @@ const MetricsPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08, ease: "easeOut" }}
+            whileHover={{ y: -2 }}
             className="stat-card rounded-xl p-5 card-lift relative overflow-hidden"
           >
             <div className={`absolute inset-0 bg-gradient-to-br ${stat.glow} to-transparent opacity-50 pointer-events-none`} />
             <div className="relative z-10">
-              <stat.icon className={`w-5 h-5 ${stat.color} mb-3`} />
+              <stat.icon className={`w-5 h-5 ${stat.color} mb-3 icon-pulse`} />
               <motion.p
-                className="text-2xl font-bold text-foreground font-mono"
+                className="text-2xl font-bold text-foreground font-mono neon-text-primary"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: i * 0.08 + 0.2 }}
               >
                 {stat.value}
               </motion.p>
-              <p className="text-xs text-muted-foreground mt-1.5 font-medium">{stat.label}</p>
+              <p className="text-xs text-foreground/60 mt-1.5 font-medium uppercase tracking-wide">{stat.label}</p>
             </div>
           </motion.div>
         ))}
@@ -174,8 +179,8 @@ const MetricsPage = () => {
                   <stop offset="100%" stopColor="hsl(172 66% 45%)" />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="date" stroke="hsl(195 14% 50%)" fontSize={11} />
-              <YAxis stroke="hsl(195 14% 50%)" fontSize={11} />
+              <XAxis dataKey="date" stroke="hsl(210 15% 58%)" fontSize={11} />
+              <YAxis stroke="hsl(210 15% 58%)" fontSize={11} />
               <Tooltip contentStyle={tooltipStyle} />
               <Bar dataKey="count" fill="url(#barGrad)" radius={[6, 6, 0, 0]} />
             </BarChart>
@@ -222,8 +227,8 @@ const MetricsPage = () => {
                 <stop offset="95%" stopColor="hsl(192 80% 40%)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <XAxis dataKey="date" stroke="hsl(195 14% 50%)" fontSize={11} />
-            <YAxis stroke="hsl(195 14% 50%)" fontSize={11} />
+            <XAxis dataKey="date" stroke="hsl(210 15% 58%)" fontSize={11} />
+            <YAxis stroke="hsl(210 15% 58%)" fontSize={11} />
             <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => `${v}h`} />
             <Area type="monotone" dataKey="hours" stroke="hsl(192 80% 40%)" strokeWidth={2.5} fill="url(#colorHours)" dot={{ fill: "hsl(192 80% 40%)", strokeWidth: 0, r: 4 }} activeDot={{ r: 6, fill: "hsl(192 80% 40%)", stroke: "hsl(192 80% 60%)", strokeWidth: 2 }} />
           </AreaChart>
@@ -234,7 +239,7 @@ const MetricsPage = () => {
         <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Histórico de Tarefas</h3>
         {completedTasks.length > 0 ? (
           <div className="space-y-1">
-            <div className="grid grid-cols-4 text-xs text-muted-foreground font-medium px-3 pb-2 uppercase tracking-wider">
+            <div className="grid grid-cols-4 text-xs text-foreground/50 font-medium px-3 pb-2 uppercase tracking-wider">
               <span>Título</span><span>Projeto</span><span>Concluída em</span><span>Criada em</span>
             </div>
             {completedTasks.slice(0, 20).map((task: any, i: number) => (
