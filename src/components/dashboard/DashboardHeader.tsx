@@ -49,7 +49,7 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
           className="flex items-center justify-between mb-3 gap-2"
         >
           <DigitalClock />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Completed today */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
