@@ -176,6 +176,27 @@ const MeetingsAIPage = () => {
     if (error) { toast.error("Erro ao excluir"); setHistory(prev); }
   };
 
+  const handleStartEdit = (e: React.MouseEvent, item: MeetingSummary) => {
+    e.stopPropagation();
+    setEditingId(item.id);
+    setEditingTitle(item.title || item.client || item.objective || "Reunião sem título");
+  };
+
+  const handleSaveTitle = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!editingTitle.trim()) return;
+    const prev = [...history];
+    setHistory(h => h.map(x => x.id === id ? { ...x, title: editingTitle.trim() } : x));
+    setEditingId(null);
+    const { error } = await supabase.from("meeting_summaries").update({ title: editingTitle.trim() }).eq("id", id);
+    if (error) { toast.error("Erro ao salvar título"); setHistory(prev); }
+  };
+
+  const handleCancelEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingId(null);
+  };
+
   const handleLoadHistory = (item: MeetingSummary) => {
     setResult(item.result);
     setTranscription(item.transcription);
