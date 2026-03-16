@@ -249,14 +249,12 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
         }
         className={`relative rounded-xl overflow-hidden transition-all duration-300 group ${
           isDragging ? "shadow-2xl z-50 ring-2 ring-primary/30" : ""
-        } ${isTop3 ? "top3-card" : ""} ${confirmDelete ? "ring-2 ring-destructive/30" : ""}`}
+        } ${isTop3 ? "top3-card" : ""}`}
         style={{
-          background: confirmDelete
-            ? "linear-gradient(145deg, rgba(239,68,68,0.08), rgba(8,18,22,0.9))"
-            : isTop3
-              ? "linear-gradient(145deg, rgba(14,165,195,0.08), rgba(45,190,160,0.04), rgba(8,18,22,0.85))"
-              : "var(--glass-bg)",
-          border: `1px solid ${confirmDelete ? "rgba(239,68,68,0.2)" : isTop3 ? "rgba(14,165,195,0.15)" : "var(--glass-border)"}`,
+          background: isTop3
+            ? "linear-gradient(145deg, rgba(14,165,195,0.08), rgba(45,190,160,0.04), rgba(8,18,22,0.85))"
+            : "var(--glass-bg)",
+          border: `1px solid ${isTop3 ? "rgba(14,165,195,0.15)" : "var(--glass-border)"}`,
           backdropFilter: "blur(20px)",
         }}
       >
@@ -290,7 +288,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
 
         {/* Hover shimmer */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          className="absolute inset-0 pointer-events-none bg-gradient-to-r from-transparent via-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           style={{ transform: "skewX(-12deg)" }}
         />
 
