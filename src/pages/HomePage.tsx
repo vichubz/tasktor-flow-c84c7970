@@ -49,7 +49,7 @@ const HomePage = () => {
       </motion.div>
 
       {/* ═══ CENTRAL CONTENT ═══ */}
-      <div className="relative flex flex-col items-center text-center px-6 max-w-2xl" style={{ zIndex: 10 }}>
+      <div className="relative flex flex-col items-center text-center px-4 sm:px-6 max-w-2xl" style={{ zIndex: 10 }}>
         {/* Greeting */}
         <motion.p
           initial={{ opacity: 0, y: -10 }}
