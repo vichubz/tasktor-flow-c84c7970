@@ -435,14 +435,24 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
               <Sparkles className="w-3.5 h-3.5" />
             </motion.button>
 
-            {/* Delete button (visible on hover) */}
-            <motion.button
-              onClick={handleDelete}
-              whileHover={{ scale: 1.15, backgroundColor: "rgba(239,68,68,0.08)" }}
-              className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </motion.button>
+            {/* Delete button with confirmation */}
+            {confirmDelete ? (
+              <motion.button
+                onClick={handleDelete}
+                initial={{ scale: 0.8 }} animate={{ scale: 1 }}
+                className="text-destructive text-[10px] font-bold px-2 py-0.5 rounded-md bg-destructive/10 border border-destructive/20 flex-shrink-0"
+              >
+                Confirm?
+              </motion.button>
+            ) : (
+              <motion.button
+                onClick={handleDelete}
+                whileHover={{ scale: 1.15, backgroundColor: "rgba(239,68,68,0.08)" }}
+                className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </motion.button>
+            )}
           </div>
 
           {/* Subtask dropdown panel — appears below the card row */}

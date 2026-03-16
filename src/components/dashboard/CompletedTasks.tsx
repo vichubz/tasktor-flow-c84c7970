@@ -27,7 +27,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
   const [editProjectId, setEditProjectId] = useState<string>("none");
   const [projects, setProjects] = useState<Tables<"projects">[]>([]);
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = useMemo(() => new Date().toISOString().split("T")[0], []);
 
   const fetchCompleted = useCallback(async () => {
     if (!user) return;
