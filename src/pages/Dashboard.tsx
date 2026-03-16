@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
@@ -7,6 +7,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import TaskCard from "@/components/dashboard/TaskCard";
 import NewTaskDialog from "@/components/dashboard/NewTaskDialog";
 import CompletedTasks from "@/components/dashboard/CompletedTasks";
+import InlineTaskCreator from "@/components/dashboard/InlineTaskCreator";
 import SkeletonTaskCard from "@/components/dashboard/SkeletonTaskCard";
 import { Plus, Filter, Inbox, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -71,25 +72,20 @@ const Dashboard = () => {
     return () => document.removeEventListener("keydown", handler);
   }, []);
 
-  // Realtime — skip self-triggered events
+  // Realtime
   useEffect(() => {
     if (!user) return;
     const channel = supabase
       .channel("dashboard-tasks")
       .on("postgres_changes", { event: "*", schema: "public", table: "tasks", filter: `user_id=eq.${user.id}` }, () => {
-        if (skipRealtimeRef.current) {
-          skipRealtimeRef.current = false;
-          return;
-        }
+        if (skipRealtimeRef.current) { skipRealtimeRef.current = false; return; }
         fetchData();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user, fetchData]);
 
-  const filteredTasks = filterProject === "all"
-    ? tasks
-    : tasks.filter(t => t.project_id === filterProject);
+  const filteredTasks = filterProject === "all" ? tasks : tasks.filter(t => t.project_id === filterProject);
 
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination || !user) return;
@@ -97,7 +93,6 @@ const Dashboard = () => {
     const [reordered] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reordered);
 
-    // Only update tasks whose position actually changed
     const changes: { id: string; position: number }[] = [];
     const updatedTasks = items.map((t, i) => {
       if (t.position !== i) changes.push({ id: t.id, position: i });
@@ -139,12 +134,11 @@ const Dashboard = () => {
       toast.error("Erro ao concluir tarefa");
       setTasks(prev);
       setTodayCompleted(p => p - 1);
-    } else {
-      toast.success("Tarefa concluída! 🎉");
     }
   };
 
   const handleDelete = async (taskId: string) => {
+    const deletedTask = tasks.find(t => t.id === taskId);
     const prev = [...tasks];
     setTasks(p => p.filter(t => t.id !== taskId));
     skipRealtimeRef.current = true;
@@ -154,7 +148,23 @@ const Dashboard = () => {
       toast.error("Erro ao excluir tarefa");
       setTasks(prev);
     } else {
-      toast.success("Tarefa excluída");
+      toast("Tarefa excluída", {
+        action: deletedTask ? {
+          label: "Desfazer",
+          onClick: async () => {
+            const { error: restoreError } = await supabase.from("tasks").insert({
+              user_id: deletedTask.user_id,
+              title: deletedTask.title,
+              description: deletedTask.description,
+              project_id: deletedTask.project_id,
+              position: deletedTask.position,
+              deadline: deletedTask.deadline,
+            });
+            if (!restoreError) fetchData();
+          },
+        } : undefined,
+        duration: 5000,
+      });
     }
   };
 
@@ -177,8 +187,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-6 mt-5">
           <div className="flex items-center gap-3">
             <motion.h2
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
               className="text-xl font-extrabold text-tight font-display gradient-text flex items-center gap-2"
             >
               <Zap className="w-5 h-5 text-primary" />
@@ -186,8 +195,7 @@ const Dashboard = () => {
             </motion.h2>
             <motion.span
               key={filteredTasks.length}
-              initial={{ scale: 1.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              initial={{ scale: 1.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
               className="text-sm text-muted-foreground font-mono px-3 py-1 rounded-lg relative overflow-hidden"
               style={{
                 background: "linear-gradient(135deg, rgba(14,165,195,0.08), rgba(8,18,22,0.6))",
@@ -244,10 +252,7 @@ const Dashboard = () => {
         )}
 
         {projects.length === 0 && !loading && tasks.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            className="text-center py-20 text-muted-foreground"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-20 text-muted-foreground">
             <motion.div
               className="w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-5 relative"
               style={{
@@ -265,43 +270,46 @@ const Dashboard = () => {
         )}
 
         {!loading && (
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="tasks">
-              {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-3">
-                  {filteredTasks.map((task, index) => (
-                    <Draggable key={task.id} draggableId={task.id} index={index}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        >
-                          <TaskCard
-                            task={task}
-                            index={index}
-                            isTop3={index < 3}
-                            isDragging={snapshot.isDragging}
-                            onComplete={handleComplete}
-                            onDelete={handleDelete}
-                            onUpdate={fetchData}
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+          <>
+            {/* Inline task creator */}
+            {projects.length > 0 && (
+              <div className="mb-3">
+                <InlineTaskCreator projects={projects} onCreated={fetchData} />
+              </div>
+            )}
+
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="tasks">
+                {(provided) => (
+                  <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-3">
+                    {filteredTasks.map((task, index) => (
+                      <Draggable key={task.id} draggableId={task.id} index={index}>
+                        {(provided, snapshot) => (
+                          <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                            <TaskCard
+                              task={task}
+                              index={index}
+                              isTop3={index < 3}
+                              isDragging={snapshot.isDragging}
+                              projects={projects}
+                              onComplete={handleComplete}
+                              onDelete={handleDelete}
+                              onUpdate={fetchData}
+                            />
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          </>
         )}
 
         {!loading && filteredTasks.length === 0 && (projects.length > 0 || tasks.length > 0) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            className="text-center py-20 text-muted-foreground"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-20 text-muted-foreground">
             <motion.div
               className="w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-5"
               style={{
@@ -321,12 +329,7 @@ const Dashboard = () => {
         <CompletedTasks />
       </div>
 
-      <NewTaskDialog
-        open={showNewTask}
-        onOpenChange={setShowNewTask}
-        projects={projects}
-        onCreated={fetchData}
-      />
+      <NewTaskDialog open={showNewTask} onOpenChange={setShowNewTask} projects={projects} onCreated={fetchData} />
     </div>
   );
 };
