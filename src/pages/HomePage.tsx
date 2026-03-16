@@ -5,11 +5,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { ChevronDown, ArrowRight } from "lucide-react";
 import logoCompleto from "@/assets/logo_completo_tasktor.png";
 import HomeBackground from "@/components/home/HomeBackground";
+import { getDailyQuote } from "@/lib/quotes";
 
 const HomePage = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
+  const quote = getDailyQuote();
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -94,9 +96,9 @@ const HomePage = () => {
           className="mb-10 sm:mb-14"
         >
           <p className="text-lg sm:text-xl md:text-2xl text-white/70 font-display font-medium leading-relaxed italic max-w-lg mx-auto">
-            "Discipline is choosing between what you want now and what you want most."
+            "{quote.text}"
           </p>
-          <p className="text-sm text-white/30 mt-4 font-body">— Abraham Lincoln</p>
+          <p className="text-sm text-white/30 mt-4 font-body">— {quote.author}</p>
         </motion.div>
 
         {/* CTA Button */}
