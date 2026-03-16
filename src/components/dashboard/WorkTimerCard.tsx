@@ -141,7 +141,7 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
         toast.success("Timer iniciado!");
       }
     } catch {
-      toast.error("Failed to start timer");
+      toast.error("Falha ao iniciar timer");
     }
   };
 
