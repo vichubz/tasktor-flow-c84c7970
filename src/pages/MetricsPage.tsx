@@ -51,7 +51,7 @@ const MetricsPage = () => {
         ]);
 
         if (tasksRes.error || projectsRes.error || timeRes.error || meetingRes.error) {
-          toast.error("Failed to load metrics");
+          toast.error("Falha ao carregar métricas");
         }
         if (tasksRes.data) setCompletedTasks(tasksRes.data);
         if (projectsRes.data) setProjects(projectsRes.data);
