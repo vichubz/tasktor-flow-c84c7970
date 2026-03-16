@@ -321,7 +321,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           </motion.div>
 
           {isTop3 && (
-            <motion.div animate={{ rotate: [0, -15, 15, 0], scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+            <motion.div animate={{ rotate: [0, -15, 15, 0], scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="hidden sm:block">
               <Flame className="w-5 h-5 text-primary flex-shrink-0 drop-shadow-[0_0_8px_rgba(14,165,195,0.6)]" />
             </motion.div>
           )}
