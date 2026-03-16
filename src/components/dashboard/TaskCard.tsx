@@ -534,6 +534,18 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               <Star className={`w-3.5 h-3.5 ${highlighted ? "fill-amber-400" : ""}`} />
             </motion.button>
 
+            {/* Move to top */}
+            {index > 0 && onMoveToTop && (
+              <motion.button
+                onClick={() => onMoveToTop(task.id)}
+                whileHover={{ scale: 1.15, backgroundColor: "hsl(var(--primary) / 0.08)" }}
+                className="text-muted-foreground/20 hover:text-primary transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100"
+                title="Mover para o topo"
+              >
+                <ArrowUpToLine className="w-3.5 h-3.5" />
+              </motion.button>
+            )}
+
             {confirmDelete ? (
               <motion.button
                 onClick={handleDelete}
