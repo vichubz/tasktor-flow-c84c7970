@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Trash2, GripVertical, ChevronDown, AlertTriangle, Clock, Sparkles, Plus, X, Loader2, CalendarIcon, Star } from "lucide-react";
+import { Check, Trash2, GripVertical, ChevronDown, AlertTriangle, Clock, Sparkles, Plus, X, Loader2, CalendarIcon, Star, Copy, ClipboardPaste } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Input } from "@/components/ui/input";
@@ -53,6 +53,14 @@ function getTaskAge(createdAt: string): string {
 // Cache for subtasks
 const subtaskCache = new Map<string, Tables<"subtasks">[]>();
 
+// Module-level clipboard for subtasks
+let subtaskClipboard: { titles: string[] } | null = null;
+const clipboardListeners = new Set<() => void>();
+function setSubtaskClipboard(data: { titles: string[] } | null) {
+  subtaskClipboard = data;
+  clipboardListeners.forEach(fn => fn());
+}
+
 const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onUpdate, dragHandleProps }: TaskCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -72,6 +80,40 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [highlighted, setHighlighted] = useState(!!(task as any).is_highlighted);
   const [descExpanded, setDescExpanded] = useState(false);
+  const [hasClipboard, setHasClipboard] = useState(!!subtaskClipboard);
+  const [pastingSubtasks, setPastingSubtasks] = useState(false);
+
+  // Listen for clipboard changes
+  useEffect(() => {
+    const listener = () => setHasClipboard(!!subtaskClipboard);
+    clipboardListeners.add(listener);
+    return () => { clipboardListeners.delete(listener); };
+  }, []);
+
+  const handleCopySubtasks = () => {
+    if (subtasks.length === 0) return;
+    setSubtaskClipboard({ titles: subtasks.map(s => s.title) });
+    toast.success(`${subtasks.length} subtask(s) copiadas`);
+  };
+
+  const handlePasteSubtasks = async () => {
+    if (!subtaskClipboard || pastingSubtasks) return;
+    setPastingSubtasks(true);
+    const startPos = subtasks.length;
+    const inserts = subtaskClipboard.titles.map((title, i) => ({
+      task_id: task.id,
+      title,
+      position: startPos + i,
+    }));
+    const { data, error } = await supabase.from("subtasks").insert(inserts).select();
+    if (error) { toast.error("Falha ao colar subtasks"); }
+    else if (data) {
+      setSubtasks(prev => [...prev, ...data]);
+      subtaskCache.delete(task.id);
+      toast.success(`${data.length} subtask(s) coladas`);
+    }
+    setPastingSubtasks(false);
+  };
 
   const handleToggleHighlight = async () => {
     const newVal = !highlighted;
@@ -497,8 +539,33 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 className="overflow-hidden"
               >
                 <div className="px-3 sm:px-5 pb-3 pt-1 border-t border-border/10" style={{ background: "rgba(14,165,195,0.02)" }}>
-                  {/* Progress bar */}
+                  {/* Progress bar + copy/paste */}
                   <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <motion.button
+                        onClick={handleCopySubtasks}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all"
+                        title="Copiar subtasks"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </motion.button>
+                      {hasClipboard && (
+                        <motion.button
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          onClick={handlePasteSubtasks}
+                          disabled={pastingSubtasks}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all disabled:opacity-30"
+                          title="Colar subtasks"
+                        >
+                          {pastingSubtasks ? <Loader2 className="w-3 h-3 animate-spin" /> : <ClipboardPaste className="w-3 h-3" />}
+                        </motion.button>
+                      )}
+                    </div>
                     <div className="flex-1 h-1.5 bg-secondary/60 rounded-full overflow-hidden">
                       <motion.div
                         className="h-full rounded-full"
@@ -678,10 +745,39 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
                   {/* Subtasks in expanded view */}
                   <div className="space-y-1.5 relative z-10">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      <Sparkles className="w-3 h-3 text-primary/50" />
-                      Subtasks
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
+                        <Sparkles className="w-3 h-3 text-primary/50" />
+                        Subtasks
+                      </span>
+                      <div className="flex items-center gap-1 ml-auto">
+                        {subtasks.length > 0 && (
+                          <motion.button
+                            onClick={handleCopySubtasks}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all"
+                            title="Copiar subtasks"
+                          >
+                            <Copy className="w-3 h-3" />
+                          </motion.button>
+                        )}
+                        {hasClipboard && (
+                          <motion.button
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            onClick={handlePasteSubtasks}
+                            disabled={pastingSubtasks}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all disabled:opacity-30"
+                            title="Colar subtasks"
+                          >
+                            {pastingSubtasks ? <Loader2 className="w-3 h-3 animate-spin" /> : <ClipboardPaste className="w-3 h-3" />}
+                          </motion.button>
+                        )}
+                      </div>
+                    </div>
 
                     {loadingSubtasks && (
                       <div className="space-y-1.5">
