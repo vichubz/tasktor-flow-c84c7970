@@ -82,7 +82,7 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
           }
         }
       } catch {
-        toast.error("Erro ao carregar timer");
+        toast.error("Failed to load timer");
       }
     };
     loadActive();
@@ -112,7 +112,7 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
 
   const handleStart = async () => {
     if (!user || !selectedProject) {
-      if (!selectedProject) toast.error("Selecione um projeto primeiro");
+      if (!selectedProject) toast.error("Select a project first");
       return;
     }
     try {
@@ -138,10 +138,10 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
         pausedSecondsRef.current = 0;
         setIsRunning(true);
         setIsPaused(false);
-        toast.success("Timer iniciado!");
+        toast.success("Timer started!");
       }
     } catch {
-      toast.error("Erro ao iniciar timer");
+      toast.error("Failed to start timer");
     }
   };
 
@@ -151,9 +151,9 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
     pausedSecondsRef.current = seconds;
     if (activeEntryId) {
       const { error } = await supabase.from("time_entries").update({ duration_seconds: seconds }).eq("id", activeEntryId);
-      if (error) toast.error("Erro ao pausar timer");
+      if (error) toast.error("Failed to pause timer");
     }
-    toast("Timer pausado", { icon: "⏸️" });
+    toast("Timer paused", { icon: "⏸️" });
   };
 
   const handleStop = async () => {
@@ -163,9 +163,9 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
     if (activeEntryId) {
       const { error } = await supabase.from("time_entries").update({ ended_at: new Date().toISOString(), duration_seconds: prevSeconds }).eq("id", activeEntryId);
       if (error) {
-        toast.error("Erro ao salvar tempo");
+        toast.error("Failed to save time");
       } else {
-        toast.success("Tempo salvo!");
+        toast.success("Time saved!");
       }
     }
     setActiveEntryId(null);
@@ -207,7 +207,7 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
           </AnimatePresence>
         </div>
         <span className="text-[10px] text-muted-foreground font-mono">
-          Hoje: <span className="text-foreground font-bold">{formatDayTotal(dayTotal + (isActive ? seconds : 0))}</span>
+          Today: <span className="text-foreground font-bold">{formatDayTotal(dayTotal + (isActive ? seconds : 0))}</span>
         </span>
       </div>
 
@@ -215,7 +215,7 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
       <div className="flex items-center gap-2">
         <Select value={selectedProject} onValueChange={setSelectedProject} disabled={isActive}>
           <SelectTrigger className="flex-1 h-7 bg-secondary/50 border-border/30 text-[11px] backdrop-blur-sm">
-            <SelectValue placeholder="Projeto" />
+            <SelectValue placeholder="Project" />
           </SelectTrigger>
           <SelectContent className="bg-card/95 backdrop-blur-xl border-border/50">
             {projects.map(p => (
@@ -259,7 +259,7 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
       {isPaused && (
         <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.2, repeat: Infinity }}
           className="text-[10px] text-primary/70 font-mono font-bold tracking-wider text-center">
-          PAUSADO
+          PAUSED
         </motion.span>
       )}
     </motion.div>

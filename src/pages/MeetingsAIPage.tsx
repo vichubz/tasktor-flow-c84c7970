@@ -27,10 +27,10 @@ const generateTitle = (client: string, objective: string, transcription: string)
     const shortObj = objective.split(/\s+/).slice(0, 2).join(" ");
     return `${client} — ${shortObj}`;
   }
-  if (client) return `${client} — Reunião`;
+  if (client) return `${client} — Meeting`;
   if (objective) return objective.length > 40 ? objective.slice(0, 40) + "…" : objective;
   const words = transcription.trim().split(/\s+/).filter(w => w.length > 2).slice(0, 4);
-  return words.length > 0 ? words.join(" ") : "Reunião sem título";
+  return words.length > 0 ? words.join(" ") : "Untitled meeting";
 };
 
 const formatHistoryDate = (dateStr: string): string => {
@@ -39,9 +39,9 @@ const formatHistoryDate = (dateStr: string): string => {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const itemDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const diffDays = Math.floor((today.getTime() - itemDate.getTime()) / 86400000);
-  if (diffDays === 0) return "Hoje";
-  if (diffDays === 1) return "Ontem";
-  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 };
 
 const MeetingsAIPage = () => {
@@ -102,12 +102,12 @@ const MeetingsAIPage = () => {
       );
 
       if (resp.status === 429) {
-        toast.error("Limite de requisições excedido. Tente novamente em alguns minutos.");
+        toast.error("Rate limit exceeded. Try again in a few minutes.");
         setProcessing(false);
         return;
       }
       if (resp.status === 402) {
-        toast.error("Créditos insuficientes. Adicione créditos ao seu workspace.");
+        toast.error("Insufficient credits. Add credits to your workspace.");
         setProcessing(false);
         return;
       }
@@ -115,14 +115,13 @@ const MeetingsAIPage = () => {
       const data = await resp.json();
 
       if (!data.success) {
-        toast.error(data.error || "Erro ao processar transcrição");
+        toast.error(data.error || "Failed to process transcription");
         setProcessing(false);
         return;
       }
 
       setResult(data.result);
 
-      // Save to history
       const title = generateTitle(client, objective, transcription);
       await supabase.from("meeting_summaries").insert({
         user_id: user.id,
@@ -135,10 +134,10 @@ const MeetingsAIPage = () => {
         result: data.result,
       });
       fetchHistory();
-      toast.success("Transcrição processada com sucesso!");
+      toast.success("Transcription processed successfully!");
     } catch (err) {
       console.error(err);
-      toast.error("Erro ao processar transcrição");
+      toast.error("Failed to process transcription");
     }
     setProcessing(false);
   };
@@ -146,16 +145,18 @@ const MeetingsAIPage = () => {
   const handleCopy = async (text: string, field: string) => {
     await navigator.clipboard.writeText(text);
     setCopiedField(field);
-    toast.success("Copiado para a área de transferência!");
+    toast.success("Copied to clipboard!");
     setTimeout(() => setCopiedField(null), 2000);
   };
 
   const extractSections = (md: string) => {
     const followUpIdx = md.indexOf("# MENSAGEM DE FOLLOW-UP");
-    if (followUpIdx === -1) return { summary: md, followUp: "" };
+    const followUpIdx2 = md.indexOf("# FOLLOW-UP MESSAGE");
+    const idx = followUpIdx !== -1 ? followUpIdx : followUpIdx2;
+    if (idx === -1) return { summary: md, followUp: "" };
     return {
-      summary: md.slice(0, followUpIdx).trim(),
-      followUp: md.slice(followUpIdx).trim(),
+      summary: md.slice(0, idx).trim(),
+      followUp: md.slice(idx).trim(),
     };
   };
 
@@ -173,13 +174,13 @@ const MeetingsAIPage = () => {
     const prev = [...history];
     setHistory(h => h.filter(x => x.id !== id));
     const { error } = await supabase.from("meeting_summaries").delete().eq("id", id);
-    if (error) { toast.error("Erro ao excluir"); setHistory(prev); }
+    if (error) { toast.error("Failed to delete"); setHistory(prev); }
   };
 
   const handleStartEdit = (e: React.MouseEvent, item: MeetingSummary) => {
     e.stopPropagation();
     setEditingId(item.id);
-    setEditingTitle(item.title || item.client || item.objective || "Reunião sem título");
+    setEditingTitle(item.title || item.client || item.objective || "Untitled meeting");
   };
 
   const handleSaveTitle = async (e: React.MouseEvent, id: string) => {
@@ -189,7 +190,7 @@ const MeetingsAIPage = () => {
     setHistory(h => h.map(x => x.id === id ? { ...x, title: editingTitle.trim() } : x));
     setEditingId(null);
     const { error } = await supabase.from("meeting_summaries").update({ title: editingTitle.trim() }).eq("id", id);
-    if (error) { toast.error("Erro ao salvar título"); setHistory(prev); }
+    if (error) { toast.error("Failed to save title"); setHistory(prev); }
   };
 
   const handleCancelEdit = (e: React.MouseEvent) => {
@@ -226,8 +227,8 @@ const MeetingsAIPage = () => {
             <BrainCircuit className="w-5 h-5 text-primary-foreground" />
           </motion.div>
           <div>
-            <h1 className="text-lg sm:text-xl font-extrabold font-display gradient-text">Reuniões IA</h1>
-            <p className="text-xs text-muted-foreground/80">Cole uma transcrição e receba um resumo executivo + follow-up</p>
+            <h1 className="text-lg sm:text-xl font-extrabold font-display gradient-text">Meet Agent</h1>
+            <p className="text-xs text-muted-foreground/80">Paste a transcription and get an executive summary + follow-up</p>
           </div>
         </div>
       </motion.div>
@@ -254,7 +255,7 @@ const MeetingsAIPage = () => {
                 onClick={() => setContextOpen(!contextOpen)}
                 className="w-full flex items-center justify-between px-5 py-3.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                <span>Contexto da Reunião (opcional)</span>
+                <span>Meeting Context (optional)</span>
                 {contextOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
               <AnimatePresence>
@@ -269,7 +270,7 @@ const MeetingsAIPage = () => {
                       <Input
                         value={client}
                         onChange={e => setClient(e.target.value)}
-                        placeholder="Cliente / Projeto"
+                        placeholder="Client / Project"
                         className="bg-secondary/40 border-border/30 h-9 text-sm"
                       />
                       <Input
@@ -281,13 +282,13 @@ const MeetingsAIPage = () => {
                       <Input
                         value={participants}
                         onChange={e => setParticipants(e.target.value)}
-                        placeholder="Participantes"
+                        placeholder="Participants"
                         className="bg-secondary/40 border-border/30 h-9 text-sm"
                       />
                       <Input
                         value={objective}
                         onChange={e => setObjective(e.target.value)}
-                        placeholder="Objetivo da reunião"
+                        placeholder="Meeting objective"
                         className="bg-secondary/40 border-border/30 h-9 text-sm"
                       />
                     </div>
@@ -308,13 +309,13 @@ const MeetingsAIPage = () => {
               <textarea
                 value={transcription}
                 onChange={e => setTranscription(e.target.value)}
-                placeholder="Cole aqui a transcrição da sua reunião..."
+                placeholder="Paste your meeting transcription here..."
                 className="w-full bg-transparent text-foreground text-sm outline-none p-5 placeholder:text-muted-foreground/30 resize-y"
                 style={{ minHeight: 300 }}
                 disabled={processing}
               />
               <div className="absolute bottom-3 right-4 text-[10px] text-muted-foreground/30 font-mono">
-                {transcription.length.toLocaleString()} caracteres
+                {transcription.length.toLocaleString()} characters
               </div>
             </div>
 
@@ -332,12 +333,12 @@ const MeetingsAIPage = () => {
                 {processing ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Processando...
+                    Processing...
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-5 h-5" />
-                    Processar Transcrição
+                    Process Transcription
                   </>
                 )}
               </Button>
@@ -352,7 +353,7 @@ const MeetingsAIPage = () => {
               >
                 <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-3 flex items-center gap-2">
                   <FileText className="w-3.5 h-3.5" />
-                  Histórico
+                  History
                 </h3>
                 <div className="space-y-1">
                   {history.map((item, i) => (
@@ -395,7 +396,7 @@ const MeetingsAIPage = () => {
                         </div>
                       ) : (
                         <p className="flex-1 text-sm text-foreground/90 truncate font-semibold">
-                          {item.title || item.client || item.objective || "Reunião sem título"}
+                          {item.title || item.client || item.objective || "Untitled meeting"}
                         </p>
                       )}
                       <motion.button
@@ -449,8 +450,8 @@ const MeetingsAIPage = () => {
                   >
                     <BrainCircuit className="w-9 h-9 text-primary/40" />
                   </motion.div>
-                  <p className="text-sm text-muted-foreground/50 font-medium">Cole uma transcrição e clique em processar</p>
-                  <p className="text-xs text-muted-foreground/30 mt-1">A IA gerará um resumo executivo e uma mensagem de follow-up</p>
+                  <p className="text-sm text-muted-foreground/50 font-medium">Paste a transcription and click process</p>
+                  <p className="text-xs text-muted-foreground/30 mt-1">AI will generate an executive summary and a follow-up message</p>
                 </div>
               )}
 
@@ -459,7 +460,7 @@ const MeetingsAIPage = () => {
                 <div className="p-6 space-y-4 min-h-[500px]">
                   <div className="flex items-center gap-3 mb-6">
                     <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                    <span className="text-sm text-primary font-medium">A IA está analisando sua reunião...</span>
+                    <span className="text-sm text-primary font-medium">AI is analyzing your meeting...</span>
                   </div>
                   <Skeleton className="h-6 w-3/4" />
                   <Skeleton className="h-4 w-full" />
@@ -484,9 +485,9 @@ const MeetingsAIPage = () => {
                   <div className="sticky top-0 z-20 flex items-center gap-2 p-4 border-b border-border/15"
                     style={{ background: "hsl(var(--card) / 0.9)", backdropFilter: "blur(12px)" }}
                   >
-                    <CopyButton label="Resumo" text={summary} field="summary" copiedField={copiedField} onCopy={handleCopy} />
+                    <CopyButton label="Summary" text={summary} field="summary" copiedField={copiedField} onCopy={handleCopy} />
                     {followUp && <CopyButton label="Follow-up" text={followUp} field="followup" copiedField={copiedField} onCopy={handleCopy} />}
-                    <CopyButton label="Tudo" text={result} field="all" copiedField={copiedField} onCopy={handleCopy} />
+                    <CopyButton label="All" text={result} field="all" copiedField={copiedField} onCopy={handleCopy} />
                     <div className="flex-1" />
                     <motion.button
                       onClick={handleReset}
@@ -495,7 +496,7 @@ const MeetingsAIPage = () => {
                       className="flex items-center gap-1.5 text-xs text-muted-foreground/50 hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-foreground/[0.05] transition-all"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
-                      Nova
+                      New
                     </motion.button>
                   </div>
 
@@ -532,7 +533,7 @@ const CopyButton = ({
     }}
   >
     {copiedField === field ? <ClipboardCheck className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-    {copiedField === field ? "Copiado!" : label}
+    {copiedField === field ? "Copied!" : label}
   </motion.button>
 );
 
