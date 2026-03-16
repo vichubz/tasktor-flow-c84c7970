@@ -261,6 +261,95 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
+        {/* Scrollable project filter bar */}
+        {!loading && projects.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-4 -mx-1 relative"
+          >
+            <div className="overflow-x-auto scrollbar-hide py-1 px-1">
+              <div className="flex items-center gap-2 w-max">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setFilterProject("all")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap ${
+                    filterProject === "all"
+                      ? "text-primary-foreground shadow-lg"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  style={filterProject === "all" ? {
+                    background: "var(--gradient-primary)",
+                    boxShadow: "0 0 16px rgba(14,165,195,0.3)",
+                  } : {
+                    background: "var(--glass-bg)",
+                    border: "1px solid var(--glass-border)",
+                  }}
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Todos
+                </motion.button>
+                {projects.map((p, i) => {
+                  const isActive = filterProject === p.id;
+                  return (
+                    <motion.button
+                      key={p.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.25 + i * 0.04 }}
+                      whileHover={{ scale: 1.05, y: -1 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setFilterProject(isActive ? "all" : p.id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap relative overflow-hidden ${
+                        isActive
+                          ? "text-foreground shadow-lg"
+                          : "text-muted-foreground/70 hover:text-foreground"
+                      }`}
+                      style={isActive ? {
+                        background: `linear-gradient(135deg, ${p.color}25, ${p.color}10)`,
+                        border: `1px solid ${p.color}40`,
+                        boxShadow: `0 0 16px ${p.color}30`,
+                      } : {
+                        background: "var(--glass-bg)",
+                        border: "1px solid var(--glass-border)",
+                      }}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="project-filter-glow"
+                          className="absolute inset-0 rounded-xl -z-10"
+                          style={{ background: `${p.color}08` }}
+                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        />
+                      )}
+                      <span
+                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                        style={{
+                          backgroundColor: p.color,
+                          boxShadow: isActive ? `0 0 10px ${p.color}60` : `0 0 6px ${p.color}30`,
+                        }}
+                      />
+                      {p.name}
+                      {isActive && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="text-[10px] font-mono ml-1 px-1.5 py-0.5 rounded-md"
+                          style={{ background: `${p.color}20`, color: p.color }}
+                        >
+                          {filteredTasks.length}
+                        </motion.span>
+                      )}
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {loading && (
           <div className="space-y-3">
             {[0, 1, 2].map(i => <SkeletonTaskCard key={i} />)}
