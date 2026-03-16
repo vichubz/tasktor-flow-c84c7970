@@ -290,7 +290,7 @@ const Dashboard = () => {
                     {filteredTasks.map((task, index) => (
                       <Draggable key={task.id} draggableId={task.id} index={index}>
                         {(provided, snapshot) => (
-                          <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                          <div ref={provided.innerRef} {...provided.draggableProps}>
                             <TaskCard
                               task={task}
                               index={index}
@@ -300,6 +300,7 @@ const Dashboard = () => {
                               onComplete={handleComplete}
                               onDelete={handleDelete}
                               onUpdate={fetchData}
+                              dragHandleProps={provided.dragHandleProps}
                             />
                           </div>
                         )}
