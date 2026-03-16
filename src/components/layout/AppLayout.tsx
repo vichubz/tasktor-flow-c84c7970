@@ -21,11 +21,11 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   if (!user) return <Navigate to="/" replace />;
 
   return (
-    <div className="flex min-h-screen mesh-gradient w-full ambient-bg dot-grid">
+    <div className="flex h-dvh mesh-gradient w-full ambient-bg dot-grid overflow-hidden">
       <div className="hidden md:block">
         <AppSidebar />
       </div>
-      <div className="relative z-10 flex-1 flex flex-col gradient-line-top pb-16 md:pb-0">
+      <div className="relative z-10 flex-1 flex flex-col min-h-0 gradient-line-top pb-16 md:pb-0 overflow-hidden">
         {children}
       </div>
       <MobileBottomNav />
