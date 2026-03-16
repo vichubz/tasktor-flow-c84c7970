@@ -174,7 +174,7 @@ const MeetingsAIPage = () => {
     const prev = [...history];
     setHistory(h => h.filter(x => x.id !== id));
     const { error } = await supabase.from("meeting_summaries").delete().eq("id", id);
-    if (error) { toast.error("Failed to delete"); setHistory(prev); }
+    if (error) { toast.error("Falha ao excluir"); setHistory(prev); }
   };
 
   const handleStartEdit = (e: React.MouseEvent, item: MeetingSummary) => {
