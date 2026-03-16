@@ -171,8 +171,9 @@ const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorP
         >
           <X className="w-4 h-4" />
         </motion.button>
+        </div>
       </div>
-      <div className="px-5 pb-2">
+      <div className="px-3 sm:px-5 pb-2">
         <p className="text-[10px] text-muted-foreground/30">
           <kbd className="bg-secondary/60 px-1 py-0.5 rounded text-[9px] font-mono">Enter</kbd> criar · <kbd className="bg-secondary/60 px-1 py-0.5 rounded text-[9px] font-mono">Esc</kbd> cancelar
         </p>

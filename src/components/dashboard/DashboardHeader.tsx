@@ -56,7 +56,7 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               whileHover={{ scale: 1.04, y: -2 }}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 cursor-default stat-card"
+              className="flex items-center gap-1.5 sm:gap-2 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 cursor-default stat-card"
             >
               <div className="w-7 h-7 rounded-md flex items-center justify-center"
                 style={{ background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05))" }}>

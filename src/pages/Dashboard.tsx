@@ -201,17 +201,17 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="flex items-center justify-between mb-6 mt-5"
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 mt-4 sm:mt-5 gap-3"
         >
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-extrabold text-tight font-display gradient-text flex items-center gap-2">
-              <Zap className="w-5 h-5 text-primary" />
+            <h2 className="text-lg sm:text-xl font-extrabold text-tight font-display gradient-text flex items-center gap-2">
+              <Zap className="w-4 sm:w-5 h-4 sm:h-5 text-primary" />
               Tarefas
             </h2>
             <motion.span
               key={filteredTasks.length}
               initial={{ scale: 1.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-              className="text-sm text-muted-foreground font-mono px-3 py-1 rounded-lg relative overflow-hidden"
+              className="text-xs sm:text-sm text-muted-foreground font-mono px-2 sm:px-3 py-1 rounded-lg relative overflow-hidden"
               style={{
                 background: "linear-gradient(135deg, rgba(14,165,195,0.08), rgba(8,18,22,0.6))",
                 border: "1px solid rgba(14,165,195,0.1)",
@@ -220,11 +220,11 @@ const Dashboard = () => {
               {filteredTasks.length} pendentes
             </motion.span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <Select value={filterProject} onValueChange={setFilterProject}>
-              <SelectTrigger className="w-44 bg-secondary/40 border-border/30 h-9 backdrop-blur-sm hover:border-primary/30 transition-colors">
-                <Filter className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Filtrar projeto" />
+              <SelectTrigger className="flex-1 sm:flex-none sm:w-44 bg-secondary/40 border-border/30 h-9 backdrop-blur-sm hover:border-primary/30 transition-colors text-xs sm:text-sm">
+                <Filter className="w-3.5 h-3.5 mr-1.5 sm:mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Filtrar" />
               </SelectTrigger>
               <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
                 <SelectItem value="all">Todos os projetos</SelectItem>
@@ -241,7 +241,7 @@ const Dashboard = () => {
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               <Button
                 onClick={() => setShowNewTask(true)}
-                className="h-9 gap-2 font-bold relative overflow-hidden group"
+                className="h-9 gap-1.5 sm:gap-2 font-bold relative overflow-hidden group text-xs sm:text-sm"
                 style={{
                   background: "var(--gradient-primary)",
                   boxShadow: "0 0 20px rgba(14,165,195,0.3), 0 4px 12px rgba(0,0,0,0.3)",
@@ -253,8 +253,9 @@ const Dashboard = () => {
                   transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                 />
                 <Plus className="w-4 h-4 relative z-10" />
-                <span className="relative z-10">Nova Tarefa</span>
-                <kbd className="relative z-10 ml-1 text-[10px] bg-white/10 px-1.5 py-0.5 rounded font-mono">N</kbd>
+                <span className="relative z-10 hidden sm:inline">Nova Tarefa</span>
+                <span className="relative z-10 sm:hidden">Nova</span>
+                <kbd className="relative z-10 ml-1 text-[10px] bg-white/10 px-1.5 py-0.5 rounded font-mono hidden sm:inline">N</kbd>
               </Button>
             </motion.div>
           </div>

@@ -107,7 +107,7 @@ const HomePage = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => navigate("/dashboard")}
-          className="relative group px-10 py-4 rounded-2xl font-display font-bold text-lg text-white overflow-hidden"
+          className="relative group px-8 sm:px-10 py-3 sm:py-4 rounded-2xl font-display font-bold text-base sm:text-lg text-white overflow-hidden"
           style={{
             background: "linear-gradient(135deg, hsl(192 80% 40%), hsl(172 66% 45%))",
             boxShadow: "0 0 40px rgba(14,165,195,0.35), 0 8px 32px rgba(0,0,0,0.4)",

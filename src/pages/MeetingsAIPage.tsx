@@ -232,7 +232,7 @@ const MeetingsAIPage = () => {
         </div>
       </motion.div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
+      <div className="flex-1 overflow-y-auto px-3 sm:px-6 pb-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* LEFT: Input */}
           <motion.div

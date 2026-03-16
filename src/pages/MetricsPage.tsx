@@ -248,17 +248,17 @@ const MetricsPage = () => {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.03 }}
-                className="grid grid-cols-4 text-sm px-3 py-2.5 rounded-lg hover:bg-primary/5 transition-all group"
+                className="grid grid-cols-1 sm:grid-cols-4 text-sm px-3 py-2.5 rounded-lg hover:bg-primary/5 transition-all group gap-1 sm:gap-0"
               >
-                <span className="text-foreground truncate group-hover:text-primary transition-colors">{task.title}</span>
+                <span className="text-foreground truncate group-hover:text-primary transition-colors font-medium sm:font-normal">{task.title}</span>
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: task.project?.color, boxShadow: `0 0 6px ${task.project?.color}40` }} />
-                  <span className="text-muted-foreground truncate">{task.project?.name || "Sem projeto"}</span>
+                  <span className="text-muted-foreground truncate text-xs sm:text-sm">{task.project?.name || "Sem projeto"}</span>
                 </span>
-                <span className="text-muted-foreground font-mono text-xs">
+                <span className="text-muted-foreground font-mono text-xs hidden sm:block">
                   {task.completed_at ? new Date(task.completed_at).toLocaleDateString("pt-BR") : "—"}
                 </span>
-                <span className="text-muted-foreground font-mono text-xs">
+                <span className="text-muted-foreground font-mono text-xs hidden sm:block">
                   {new Date(task.created_at).toLocaleDateString("pt-BR")}
                 </span>
               </motion.div>
