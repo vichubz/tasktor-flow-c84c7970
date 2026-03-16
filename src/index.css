@@ -230,23 +230,23 @@
     z-index: -1;
   }
 
-  /* ═══ Logo Spin Effect ═══ */
-  .logo-spin {
-    animation: logo-slow-spin 20s linear infinite;
+  /* ═══ Logo Float Effect ═══ */
+  .logo-float {
+    animation: logo-float 3s ease-in-out infinite;
   }
 
-  .logo-icon-wrapper:hover .logo-spin {
-    animation-duration: 2s;
+  .logo-icon-wrapper:hover .logo-float {
+    animation-duration: 1.5s;
   }
 
   .logo-glow {
     animation: logo-glow-pulse 4s ease-in-out infinite;
-    background: radial-gradient(circle, hsl(var(--primary) / 0.15), transparent 70%);
+    background: radial-gradient(circle, hsl(var(--primary) / 0.2), transparent 70%);
   }
 
-  @keyframes logo-slow-spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+  @keyframes logo-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
   }
 
   @keyframes logo-glow-pulse {
