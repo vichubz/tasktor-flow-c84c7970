@@ -430,7 +430,21 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               <Sparkles className="w-3.5 h-3.5" />
             </motion.button>
 
-            {/* Delete button with confirmation */}
+            {/* Highlight toggle */}
+            <motion.button
+              onClick={handleToggleHighlight}
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.9 }}
+              className={`flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md transition-all ${
+                highlighted
+                  ? "text-amber-400"
+                  : "text-muted-foreground/20 hover:text-amber-400/60 opacity-0 group-hover:opacity-100"
+              }`}
+              title={highlighted ? "Remove highlight" : "Highlight task"}
+            >
+              <Star className={`w-3.5 h-3.5 ${highlighted ? "fill-amber-400" : ""}`} />
+            </motion.button>
+
             {confirmDelete ? (
               <motion.button
                 onClick={handleDelete}
