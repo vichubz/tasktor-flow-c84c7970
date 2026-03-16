@@ -72,6 +72,13 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   const [editingSubtaskTitle, setEditingSubtaskTitle] = useState("");
   const [showSubtaskDropdown, setShowSubtaskDropdown] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [highlighted, setHighlighted] = useState(!!(task as any).is_highlighted);
+
+  const handleToggleHighlight = async () => {
+    const newVal = !highlighted;
+    setHighlighted(newVal);
+    await supabase.from("tasks").update({ is_highlighted: newVal } as any).eq("id", task.id);
+  };
 
   const titleDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const descDebounceRef = useRef<NodeJS.Timeout | null>(null);
