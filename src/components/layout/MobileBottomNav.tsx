@@ -1,12 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { LayoutDashboard, BarChart3, Rocket, BrainCircuit, Calendar } from "lucide-react";
 
-interface MobileBottomNavProps {
-  onCalendarToggle: () => void;
-  calendarOpen: boolean;
-}
-
-const MobileBottomNav = ({ onCalendarToggle, calendarOpen }: MobileBottomNavProps) => {
+const MobileBottomNav = () => {
   const location = useLocation();
 
   const links = [
@@ -14,6 +9,7 @@ const MobileBottomNav = ({ onCalendarToggle, calendarOpen }: MobileBottomNavProp
     { to: "/dashboard", icon: LayoutDashboard, label: "Tarefas" },
     { to: "/metrics", icon: BarChart3, label: "Métricas" },
     { to: "/meetings-ai", icon: BrainCircuit, label: "IA" },
+    { to: "/calendar", icon: Calendar, label: "Agenda" },
   ];
 
   return (
