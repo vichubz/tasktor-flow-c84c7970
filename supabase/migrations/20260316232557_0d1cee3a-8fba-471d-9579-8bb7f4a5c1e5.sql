@@ -1,0 +1,1 @@
+ALTER TABLE public.tasks ADD COLUMN difficulty integer NOT NULL DEFAULT 0;

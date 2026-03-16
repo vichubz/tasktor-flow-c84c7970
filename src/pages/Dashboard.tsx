@@ -23,6 +23,7 @@ const Dashboard = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [filterProject, setFilterProject] = useState<string>("all");
+  const [filterDifficulty, setFilterDifficulty] = useState<string>("all");
   const [showNewTask, setShowNewTask] = useState(false);
   const [loading, setLoading] = useState(true);
   const [todayCompleted, setTodayCompleted] = useState(0);
@@ -93,7 +94,11 @@ const Dashboard = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user, fetchData]);
 
-  const filteredTasks = filterProject === "all" ? tasks : tasks.filter(t => t.project_id === filterProject);
+  const filteredTasks = tasks.filter(t => {
+    if (filterProject !== "all" && t.project_id !== filterProject) return false;
+    if (filterDifficulty !== "all" && (t as any).difficulty !== Number(filterDifficulty)) return false;
+    return true;
+  });
 
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination || !user) return;
@@ -245,6 +250,19 @@ const Dashboard = () => {
                     </span>
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterDifficulty} onValueChange={setFilterDifficulty}>
+              <SelectTrigger className="w-[100px] sm:w-32 bg-secondary/40 border-border/30 h-9 backdrop-blur-sm hover:border-primary/30 transition-colors text-xs sm:text-sm">
+                <Zap className="w-3.5 h-3.5 mr-1 text-muted-foreground" />
+                <SelectValue placeholder="Difficulty" />
+              </SelectTrigger>
+              <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
+                <SelectItem value="all">All levels</SelectItem>
+                <SelectItem value="0">No level</SelectItem>
+                <SelectItem value="1"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Easy</span></SelectItem>
+                <SelectItem value="2"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Medium</span></SelectItem>
+                <SelectItem value="3"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Hard</span></SelectItem>
               </SelectContent>
             </Select>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>

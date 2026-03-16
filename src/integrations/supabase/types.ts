@@ -241,6 +241,7 @@ export type Database = {
           created_at: string
           deadline: string | null
           description: string | null
+          difficulty: number
           id: string
           is_completed: boolean
           is_highlighted: boolean
@@ -254,6 +255,7 @@ export type Database = {
           created_at?: string
           deadline?: string | null
           description?: string | null
+          difficulty?: number
           id?: string
           is_completed?: boolean
           is_highlighted?: boolean
@@ -267,6 +269,7 @@ export type Database = {
           created_at?: string
           deadline?: string | null
           description?: string | null
+          difficulty?: number
           id?: string
           is_completed?: boolean
           is_highlighted?: boolean
