@@ -67,3 +67,8 @@ export function getDailyQuote(): Quote {
   const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
   return quotes[dayOfYear % quotes.length];
 }
+
+export function getRandomQuote(excludeText?: string): Quote {
+  const filtered = excludeText ? quotes.filter(q => q.text !== excludeText) : quotes;
+  return filtered[Math.floor(Math.random() * filtered.length)];
+}
