@@ -59,21 +59,15 @@ const Dashboard = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Keyboard shortcuts: N = new task modal, Cmd/Ctrl+K = inline creator
+  // Keyboard shortcut: N = inline task creator
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
       const isInput = tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable;
 
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      if ((e.key === "n" || e.key === "N") && !isInput && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
         inlineCreatorRef.current?.activate();
-        return;
-      }
-
-      if ((e.key === "n" || e.key === "N") && !isInput) {
-        e.preventDefault();
-        setShowNewTask(true);
       }
     };
     document.addEventListener("keydown", handler);
