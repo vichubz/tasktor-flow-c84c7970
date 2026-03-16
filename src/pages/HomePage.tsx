@@ -32,7 +32,7 @@ const HomePage = () => {
   });
 
   return (
-    <div className="flex-1 h-screen overflow-hidden relative flex items-center justify-center" style={{ background: "#050510" }}>
+    <div className="flex-1 h-dvh min-h-0 overflow-hidden relative flex items-center justify-center" style={{ background: "#050510" }}>
       {/* ═══ Animated Background ═══ */}
       <HomeBackground />
 
