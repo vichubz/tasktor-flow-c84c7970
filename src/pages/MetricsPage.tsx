@@ -240,7 +240,7 @@ const MetricsPage = () => {
         {completedTasks.length > 0 ? (
           <div className="space-y-1">
             <div className="hidden sm:grid grid-cols-4 text-xs text-foreground/50 font-medium px-3 pb-2 uppercase tracking-wider">
-              <span>Title</span><span>Project</span><span>Completed</span><span>Created</span>
+              <span>Título</span><span>Projeto</span><span>Concluída</span><span>Criada</span>
             </div>
             {completedTasks.slice(0, 20).map((task: any, i: number) => (
               <motion.div
