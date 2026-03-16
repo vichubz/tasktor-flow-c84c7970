@@ -53,6 +53,14 @@ function getTaskAge(createdAt: string): string {
 // Cache for subtasks
 const subtaskCache = new Map<string, Tables<"subtasks">[]>();
 
+// Module-level clipboard for subtasks
+let subtaskClipboard: { titles: string[] } | null = null;
+const clipboardListeners = new Set<() => void>();
+function setSubtaskClipboard(data: { titles: string[] } | null) {
+  subtaskClipboard = data;
+  clipboardListeners.forEach(fn => fn());
+}
+
 const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onUpdate, dragHandleProps }: TaskCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
