@@ -122,7 +122,7 @@ const MetricsPage = () => {
   };
 
   return (
-    <div className="flex-1 h-screen overflow-y-auto px-6 py-6">
+    <div className="flex-1 h-screen overflow-y-auto px-3 sm:px-6 py-4 sm:py-6">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
