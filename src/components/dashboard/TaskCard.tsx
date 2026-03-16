@@ -539,8 +539,33 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 className="overflow-hidden"
               >
                 <div className="px-3 sm:px-5 pb-3 pt-1 border-t border-border/10" style={{ background: "rgba(14,165,195,0.02)" }}>
-                  {/* Progress bar */}
+                  {/* Progress bar + copy/paste */}
                   <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <motion.button
+                        onClick={handleCopySubtasks}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all"
+                        title="Copiar subtasks"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </motion.button>
+                      {hasClipboard && (
+                        <motion.button
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          onClick={handlePasteSubtasks}
+                          disabled={pastingSubtasks}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all disabled:opacity-30"
+                          title="Colar subtasks"
+                        >
+                          {pastingSubtasks ? <Loader2 className="w-3 h-3 animate-spin" /> : <ClipboardPaste className="w-3 h-3" />}
+                        </motion.button>
+                      )}
+                    </div>
                     <div className="flex-1 h-1.5 bg-secondary/60 rounded-full overflow-hidden">
                       <motion.div
                         className="h-full rounded-full"
