@@ -198,24 +198,60 @@
     animation: pulse-glow 2s ease-in-out infinite;
   }
 
-  .top3-card {
+  /* ═══ Electric Border — Top 3 Tasks ═══ */
+  .electric-border {
     position: relative;
-    overflow: hidden;
+    z-index: 0;
   }
 
-  .top3-card::before {
+  .electric-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 14px;
+    background: conic-gradient(
+      from var(--border-angle, 0deg),
+      transparent 60%,
+      #0EA5C3 75%,
+      #2DBEA0 85%,
+      #7C3AED 95%,
+      transparent 100%
+    );
+    animation: rotating-border 3s linear infinite;
+    z-index: -2;
+  }
+
+  .electric-border::after {
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: conic-gradient(from var(--border-angle, 0deg), #0EA5C3, #2DBEA0, #7C3AED, #0EA5C3);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    animation: rotating-border 6s linear infinite;
+    border-radius: 12px;
+    background: hsl(var(--card));
+    z-index: -1;
+  }
+
+  /* ═══ Logo Spin Effect ═══ */
+  .logo-spin {
+    animation: logo-slow-spin 20s linear infinite;
+  }
+
+  .logo-icon-wrapper:hover .logo-spin {
+    animation-duration: 2s;
+  }
+
+  .logo-glow {
+    animation: logo-glow-pulse 4s ease-in-out infinite;
+    background: radial-gradient(circle, hsl(var(--primary) / 0.15), transparent 70%);
+  }
+
+  @keyframes logo-slow-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes logo-glow-pulse {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
   }
 
   .shimmer {
