@@ -195,7 +195,7 @@ const Dashboard = () => {
 
       <DashboardHeader projects={projects} todayCompleted={todayCompleted} />
 
-      <div className="flex-1 overflow-y-auto px-6 pb-6 relative z-10">
+      <div className="flex-1 overflow-y-auto px-3 sm:px-6 pb-6 relative z-10">
         {/* Task controls */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
