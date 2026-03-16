@@ -178,7 +178,7 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
                 <motion.div
                   key={p.id}
                   whileHover={{ x: 4 }}
-                  className="flex items-center gap-2.5 px-3 py-1.5 text-[12px] text-muted-foreground/50 rounded-lg hover:text-muted-foreground/80 hover:bg-foreground/[0.02] transition-all duration-200 cursor-default"
+                  className="flex items-center gap-2.5 px-3 py-1.5 text-[12px] text-muted-foreground/60 rounded-lg hover:text-muted-foreground/80 hover:bg-foreground/[0.02] transition-all duration-200 cursor-default"
                 >
                   <span
                     className="w-2 h-2 rounded-full flex-shrink-0"
