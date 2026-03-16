@@ -42,7 +42,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
         .order("completed_at", { ascending: false });
       if (error) throw error;
       if (data) setTasks(data as Task[]);
-    } catch { toast.error("Failed to load completed tasks"); }
+    } catch { toast.error("Falha ao carregar tasks concluídas"); }
     setLoading(false);
     setHasFetched(true);
   }, [user, today]);
