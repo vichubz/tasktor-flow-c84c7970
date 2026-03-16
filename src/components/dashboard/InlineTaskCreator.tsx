@@ -135,24 +135,25 @@ const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorP
           className="flex-1 bg-transparent text-foreground text-sm outline-none placeholder:text-muted-foreground/40"
           disabled={creating}
         />
-        <Select value={projectId} onValueChange={setProjectId}>
-          <SelectTrigger className="w-36 h-8 bg-secondary/40 border-border/30 text-xs">
-            <SelectValue placeholder="Projeto" />
-          </SelectTrigger>
-          <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
-            <SelectItem value="none">
-              <span className="text-muted-foreground">Sem projeto</span>
-            </SelectItem>
-            {projects.map(p => (
-              <SelectItem key={p.id} value={p.id}>
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-                  {p.name}
-                </span>
+        <div className="flex items-center gap-2">
+          <Select value={projectId} onValueChange={setProjectId}>
+            <SelectTrigger className="flex-1 sm:flex-none sm:w-36 h-8 bg-secondary/40 border-border/30 text-xs">
+              <SelectValue placeholder="Projeto" />
+            </SelectTrigger>
+            <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
+              <SelectItem value="none">
+                <span className="text-muted-foreground">Sem projeto</span>
               </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              {projects.map(p => (
+                <SelectItem key={p.id} value={p.id}>
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                    {p.name}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         <motion.button
           onClick={handleCreate}
           disabled={!title.trim() || creating}
