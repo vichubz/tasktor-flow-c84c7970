@@ -305,7 +305,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           {/* Position badge */}
           <motion.div
             whileHover={{ scale: 1.1, rotate: 3 }}
-            className={`flex items-center justify-center min-w-[36px] h-9 rounded-lg font-mono text-sm font-bold relative overflow-hidden ${
+            className={`flex items-center justify-center min-w-[28px] sm:min-w-[36px] h-7 sm:h-9 rounded-lg font-mono text-xs sm:text-sm font-bold relative overflow-hidden ${
               isTop3 ? "text-primary-foreground" : "bg-secondary/60 text-muted-foreground"
             }`}
             style={isTop3 ? { background: "var(--gradient-primary)", boxShadow: "0 0 16px rgba(14,165,195,0.3)" } : {}}
