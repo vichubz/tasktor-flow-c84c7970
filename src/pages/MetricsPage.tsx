@@ -256,7 +256,7 @@ const MetricsPage = () => {
                   <span className="text-muted-foreground truncate text-xs sm:text-sm">{task.project?.name || "Sem projeto"}</span>
                 </span>
                 <span className="text-muted-foreground font-mono text-xs hidden sm:block">
-                  {task.completed_at ? new Date(task.completed_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}
+                  {task.completed_at ? new Date(task.completed_at).toLocaleDateString("pt-BR", { month: "short", day: "numeric" }) : "—"}
                 </span>
                 <span className="text-muted-foreground font-mono text-xs hidden sm:block">
                   {new Date(task.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
