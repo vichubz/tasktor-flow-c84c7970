@@ -218,13 +218,13 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
     setShowConfetti(true);
     setCompleting(true);
     const msg = SUCCESS_MESSAGES[Math.floor(Math.random() * SUCCESS_MESSAGES.length)];
+    toast.success(msg);
     setTimeout(() => {
       onComplete(task.id);
-      toast.success(msg);
-    }, 800);
+    }, 700);
   }, [task.id, onComplete]);
 
-  // Inline delete
+  // Inline delete — immediate, no animation lock
   const handleConfirmDelete = () => {
     setConfirmDelete(false);
     onDelete(task.id);
