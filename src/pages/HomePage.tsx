@@ -70,7 +70,7 @@ const HomePage = () => {
           <img
             src={logoCompleto}
             alt="Tasktor"
-            className="h-20 md:h-24 object-contain drop-shadow-[0_0_40px_rgba(14,165,195,0.3)]"
+            className="h-16 sm:h-20 md:h-24 object-contain drop-shadow-[0_0_40px_rgba(14,165,195,0.3)]"
           />
         </motion.div>
 
