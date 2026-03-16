@@ -349,7 +349,10 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                   autoFocus value={title}
                   onChange={(e) => handleTitleChange(e.target.value)}
                   onBlur={handleTitleBlur}
-                  onKeyDown={(e) => e.key === "Enter" && handleTitleBlur()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleTitleBlur();
+                    if (e.key === "Escape") { setTitle(task.title); setIsEditing(false); }
+                  }}
                   className="w-full bg-transparent text-foreground text-base font-bold outline-none border-b-2 border-primary/50 pb-0.5"
                 />
               ) : (
@@ -604,8 +607,12 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                         autoFocus value={description}
                         onChange={(e) => handleDescChange(e.target.value)}
                         onBlur={handleDescBlur}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleDescBlur(); }
+                          if (e.key === "Escape") { setDescription(task.description || ""); setIsEditingDesc(false); }
+                        }}
                         className="w-full bg-secondary/40 text-sm text-foreground rounded-lg p-2.5 outline-none border border-primary/20 min-h-[50px] resize-none"
-                        placeholder="Add a description..."
+                        placeholder="Add a description... (Enter to save, Shift+Enter for new line)"
                       />
                     ) : (
                       <p onClick={() => setIsEditingDesc(true)} className="text-sm text-muted-foreground leading-relaxed cursor-text hover:text-foreground transition-colors min-h-[20px] p-1.5 rounded-md hover:bg-secondary/30">
