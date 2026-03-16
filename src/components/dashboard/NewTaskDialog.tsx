@@ -20,7 +20,7 @@ interface NewTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   projects: Project[];
-  onCreated: () => void;
+  onCreated: () => Promise<void>;
 }
 
 const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialogProps) => {
@@ -77,9 +77,9 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
     setProjectId("");
     setDeadline(undefined);
     setSubtasks([]);
+    await onCreated();
     setLoading(false);
     onOpenChange(false);
-    onCreated();
   };
 
   const addSubtask = () => {

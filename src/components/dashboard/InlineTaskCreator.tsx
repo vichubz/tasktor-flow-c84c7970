@@ -11,7 +11,7 @@ type Project = Tables<"projects">;
 
 interface InlineTaskCreatorProps {
   projects: Project[];
-  onCreated: () => void;
+  onCreated: () => Promise<void>;
 }
 
 export interface InlineTaskCreatorHandle {
@@ -62,7 +62,7 @@ const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorP
       toast.error("Erro ao criar tarefa");
     } else {
       toast.success("Tarefa criada!");
-      onCreated();
+      await onCreated();
     }
 
     setTitle("");
