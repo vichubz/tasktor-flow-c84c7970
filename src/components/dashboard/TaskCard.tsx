@@ -24,6 +24,7 @@ interface TaskCardProps {
   onComplete: (id: string) => void;
   onDelete: (id: string) => void;
   onUpdate: () => void;
+  dragHandleProps?: any;
 }
 
 const SUCCESS_MESSAGES = [
