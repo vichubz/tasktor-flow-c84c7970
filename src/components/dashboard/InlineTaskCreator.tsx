@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +14,11 @@ interface InlineTaskCreatorProps {
   onCreated: () => void;
 }
 
-const InlineTaskCreator = ({ projects, onCreated }: InlineTaskCreatorProps) => {
+export interface InlineTaskCreatorHandle {
+  activate: () => void;
+}
+
+const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorProps>(({ projects, onCreated }, ref) => {
   const { user } = useAuth();
   const [active, setActive] = useState(false);
   const [title, setTitle] = useState("");
