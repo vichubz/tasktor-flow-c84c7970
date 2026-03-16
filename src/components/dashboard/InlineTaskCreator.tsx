@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Plus, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -59,9 +59,9 @@ const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorP
     });
 
     if (error) {
-      toast.error("Erro ao criar tarefa");
+      toast.error("Failed to create task");
     } else {
-      toast.success("Tarefa criada!");
+      toast.success("Task created!");
       await onCreated();
     }
 
@@ -92,17 +92,17 @@ const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorP
         onClick={() => setActive(true)}
         whileHover={{ scale: 1.005 }}
         whileTap={{ scale: 0.995 }}
-        className="w-full rounded-xl px-5 py-4 flex items-center gap-3 cursor-pointer transition-all group"
+        className="w-full rounded-xl px-5 py-3 flex items-center gap-3 cursor-pointer transition-all group"
         style={{
           background: "var(--glass-bg)",
           border: "1px dashed hsl(var(--border) / 0.3)",
         }}
       >
-        <div className="w-8 h-8 rounded-full border-2 border-dashed border-muted-foreground/20 flex items-center justify-center group-hover:border-primary/40 transition-colors">
-          <Plus className="w-4 h-4 text-muted-foreground/30 group-hover:text-primary/60 transition-colors" />
+        <div className="w-7 h-7 rounded-full border-2 border-dashed border-muted-foreground/20 flex items-center justify-center group-hover:border-primary/40 transition-colors">
+          <Plus className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-primary/60 transition-colors" />
         </div>
         <span className="text-sm text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors font-medium flex-1">
-          Adicionar tarefa...
+          Add task...
         </span>
         <kbd className="text-[10px] text-muted-foreground/30 bg-secondary/60 px-1.5 py-0.5 rounded font-mono">N</kbd>
       </motion.button>
@@ -122,27 +122,27 @@ const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorP
         backdropFilter: "blur(20px)",
       }}
     >
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 px-3 sm:px-5 py-3">
-        <div className="hidden sm:flex w-8 h-8 rounded-full border-2 border-primary/30 items-center justify-center flex-shrink-0">
-          <Plus className="w-4 h-4 text-primary/50" />
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5">
+        <div className="hidden sm:flex w-7 h-7 rounded-full border-2 border-primary/30 items-center justify-center flex-shrink-0">
+          <Plus className="w-3.5 h-3.5 text-primary/50" />
         </div>
         <input
           ref={inputRef}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Título da tarefa..."
+          placeholder="Add task..."
           className="flex-1 bg-transparent text-foreground text-sm outline-none placeholder:text-muted-foreground/40"
           disabled={creating}
         />
         <div className="flex items-center gap-2">
           <Select value={projectId} onValueChange={setProjectId}>
-            <SelectTrigger className="flex-1 sm:flex-none sm:w-36 h-8 bg-secondary/40 border-border/30 text-xs">
-              <SelectValue placeholder="Projeto" />
+            <SelectTrigger className="flex-1 sm:flex-none sm:w-36 h-7 bg-secondary/40 border-border/30 text-xs">
+              <SelectValue placeholder="Project" />
             </SelectTrigger>
             <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
               <SelectItem value="none">
-                <span className="text-muted-foreground">Sem projeto</span>
+                <span className="text-muted-foreground">No project</span>
               </SelectItem>
               {projects.map(p => (
                 <SelectItem key={p.id} value={p.id}>
@@ -159,23 +159,23 @@ const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorP
           disabled={!title.trim() || creating}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary/15 text-primary hover:bg-primary/25 transition-all disabled:opacity-30 flex-shrink-0"
+          className="w-7 h-7 rounded-md flex items-center justify-center bg-primary/15 text-primary hover:bg-primary/25 transition-all disabled:opacity-30 flex-shrink-0"
         >
-          <Check className="w-4 h-4" />
+          <Check className="w-3.5 h-3.5" />
         </motion.button>
         <motion.button
           onClick={handleCancel}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all flex-shrink-0"
+          className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all flex-shrink-0"
         >
-          <X className="w-4 h-4" />
+          <X className="w-3.5 h-3.5" />
         </motion.button>
         </div>
       </div>
       <div className="px-3 sm:px-5 pb-2">
         <p className="text-[10px] text-muted-foreground/30">
-          <kbd className="bg-secondary/60 px-1 py-0.5 rounded text-[9px] font-mono">Enter</kbd> criar · <kbd className="bg-secondary/60 px-1 py-0.5 rounded text-[9px] font-mono">Esc</kbd> cancelar
+          <kbd className="bg-secondary/60 px-1 py-0.5 rounded text-[9px] font-mono">Enter</kbd> create · <kbd className="bg-secondary/60 px-1 py-0.5 rounded text-[9px] font-mono">Esc</kbd> cancel
         </p>
       </div>
     </motion.div>

@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Trash2, GripVertical, ChevronRight, Flame, AlertTriangle, Clock, Sparkles, Plus, X, Loader2, CalendarIcon } from "lucide-react";
+import { Check, Trash2, GripVertical, ChevronDown, AlertTriangle, Clock, Sparkles, Plus, X, Loader2, CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Input } from "@/components/ui/input";
@@ -29,30 +29,28 @@ interface TaskCardProps {
 }
 
 const SUCCESS_MESSAGES = [
-  "Tarefa concluída! Mandou bem! 🎉",
-  "Mais uma pra conta! Continue assim! 🚀",
-  "Feito! Você tá voando hoje! ✈️",
-  "Concluída! Foco total! 🎯",
-  "Boa! Próxima! ⚡",
+  "Task completed! Nice work! 🎉",
+  "Another one done! Keep going! 🚀",
+  "Done! You're on fire today! ✈️",
+  "Completed! Total focus! 🎯",
+  "Great! Next one! ⚡",
 ];
 
 function getTaskAge(createdAt: string): string {
   const created = new Date(createdAt);
   const now = new Date();
   const diffMs = now.getTime() - created.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
   const diffWeeks = Math.floor(diffDays / 7);
   const diffMonths = Math.floor(diffDays / 30);
 
-  if (diffDays === 0) return "Criada hoje";
-  if (diffDays === 1) return "Criada há 1 dia";
-  if (diffDays < 7) return `Criada há ${diffDays} dias`;
-  if (diffWeeks === 1) return "Criada há 1 semana";
-  if (diffWeeks < 4) return `Criada há ${diffWeeks} semanas`;
-  if (diffMonths === 1) return "Criada há 1 mês";
-  return `Criada há ${diffMonths} meses`;
+  if (diffDays === 0) return "Created today";
+  if (diffDays === 1) return "Created 1 day ago";
+  if (diffDays < 7) return `Created ${diffDays} days ago`;
+  if (diffWeeks === 1) return "Created 1 week ago";
+  if (diffWeeks < 4) return `Created ${diffWeeks} weeks ago`;
+  if (diffMonths === 1) return "Created 1 month ago";
+  return `Created ${diffMonths} months ago`;
 }
 
 // Cache for subtasks
@@ -73,10 +71,10 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
   const [loadingSubtasks, setLoadingSubtasks] = useState(false);
   const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
   const [editingSubtaskTitle, setEditingSubtaskTitle] = useState("");
+  const [showSubtaskDropdown, setShowSubtaskDropdown] = useState(false);
 
   const titleDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const descDebounceRef = useRef<NodeJS.Timeout | null>(null);
-  const subtaskDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => { setTitle(task.title); }, [task.title]);
   useEffect(() => { setDescription(task.description || ""); }, [task.description]);
@@ -95,13 +93,19 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
       const { data, error } = await supabase.from("subtasks").select("*").eq("task_id", task.id).order("position");
       if (error) throw error;
       if (data) { setSubtasks(data); subtaskCache.set(task.id, data); }
-    } catch { toast.error("Erro ao carregar subtarefas"); }
+    } catch { toast.error("Failed to load subtasks"); }
     setLoadingSubtasks(false);
   }, [task.id]);
 
   const handleExpand = () => {
     const next = !expanded;
     setExpanded(next);
+    if (next && subtasks.length === 0 && !task.subtasks?.length) fetchSubtasks();
+  };
+
+  const handleToggleSubtaskDropdown = () => {
+    const next = !showSubtaskDropdown;
+    setShowSubtaskDropdown(next);
     if (next && subtasks.length === 0 && !task.subtasks?.length) fetchSubtasks();
   };
 
@@ -156,7 +160,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
     const pid = newProjectId === "none" ? null : newProjectId;
     setSaving(true);
     const { error } = await supabase.from("tasks").update({ project_id: pid }).eq("id", task.id);
-    if (error) toast.error("Erro ao alterar projeto");
+    if (error) toast.error("Failed to change project");
     setSaving(false);
     onUpdate();
   };
@@ -166,7 +170,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
     const deadlineStr = date ? format(date, "yyyy-MM-dd") : null;
     setSaving(true);
     const { error } = await supabase.from("tasks").update({ deadline: deadlineStr }).eq("id", task.id);
-    if (error) toast.error("Erro ao alterar prazo");
+    if (error) toast.error("Failed to change deadline");
     setSaving(false);
     onUpdate();
   };
@@ -177,7 +181,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
     subtaskCache.delete(task.id);
     const { error } = await supabase.from("subtasks").update({ is_completed: !completed }).eq("id", subtaskId);
     if (error) {
-      toast.error("Erro ao atualizar subtarefa");
+      toast.error("Failed to update subtask");
       setSubtasks(prev => prev.map(s => s.id === subtaskId ? { ...s, is_completed: completed } : s));
     }
   };
@@ -187,7 +191,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
     setAddingSubtask(true);
     const position = subtasks.length;
     const { data, error } = await supabase.from("subtasks").insert({ task_id: task.id, title: newSubtaskTitle.trim(), position }).select().single();
-    if (error) { toast.error("Erro ao adicionar subtarefa"); }
+    if (error) { toast.error("Failed to add subtask"); }
     else if (data) { setSubtasks(prev => [...prev, data]); subtaskCache.delete(task.id); }
     setNewSubtaskTitle("");
     setAddingSubtask(false);
@@ -198,7 +202,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
     setSubtasks(s => s.filter(x => x.id !== subtaskId));
     subtaskCache.delete(task.id);
     const { error } = await supabase.from("subtasks").delete().eq("id", subtaskId);
-    if (error) { toast.error("Erro ao excluir subtarefa"); setSubtasks(prev); }
+    if (error) { toast.error("Failed to delete subtask"); setSubtasks(prev); }
   };
 
   const handleEditSubtask = (sub: Tables<"subtasks">) => {
@@ -249,389 +253,464 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           ? { duration: 0.7, ease: "easeInOut" }
           : { duration: 0.35, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }
         }
-        className={`relative rounded-xl overflow-hidden transition-all duration-300 group ${
+        className={`relative overflow-visible transition-all duration-300 group ${
           isDragging ? "shadow-2xl z-50 ring-2 ring-primary/30" : ""
-        } ${isTop3 ? "top3-card" : "task-card-hover"}`}
-        style={{
-          background: isTop3
-            ? "linear-gradient(145deg, rgba(14,165,195,0.08), rgba(45,190,160,0.04), rgba(8,18,22,0.85))"
-            : "var(--glass-bg)",
-          border: `1px solid ${isTop3 ? "transparent" : "rgba(14,165,195,0.08)"}`,
-          backdropFilter: "blur(20px)",
-        }}
+        } ${isTop3 ? "electric-border" : ""}`}
       >
-        {/* Full-screen confetti */}
-        {showConfetti && <ConfettiExplosion count={40} fullScreen />}
-
-        {/* Completion flash */}
-        <AnimatePresence>
-          {completing && (
-            <motion.div
-              className="absolute inset-0 z-40 pointer-events-none"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 0.4, 0] }}
-              transition={{ duration: 0.6 }}
-              style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.4), transparent)" }}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Left accent bar */}
-        <motion.div
-          className="absolute left-0 top-0 bottom-0 w-1 rounded-full"
+        {/* Electric border wrapper for top 3 */}
+        <div
+          className="rounded-xl overflow-hidden relative"
           style={{
-            background: task.project
-              ? `linear-gradient(180deg, ${projectColor}, ${projectColor}80)`
-              : "var(--gradient-primary)",
+            background: isTop3
+              ? "linear-gradient(145deg, rgba(14,165,195,0.08), rgba(45,190,160,0.04), rgba(8,18,22,0.85))"
+              : "var(--glass-bg)",
+            border: `1px solid ${isTop3 ? "transparent" : "rgba(14,165,195,0.08)"}`,
+            backdropFilter: "blur(20px)",
           }}
-          initial={{ scaleY: 0 }} animate={{ scaleY: 1 }}
-          transition={{ duration: 0.4, delay: index * 0.05 }}
-        />
+        >
+          {/* Full-screen confetti */}
+          {showConfetti && <ConfettiExplosion count={40} fullScreen />}
 
-        {/* Hover shimmer */}
-        <motion.div
-          className="absolute inset-0 pointer-events-none bg-gradient-to-r from-transparent via-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-          style={{ transform: "skewX(-12deg)" }}
-        />
-
-        {/* Main row */}
-        <div className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-3 sm:py-4 pl-4 sm:pl-6">
-          <div
-            {...dragHandleProps}
-            className="flex-shrink-0 cursor-grab touch-none active:cursor-grabbing"
-            title="Arrastar tarefa"
-          >
-            <GripVertical className="w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground/20 hover:text-muted-foreground/60 transition-colors" />
-          </div>
-
-          {/* Position badge */}
-          <motion.div
-            whileHover={{ scale: 1.1, rotate: 3 }}
-            className={`flex items-center justify-center min-w-[28px] sm:min-w-[36px] h-7 sm:h-9 rounded-lg font-mono text-xs sm:text-sm font-bold relative overflow-hidden ${
-              isTop3 ? "text-primary-foreground" : "bg-secondary/60 text-muted-foreground"
-            }`}
-            style={isTop3 ? { background: "var(--gradient-primary)", boxShadow: "0 0 16px rgba(14,165,195,0.3)" } : {}}
-          >
-            {isTop3 && (
+          {/* Completion flash */}
+          <AnimatePresence>
+            {completing && (
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                animate={{ x: ["-200%", "200%"] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                className="absolute inset-0 z-40 pointer-events-none"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 0.4, 0] }}
+                transition={{ duration: 0.6 }}
+                style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.4), transparent)" }}
               />
             )}
-            <span className="relative z-10">#{index + 1}</span>
-          </motion.div>
+          </AnimatePresence>
 
-          {isTop3 && (
-            <motion.div animate={{ rotate: [0, -15, 15, 0], scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="hidden sm:block">
-              <Flame className="w-5 h-5 text-primary flex-shrink-0 drop-shadow-[0_0_8px_rgba(14,165,195,0.6)]" />
+          {/* Left accent bar */}
+          <motion.div
+            className="absolute left-0 top-0 bottom-0 w-1 rounded-full"
+            style={{
+              background: task.project
+                ? `linear-gradient(180deg, ${projectColor}, ${projectColor}80)`
+                : "var(--gradient-primary)",
+            }}
+            initial={{ scaleY: 0 }} animate={{ scaleY: 1 }}
+            transition={{ duration: 0.4, delay: index * 0.05 }}
+          />
+
+          {/* Main row — compact single line */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-4 py-2 pl-3 sm:pl-5">
+            <div
+              {...dragHandleProps}
+              className="flex-shrink-0 cursor-grab touch-none active:cursor-grabbing"
+              title="Drag task"
+            >
+              <GripVertical className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-muted-foreground/20 hover:text-muted-foreground/60 transition-colors" />
+            </div>
+
+            {/* Position badge */}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              className={`flex items-center justify-center min-w-[24px] sm:min-w-[28px] h-6 sm:h-7 rounded-md font-mono text-[10px] sm:text-xs font-bold relative overflow-hidden ${
+                isTop3 ? "text-primary-foreground" : "bg-secondary/60 text-muted-foreground"
+              }`}
+              style={isTop3 ? { background: "var(--gradient-primary)", boxShadow: "0 0 16px rgba(14,165,195,0.3)" } : {}}
+            >
+              {isTop3 && (
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                  animate={{ x: ["-200%", "200%"] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                />
+              )}
+              <span className="relative z-10">#{index + 1}</span>
             </motion.div>
-          )}
 
-          {/* Complete button */}
-          <div className="relative">
+            {/* Complete button */}
             <motion.button
               onClick={handleComplete}
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.85 }}
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center hover:border-success transition-all flex-shrink-0 group/btn relative overflow-hidden"
+              className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center hover:border-success transition-all flex-shrink-0 group/btn relative overflow-hidden"
             >
               <motion.div
                 className="absolute inset-0 rounded-full"
                 style={{ background: "linear-gradient(135deg, rgba(16,185,129,0.2), rgba(45,190,160,0.1))" }}
                 initial={{ scale: 0 }} whileHover={{ scale: 1 }}
               />
-              <Check className="w-4 h-4 text-transparent group-hover/btn:text-success transition-colors relative z-10" />
+              <Check className="w-3.5 h-3.5 text-transparent group-hover/btn:text-success transition-colors relative z-10" />
+            </motion.button>
+
+            {/* Title */}
+            <div className="flex-1 min-w-0">
+              {isEditing ? (
+                <input
+                  autoFocus value={title}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                  onBlur={handleTitleBlur}
+                  onKeyDown={(e) => e.key === "Enter" && handleTitleBlur()}
+                  className="w-full bg-transparent text-foreground text-base font-bold outline-none border-b-2 border-primary/50 pb-0.5"
+                />
+              ) : (
+                <span onClick={() => setIsEditing(true)} className="text-sm sm:text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-bold" style={{ textShadow: isTop3 ? "0 0 20px rgba(14,165,195,0.1)" : undefined }}>
+                  {task.title}
+                </span>
+              )}
+            </div>
+
+            {saving && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center text-xs text-primary/60">
+                <Loader2 className="w-3 h-3 animate-spin" />
+              </motion.div>
+            )}
+
+            {/* Project badge */}
+            {task.project ? (
+              <motion.span
+                whileHover={{ scale: 1.08 }}
+                className="text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:py-1 rounded-md flex-shrink-0 cursor-default hidden sm:inline-flex"
+                style={{
+                  background: `linear-gradient(135deg, ${task.project.color}20, ${task.project.color}08)`,
+                  color: task.project.color,
+                  border: `1px solid ${task.project.color}25`,
+                }}
+              >
+                {task.project.name}
+              </motion.span>
+            ) : (
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-md flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/30 hidden sm:inline-flex">
+                No project
+              </span>
+            )}
+
+            {/* Deadline badge */}
+            {task.deadline && (
+              <span
+                className={`text-[10px] font-mono flex-shrink-0 items-center gap-1 px-2 py-0.5 rounded-md hidden sm:flex ${
+                  isOverdue
+                    ? "text-destructive bg-destructive/10 border border-destructive/20"
+                    : daysUntilDeadline !== null && daysUntilDeadline <= 2
+                      ? "text-yellow-400 bg-yellow-400/10 border border-yellow-400/15"
+                      : "text-muted-foreground bg-secondary/50 border border-border/20"
+                }`}
+              >
+                {isOverdue ? (
+                  <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 0.5, repeat: Infinity }}>
+                    <AlertTriangle className="w-3 h-3" />
+                  </motion.div>
+                ) : <Clock className="w-3 h-3" />}
+                {isOverdue && <span className="text-[9px] font-bold mr-0.5">Late</span>}
+                {new Date(task.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+              </span>
+            )}
+
+            {/* Subtask dropdown button */}
+            {totalSubtasks > 0 && (
+              <motion.button
+                onClick={handleToggleSubtaskDropdown}
+                whileHover={{ scale: 1.1 }}
+                className="flex items-center gap-1 flex-shrink-0 px-1.5 py-0.5 rounded-md hover:bg-primary/10 transition-colors"
+              >
+                <motion.div animate={{ rotate: showSubtaskDropdown ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                </motion.div>
+                <span className="text-[10px] font-mono text-muted-foreground">{completedSubtasks}/{totalSubtasks}</span>
+              </motion.button>
+            )}
+
+            {/* Edit expand button */}
+            <motion.button
+              onClick={handleExpand}
+              whileHover={{ scale: 1.15, backgroundColor: "rgba(14,165,195,0.08)" }}
+              className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md"
+              title="Edit details"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+            </motion.button>
+
+            {/* Delete button (visible on hover) */}
+            <motion.button
+              onClick={handleDelete}
+              whileHover={{ scale: 1.15, backgroundColor: "rgba(239,68,68,0.08)" }}
+              className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
             </motion.button>
           </div>
 
-          {/* Title + description */}
-          <div className="flex-1 min-w-0">
-            {isEditing ? (
-              <input
-                autoFocus value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                onBlur={handleTitleBlur}
-                onKeyDown={(e) => e.key === "Enter" && handleTitleBlur()}
-                className="w-full bg-transparent text-foreground text-sm sm:text-base outline-none border-b-2 border-primary/50 pb-0.5"
-              />
-            ) : (
-              <span onClick={() => setIsEditing(true)} className="text-sm sm:text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-semibold" style={{ textShadow: isTop3 ? "0 0 20px rgba(14,165,195,0.1)" : undefined }}>
-                {task.title}
-              </span>
-            )}
-            {task.description && !expanded && (
-              <p className="text-xs text-muted-foreground/80 truncate mt-0.5">{task.description}</p>
-            )}
-            <div className="flex items-center gap-1 mt-0.5">
-              <Clock className="w-3 h-3 text-muted-foreground/40" />
-              <span className="text-[10px] text-muted-foreground/50">{getTaskAge(task.created_at)}</span>
-            </div>
-          </div>
+          {/* Subtask dropdown panel — appears below the card row */}
+          <AnimatePresence>
+            {showSubtaskDropdown && totalSubtasks > 0 && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="px-3 sm:px-5 pb-3 pt-1 border-t border-border/10" style={{ background: "rgba(14,165,195,0.02)" }}>
+                  {/* Progress bar */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="flex-1 h-1.5 bg-secondary/60 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{
+                          background: subtaskProgress === 100
+                            ? "linear-gradient(90deg, hsl(var(--success)), hsl(172 66% 45%))"
+                            : "var(--gradient-primary)",
+                        }}
+                        initial={{ width: 0 }} animate={{ width: `${subtaskProgress}%` }}
+                        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-muted-foreground font-mono">{completedSubtasks}/{totalSubtasks}</span>
+                  </div>
 
-          {saving && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1 text-xs text-primary/60">
-              <Loader2 className="w-3 h-3 animate-spin" />
-            </motion.div>
-          )}
+                  {/* Subtask list */}
+                  {subtasks.map((sub, si) => (
+                    <motion.div
+                      key={sub.id}
+                      initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: si * 0.03 }}
+                      className="flex items-center gap-2.5 group/sub py-1 px-2 rounded-md hover:bg-primary/[0.04] transition-all"
+                    >
+                      <motion.button
+                        whileTap={{ scale: 0.8 }}
+                        onClick={() => handleSubtaskToggle(sub.id, sub.is_completed)}
+                        className={`w-4 h-4 rounded border-[1.5px] flex items-center justify-center transition-all flex-shrink-0 ${
+                          sub.is_completed
+                            ? "border-success bg-success/20"
+                            : "border-muted-foreground/25 group-hover/sub:border-primary"
+                        }`}
+                      >
+                        {sub.is_completed && <Check className="w-2.5 h-2.5 text-success" />}
+                      </motion.button>
 
-          {totalSubtasks > 0 && (
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <div className="w-20 h-2.5 bg-secondary/60 rounded-full overflow-hidden relative">
-                <motion.div
-                  className="h-full rounded-full relative overflow-hidden"
-                  style={{
-                    background: subtaskProgress === 100
-                      ? "linear-gradient(90deg, hsl(var(--success)), hsl(172 66% 45%))"
-                      : "var(--gradient-primary)",
-                  }}
-                  initial={{ width: 0 }} animate={{ width: `${subtaskProgress}%` }}
-                  transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                    animate={{ x: ["-100%", "100%"] }}
-                    transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
-                  />
-                </motion.div>
-              </div>
-              <span className="text-xs text-muted-foreground font-mono">{completedSubtasks}/{totalSubtasks}</span>
-            </div>
-          )}
-
-          {task.project ? (
-            <motion.span
-              whileHover={{ scale: 1.08, y: -1 }}
-              className="text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg flex-shrink-0 cursor-default relative overflow-hidden hidden sm:inline-flex"
-              style={{
-                background: `linear-gradient(135deg, ${task.project.color}20, ${task.project.color}08)`,
-                color: task.project.color,
-                border: `1px solid ${task.project.color}25`,
-                boxShadow: `0 0 16px ${task.project.color}12`,
-              }}
-            >
-              {task.project.name}
-            </motion.span>
-          ) : (
-            <span className="text-[10px] sm:text-xs font-medium px-2 sm:px-2.5 py-1 rounded-lg flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/30 hidden sm:inline-flex">
-              Sem projeto
-            </span>
-          )}
-
-          {task.deadline && (
-            <motion.span
-              whileHover={{ scale: 1.05 }}
-              className={`text-[10px] sm:text-xs font-mono flex-shrink-0 items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg hidden sm:flex ${
-                isOverdue
-                  ? "text-destructive bg-destructive/10 border border-destructive/20"
-                  : daysUntilDeadline !== null && daysUntilDeadline <= 2
-                    ? "text-yellow-400 bg-yellow-400/10 border border-yellow-400/15"
-                    : "text-muted-foreground bg-secondary/50 border border-border/20"
-              }`}
-            >
-              {isOverdue ? (
-                <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 0.5, repeat: Infinity }}>
-                  <AlertTriangle className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
-                </motion.div>
-              ) : <Clock className="w-3 sm:w-3.5 h-3 sm:h-3.5" />}
-              {isOverdue && <span className="text-[9px] sm:text-[10px] font-bold mr-1">Atrasado</span>}
-              {new Date(task.deadline).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
-            </motion.span>
-          )}
-
-          <motion.button
-            onClick={handleExpand}
-            whileHover={{ scale: 1.15, backgroundColor: "rgba(14,165,195,0.08)" }}
-            className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg"
-          >
-            <motion.div animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
-              <ChevronRight className="w-4 h-4" />
-            </motion.div>
-          </motion.button>
-
-          <motion.button
-            onClick={handleDelete}
-            whileHover={{ scale: 1.15, backgroundColor: "rgba(239,68,68,0.08)" }}
-            className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100"
-          >
-            <Trash2 className="w-4 h-4" />
-          </motion.button>
-        </div>
-
-        {/* Expanded content */}
-        <AnimatePresence>
-          {expanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="overflow-hidden"
-            >
-              <div className="px-3 sm:px-5 pb-5 pt-2 ml-0 sm:ml-[76px] border-t border-border/15 relative">
-                    <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent pointer-events-none" />
-
-                    {/* Description */}
-                    <div className="mb-4 relative z-10">
-                      <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2 block">Descrição</span>
-                      {isEditingDesc ? (
-                        <textarea
-                          autoFocus value={description}
-                          onChange={(e) => handleDescChange(e.target.value)}
-                          onBlur={handleDescBlur}
-                          className="w-full bg-secondary/40 text-sm text-foreground rounded-lg p-3 outline-none border border-primary/20 min-h-[60px] resize-none"
-                          placeholder="Adicione uma descrição..."
+                      {editingSubtaskId === sub.id ? (
+                        <input
+                          autoFocus
+                          value={editingSubtaskTitle}
+                          onChange={(e) => setEditingSubtaskTitle(e.target.value)}
+                          onBlur={() => handleSaveSubtaskTitle(sub.id)}
+                          onKeyDown={(e) => e.key === "Enter" && handleSaveSubtaskTitle(sub.id)}
+                          className="flex-1 bg-transparent text-xs text-foreground outline-none border-b border-primary/30 pb-0.5"
                         />
                       ) : (
-                        <p onClick={() => setIsEditingDesc(true)} className="text-sm text-muted-foreground leading-relaxed cursor-text hover:text-foreground transition-colors min-h-[24px] p-2 rounded-lg hover:bg-secondary/30">
-                          {task.description || "Clique para adicionar descrição..."}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Project selector */}
-                    <div className="mb-4 relative z-10">
-                      <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2 block">Projeto</span>
-                      <Select value={task.project_id || "none"} onValueChange={handleProjectChange}>
-                        <SelectTrigger className="bg-secondary/40 border-border/30 h-9 text-sm w-full max-w-xs">
-                          <SelectValue placeholder="Selecionar projeto" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
-                          <SelectItem value="none"><span className="text-muted-foreground">Sem projeto</span></SelectItem>
-                          {projects.map(p => (
-                            <SelectItem key={p.id} value={p.id}>
-                              <span className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-                                {p.name}
-                              </span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Deadline editor */}
-                    <div className="mb-4 relative z-10">
-                      <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2 block">Prazo</span>
-                      <div className="flex items-center gap-2">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <button className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/40 border border-border/30 text-sm hover:border-primary/30 transition-colors">
-                              <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground" />
-                              {task.deadline
-                                ? new Date(task.deadline).toLocaleDateString("pt-BR")
-                                : <span className="text-muted-foreground/50">Adicionar prazo</span>}
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={task.deadline ? new Date(task.deadline) : undefined}
-                              onSelect={handleDeadlineChange}
-                              className="p-3 pointer-events-auto"
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        {task.deadline && (
-                          <motion.button
-                            onClick={() => handleDeadlineChange(undefined)}
-                            whileHover={{ scale: 1.1 }}
-                            className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </motion.button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Subtasks */}
-                    <div className="space-y-2 relative z-10">
-                      <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-2">
-                        <Sparkles className="w-3 h-3 text-primary/50" />
-                        Subtarefas
-                      </span>
-
-                      {loadingSubtasks && (
-                        <div className="space-y-2">
-                          <Skeleton className="h-8 w-full" />
-                          <Skeleton className="h-8 w-3/4" />
-                        </div>
-                      )}
-
-                      {!loadingSubtasks && subtasks.map((sub, si) => (
-                        <motion.div
-                          key={sub.id}
-                          initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: si * 0.05 }}
-                          className="flex items-center gap-3 group/sub py-2 px-3 rounded-lg hover:bg-primary/[0.04] transition-all"
+                        <span
+                          onClick={() => handleEditSubtask(sub)}
+                          className={`text-xs transition-all flex-1 cursor-text hover:text-primary ${
+                            sub.is_completed ? "line-through text-muted-foreground/40" : "text-foreground"
+                          }`}
                         >
-                          <motion.button
-                            whileTap={{ scale: 0.8 }}
-                            onClick={() => handleSubtaskToggle(sub.id, sub.is_completed)}
-                            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${
-                              sub.is_completed
-                                ? "border-success bg-success/20"
-                                : "border-muted-foreground/25 group-hover/sub:border-primary"
-                            }`}
-                            style={sub.is_completed ? { boxShadow: "0 0 10px rgba(16,185,129,0.3)" } : {}}
-                          >
-                            {sub.is_completed && <Check className="w-3 h-3 text-success" />}
-                          </motion.button>
+                          {sub.title}
+                        </span>
+                      )}
 
-                          {editingSubtaskId === sub.id ? (
-                            <input
-                              autoFocus
-                              value={editingSubtaskTitle}
-                              onChange={(e) => setEditingSubtaskTitle(e.target.value)}
-                              onBlur={() => handleSaveSubtaskTitle(sub.id)}
-                              onKeyDown={(e) => e.key === "Enter" && handleSaveSubtaskTitle(sub.id)}
-                              className="flex-1 bg-transparent text-sm text-foreground outline-none border-b border-primary/30 pb-0.5"
-                            />
-                          ) : (
-                            <span
-                              onClick={() => handleEditSubtask(sub)}
-                              className={`text-sm transition-all flex-1 cursor-text hover:text-primary ${
-                                sub.is_completed ? "line-through text-muted-foreground/40" : "text-foreground"
-                              }`}
-                            >
-                              {sub.title}
+                      <button
+                        onClick={() => handleDeleteSubtask(sub.id)}
+                        className="opacity-0 group-hover/sub:opacity-100 text-muted-foreground/40 hover:text-destructive transition-all"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </motion.div>
+                  ))}
+
+                  {/* Add subtask inline */}
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <Input
+                      value={newSubtaskTitle}
+                      onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                      placeholder="Add subtask..."
+                      className="bg-secondary/40 border-border/30 h-7 text-xs"
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSubtask())}
+                    />
+                    <motion.button
+                      onClick={handleAddSubtask}
+                      disabled={!newSubtaskTitle.trim() || addingSubtask}
+                      whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+                      className="w-7 h-7 rounded-md flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 transition-all disabled:opacity-30 flex-shrink-0"
+                    >
+                      {addingSubtask ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Expanded edit content */}
+          <AnimatePresence>
+            {expanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="px-3 sm:px-5 pb-4 pt-2 border-t border-border/15 relative">
+                  <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent pointer-events-none" />
+
+                  {/* Description */}
+                  <div className="mb-3 relative z-10">
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Description</span>
+                    {isEditingDesc ? (
+                      <textarea
+                        autoFocus value={description}
+                        onChange={(e) => handleDescChange(e.target.value)}
+                        onBlur={handleDescBlur}
+                        className="w-full bg-secondary/40 text-sm text-foreground rounded-lg p-2.5 outline-none border border-primary/20 min-h-[50px] resize-none"
+                        placeholder="Add a description..."
+                      />
+                    ) : (
+                      <p onClick={() => setIsEditingDesc(true)} className="text-sm text-muted-foreground leading-relaxed cursor-text hover:text-foreground transition-colors min-h-[20px] p-1.5 rounded-md hover:bg-secondary/30">
+                        {task.description || "Click to add description..."}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Project selector */}
+                  <div className="mb-3 relative z-10">
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Project</span>
+                    <Select value={task.project_id || "none"} onValueChange={handleProjectChange}>
+                      <SelectTrigger className="bg-secondary/40 border-border/30 h-8 text-sm w-full max-w-xs">
+                        <SelectValue placeholder="Select project" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
+                        <SelectItem value="none"><span className="text-muted-foreground">No project</span></SelectItem>
+                        {projects.map(p => (
+                          <SelectItem key={p.id} value={p.id}>
+                            <span className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                              {p.name}
                             </span>
-                          )}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                          <button
-                            onClick={() => handleDeleteSubtask(sub.id)}
-                            className="opacity-0 group-hover/sub:opacity-100 text-muted-foreground/40 hover:text-destructive transition-all"
-                          >
-                            <X className="w-3.5 h-3.5" />
+                  {/* Deadline editor */}
+                  <div className="mb-3 relative z-10">
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Deadline</span>
+                    <div className="flex items-center gap-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-secondary/40 border border-border/30 text-sm hover:border-primary/30 transition-colors">
+                            <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                            {task.deadline
+                              ? new Date(task.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                              : <span className="text-muted-foreground/50">Set deadline</span>}
                           </button>
-                        </motion.div>
-                      ))}
-
-                      {/* Add subtask */}
-                      <div className="flex items-center gap-2 mt-2">
-                        <Input
-                          value={newSubtaskTitle}
-                          onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                          placeholder="Adicionar subtarefa..."
-                          className="bg-secondary/40 border-border/30 h-8 text-sm"
-                          onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSubtask())}
-                        />
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={task.deadline ? new Date(task.deadline) : undefined}
+                            onSelect={handleDeadlineChange}
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      {task.deadline && (
                         <motion.button
-                          onClick={handleAddSubtask}
-                          disabled={!newSubtaskTitle.trim() || addingSubtask}
-                          whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 transition-all disabled:opacity-30 flex-shrink-0"
+                          onClick={() => handleDeadlineChange(undefined)}
+                          whileHover={{ scale: 1.1 }}
+                          className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
                         >
-                          {addingSubtask ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                          <X className="w-3.5 h-3.5" />
                         </motion.button>
-                      </div>
+                      )}
                     </div>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-        </motion.div>
-      </AnimatePresence>
+
+                  {/* Subtasks in expanded view */}
+                  <div className="space-y-1.5 relative z-10">
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-3 h-3 text-primary/50" />
+                      Subtasks
+                    </span>
+
+                    {loadingSubtasks && (
+                      <div className="space-y-1.5">
+                        <Skeleton className="h-7 w-full" />
+                        <Skeleton className="h-7 w-3/4" />
+                      </div>
+                    )}
+
+                    {!loadingSubtasks && subtasks.map((sub, si) => (
+                      <motion.div
+                        key={sub.id}
+                        initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: si * 0.05 }}
+                        className="flex items-center gap-2.5 group/sub py-1.5 px-2 rounded-md hover:bg-primary/[0.04] transition-all"
+                      >
+                        <motion.button
+                          whileTap={{ scale: 0.8 }}
+                          onClick={() => handleSubtaskToggle(sub.id, sub.is_completed)}
+                          className={`w-4 h-4 rounded border-[1.5px] flex items-center justify-center transition-all flex-shrink-0 ${
+                            sub.is_completed
+                              ? "border-success bg-success/20"
+                              : "border-muted-foreground/25 group-hover/sub:border-primary"
+                          }`}
+                          style={sub.is_completed ? { boxShadow: "0 0 8px rgba(16,185,129,0.3)" } : {}}
+                        >
+                          {sub.is_completed && <Check className="w-2.5 h-2.5 text-success" />}
+                        </motion.button>
+
+                        {editingSubtaskId === sub.id ? (
+                          <input
+                            autoFocus
+                            value={editingSubtaskTitle}
+                            onChange={(e) => setEditingSubtaskTitle(e.target.value)}
+                            onBlur={() => handleSaveSubtaskTitle(sub.id)}
+                            onKeyDown={(e) => e.key === "Enter" && handleSaveSubtaskTitle(sub.id)}
+                            className="flex-1 bg-transparent text-xs text-foreground outline-none border-b border-primary/30 pb-0.5"
+                          />
+                        ) : (
+                          <span
+                            onClick={() => handleEditSubtask(sub)}
+                            className={`text-xs transition-all flex-1 cursor-text hover:text-primary ${
+                              sub.is_completed ? "line-through text-muted-foreground/40" : "text-foreground"
+                            }`}
+                          >
+                            {sub.title}
+                          </span>
+                        )}
+
+                        <button
+                          onClick={() => handleDeleteSubtask(sub.id)}
+                          className="opacity-0 group-hover/sub:opacity-100 text-muted-foreground/40 hover:text-destructive transition-all"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </motion.div>
+                    ))}
+
+                    {/* Add subtask */}
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <Input
+                        value={newSubtaskTitle}
+                        onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                        placeholder="Add subtask..."
+                        className="bg-secondary/40 border-border/30 h-7 text-xs"
+                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSubtask())}
+                      />
+                      <motion.button
+                        onClick={handleAddSubtask}
+                        disabled={!newSubtaskTitle.trim() || addingSubtask}
+                        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+                        className="w-7 h-7 rounded-md flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 transition-all disabled:opacity-30 flex-shrink-0"
+                      >
+                        {addingSubtask ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                      </motion.button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 

@@ -56,24 +56,25 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
         {/* Soft top glow */}
         <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-primary/[0.05] to-transparent pointer-events-none" />
 
-        {/* Logo */}
+        {/* Logo with spin effect */}
         <div className="flex items-center justify-center px-3 py-5 border-b border-border/10 relative z-10">
           {collapsed ? (
-            <motion.div
-              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
-              whileHover={{ rotate: 10, scale: 1.08 }}
-              transition={{ type: "spring", stiffness: 400, damping: 15 }}
-            >
-              <img src={logoIcone} alt="Tasktor" className="w-8 h-8 object-contain" />
-            </motion.div>
+            <div className="logo-icon-wrapper w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative">
+              <div className="logo-glow absolute inset-0 rounded-lg pointer-events-none" />
+              <img src={logoIcone} alt="Tasktor" className="w-8 h-8 object-contain logo-spin" />
+            </div>
           ) : (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4 }}
-              className="flex items-center justify-center"
+              className="flex items-center justify-center gap-2 logo-icon-wrapper"
             >
-              <img src={logoCompleto} alt="Tasktor" className="h-8 object-contain" style={{ filter: "drop-shadow(0 0 12px rgba(14,165,195,0.2))" }} />
+              <div className="relative flex-shrink-0">
+                <div className="logo-glow absolute inset-0 rounded-full pointer-events-none" />
+                <img src={logoIcone} alt="" className="w-8 h-8 object-contain logo-spin" />
+              </div>
+              <img src={logoCompleto} alt="Tasktor" className="h-6 object-contain" style={{ filter: "drop-shadow(0 0 12px rgba(14,165,195,0.2))" }} />
             </motion.div>
           )}
         </div>

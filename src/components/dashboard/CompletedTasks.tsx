@@ -42,7 +42,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
         .order("completed_at", { ascending: false });
       if (error) throw error;
       if (data) setTasks(data as Task[]);
-    } catch { toast.error("Erro ao carregar tarefas concluídas"); }
+    } catch { toast.error("Failed to load completed tasks"); }
     setLoading(false);
     setHasFetched(true);
   }, [user, today]);
@@ -61,8 +61,8 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
     const prev = [...tasks];
     setTasks(t => t.filter(x => x.id !== taskId));
     const { error } = await supabase.from("tasks").update({ is_completed: false, completed_at: null }).eq("id", taskId);
-    if (error) { toast.error("Erro ao restaurar tarefa"); setTasks(prev); }
-    else { toast.success("Tarefa restaurada para a lista ativa"); onTaskRestored?.(); }
+    if (error) { toast.error("Failed to restore task"); setTasks(prev); }
+    else { toast.success("Task restored to active list"); onTaskRestored?.(); }
   };
 
   const handleDelete = async (taskId: string) => {
@@ -71,11 +71,11 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
     const prev = [...tasks];
     setTasks(t => t.filter(x => x.id !== taskId));
     const { error } = await supabase.from("tasks").delete().eq("id", taskId);
-    if (error) { toast.error("Erro ao excluir tarefa"); setTasks(prev); }
+    if (error) { toast.error("Failed to delete task"); setTasks(prev); }
     else {
-      toast("Tarefa excluída", {
+      toast("Task deleted", {
         action: deletedTask ? {
-          label: "Desfazer",
+          label: "Undo",
           onClick: async () => {
             await supabase.from("tasks").insert({
               user_id: deletedTask.user_id,
@@ -102,9 +102,9 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
     setTasks([]);
     for (const id of ids) {
       const { error } = await supabase.from("tasks").delete().eq("id", id);
-      if (error) { toast.error("Erro ao limpar tarefas"); setTasks(prev); return; }
+      if (error) { toast.error("Failed to clear tasks"); setTasks(prev); return; }
     }
-    toast.success("Todas as tarefas concluídas foram excluídas");
+    toast.success("All completed tasks cleared");
   };
 
   const startEdit = (task: Task) => {
@@ -120,8 +120,8 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
     setTasks(t => t.map(x => x.id === taskId ? { ...x, title: editTitle.trim(), project_id: newProjectId } : x));
     setEditingId(null);
     const { error } = await supabase.from("tasks").update({ title: editTitle.trim(), project_id: newProjectId }).eq("id", taskId);
-    if (error) { toast.error("Erro ao salvar"); setTasks(prev); }
-    else { toast.success("Tarefa atualizada"); fetchCompleted(); }
+    if (error) { toast.error("Failed to save"); setTasks(prev); }
+    else { toast.success("Task updated"); fetchCompleted(); }
   };
 
   return (
@@ -135,7 +135,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
           <motion.div animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
             <ChevronRight className="w-4 h-4" />
           </motion.div>
-          <span>Concluídas hoje</span>
+          <span>Completed today</span>
           {hasFetched && tasks.length > 0 && (
             <span className="text-xs font-mono bg-success/10 text-success px-2 py-0.5 rounded-md">{tasks.length}</span>
           )}
@@ -144,12 +144,12 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
         {expanded && tasks.length > 0 && (
           confirmClearAll ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-destructive font-semibold">Excluir todas?</span>
+              <span className="text-xs text-destructive font-semibold">Delete all?</span>
               <motion.button onClick={handleClearAll} whileHover={{ scale: 1.05 }} className="px-3 py-1 rounded-lg bg-destructive text-destructive-foreground text-xs font-bold">
-                Confirmar
+                Confirm
               </motion.button>
               <motion.button onClick={() => setConfirmClearAll(false)} whileHover={{ scale: 1.05 }} className="px-3 py-1 rounded-lg bg-secondary text-foreground text-xs font-bold">
-                Cancelar
+                Cancel
               </motion.button>
             </div>
           ) : (
@@ -159,7 +159,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
               className="text-xs text-muted-foreground/50 hover:text-destructive transition-colors flex items-center gap-1"
             >
               <Trash2 className="w-3 h-3" />
-              Limpar todas
+              Clear all
             </motion.button>
           )
         )}
@@ -176,11 +176,11 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
             {loading && (
               <div className="flex items-center gap-2 py-4 justify-center text-muted-foreground">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-sm">Carregando...</span>
+                <span className="text-sm">Loading...</span>
               </div>
             )}
             {!loading && tasks.length === 0 && (
-              <p className="text-sm text-muted-foreground/60 py-4 text-center">Nenhuma tarefa concluída hoje</p>
+              <p className="text-sm text-muted-foreground/60 py-4 text-center">No tasks completed today</p>
             )}
             {!loading && tasks.map((task, i) => (
               <motion.div
@@ -189,7 +189,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20, scale: 0.95 }}
                 transition={{ delay: i * 0.05 }}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg glass-gradient hover:bg-primary/5 transition-all group"
+                className="flex items-center gap-3 px-4 py-2.5 rounded-lg glass-gradient hover:bg-primary/5 transition-all group"
               >
                 <div className="w-5 h-5 rounded-full bg-success/15 flex items-center justify-center">
                   <Check className="w-3 h-3 text-success" />
@@ -207,7 +207,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
                     <Select value={editProjectId} onValueChange={setEditProjectId}>
                       <SelectTrigger className="h-7 text-xs bg-secondary/40 border-border/30 w-28"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">Sem projeto</SelectItem>
+                        <SelectItem value="none">No project</SelectItem>
                         {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
@@ -223,7 +223,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
                     <span className="text-sm text-muted-foreground line-through flex-1 group-hover:text-foreground/60 transition-colors">{task.title}</span>
                     {task.completed_at && (
                       <span className="text-[10px] text-muted-foreground/50 font-mono">
-                        {new Date(task.completed_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                        {new Date(task.completed_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     )}
                     {task.project && (
@@ -235,7 +235,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
                     {confirmDeleteId === task.id ? (
                       <div className="flex items-center gap-1">
                         <motion.button onClick={() => handleDelete(task.id)} whileTap={{ scale: 0.9 }} className="text-[10px] px-2 py-0.5 rounded bg-destructive text-destructive-foreground font-bold">
-                          Excluir
+                          Delete
                         </motion.button>
                         <motion.button onClick={() => setConfirmDeleteId(null)} whileTap={{ scale: 0.9 }} className="text-muted-foreground/40 hover:text-foreground">
                           <X className="w-3 h-3" />
@@ -247,7 +247,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
                           onClick={() => startEdit(task)}
                           whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
                           className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-primary transition-all"
-                          title="Editar tarefa"
+                          title="Edit task"
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </motion.button>
@@ -255,7 +255,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
                           onClick={() => handleUncomplete(task.id)}
                           whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
                           className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-primary transition-all"
-                          title="Restaurar tarefa"
+                          title="Restore task"
                         >
                           <Undo2 className="w-3.5 h-3.5" />
                         </motion.button>
@@ -263,7 +263,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
                           onClick={() => setConfirmDeleteId(task.id)}
                           whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
                           className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-destructive transition-all"
-                          title="Excluir tarefa"
+                          title="Delete task"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </motion.button>
