@@ -46,8 +46,8 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
         transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
         className="h-screen flex flex-col overflow-hidden relative flex-shrink-0"
         style={{
-          background: "linear-gradient(180deg, hsl(200 25% 4.5%), hsl(200 25% 3.5%))",
-          borderRight: "1px solid hsl(var(--border) / 0.15)",
+          background: "linear-gradient(170deg, hsl(195 30% 12%) 0%, hsl(200 28% 8%) 40%, hsl(210 25% 6%) 100%)",
+          borderRight: "1px solid hsl(195 40% 20% / 0.25)",
           backdropFilter: "blur(24px)",
         }}
       >
