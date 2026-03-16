@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { ChevronDown, ArrowRight } from "lucide-react";
 import logoCompleto from "@/assets/logo_completo_tasktor.png";
 import HomeBackground from "@/components/home/HomeBackground";
+import { getDailyQuote } from "@/lib/quotes";
 
 const HomePage = () => {
   const { profile } = useAuth();
