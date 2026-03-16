@@ -57,7 +57,7 @@ function getTaskAge(createdAt: string): string {
 // Cache for subtasks
 const subtaskCache = new Map<string, Tables<"subtasks">[]>();
 
-const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDelete, onUpdate }: TaskCardProps) => {
+const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDelete, onUpdate, dragHandleProps }: TaskCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
