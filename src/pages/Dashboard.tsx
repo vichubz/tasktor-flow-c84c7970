@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [todayCompleted, setTodayCompleted] = useState(0);
   const skipRealtimeRef = useRef(false);
+  const inlineCreatorRef = useRef<InlineTaskCreatorHandle>(null);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
