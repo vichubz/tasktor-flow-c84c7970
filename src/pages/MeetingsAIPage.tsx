@@ -214,7 +214,7 @@ const MeetingsAIPage = () => {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="px-6 pt-6 pb-4 flex-shrink-0"
+        className="px-3 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 flex-shrink-0"
       >
         <div className="flex items-center gap-3">
           <motion.div
