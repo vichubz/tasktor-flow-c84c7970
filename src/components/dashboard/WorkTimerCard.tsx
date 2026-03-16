@@ -138,7 +138,7 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
         pausedSecondsRef.current = 0;
         setIsRunning(true);
         setIsPaused(false);
-        toast.success("Timer started!");
+        toast.success("Timer iniciado!");
       }
     } catch {
       toast.error("Failed to start timer");
