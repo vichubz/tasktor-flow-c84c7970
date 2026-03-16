@@ -218,7 +218,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
             }`}
           >
             <Settings className="w-[17px] h-[17px] flex-shrink-0" />
-            {!collapsed && <span>Settings</span>}
+            {!collapsed && <span>Configurações</span>}
           </NavLink>
 
           <button
