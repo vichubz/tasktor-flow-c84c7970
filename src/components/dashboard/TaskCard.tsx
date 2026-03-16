@@ -292,207 +292,169 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
           style={{ transform: "skewX(-12deg)" }}
         />
 
-        {/* Inline delete confirmation */}
-        {confirmDelete ? (
-          <div className="flex items-center justify-between gap-4 px-5 py-4 pl-6">
-            <span className="text-sm text-destructive font-semibold">Excluir "{task.title}"?</span>
-            <div className="flex items-center gap-2">
-              <motion.button
-                onClick={handleConfirmDelete}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-4 py-1.5 rounded-lg bg-destructive text-destructive-foreground text-xs font-bold"
-              >
-                Excluir
-              </motion.button>
-              <motion.button
-                onClick={() => setConfirmDelete(false)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-4 py-1.5 rounded-lg bg-secondary text-foreground text-xs font-bold"
-              >
-                Cancelar
-              </motion.button>
+        {/* Main row */}
+        <div className="flex items-center gap-4 px-5 py-4 pl-6">
+          <div
+            {...dragHandleProps}
+            className="flex-shrink-0 cursor-grab touch-none active:cursor-grabbing"
+            title="Arrastar tarefa"
+          >
+            <GripVertical className="w-5 h-5 text-muted-foreground/20 hover:text-muted-foreground/50 transition-colors" />
+          </div>
+
+          {/* Position badge */}
+          <motion.div
+            whileHover={{ scale: 1.1, rotate: 3 }}
+            className={`flex items-center justify-center min-w-[36px] h-9 rounded-lg font-mono text-sm font-bold relative overflow-hidden ${
+              isTop3 ? "text-primary-foreground" : "bg-secondary/60 text-muted-foreground"
+            }`}
+            style={isTop3 ? { background: "var(--gradient-primary)" } : {}}
+          >
+            {isTop3 && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                animate={{ x: ["-200%", "200%"] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+              />
+            )}
+            <span className="relative z-10">#{index + 1}</span>
+          </motion.div>
+
+          {isTop3 && (
+            <motion.div animate={{ rotate: [0, -15, 15, 0], scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+              <Flame className="w-5 h-5 text-primary flex-shrink-0 drop-shadow-[0_0_8px_rgba(14,165,195,0.6)]" />
+            </motion.div>
+          )}
+
+          {/* Complete button */}
+          <div className="relative">
+            <motion.button
+              onClick={handleComplete}
+              whileHover={{ scale: 1.2 }}
+              whileTap={{ scale: 0.85 }}
+              className="w-8 h-8 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center hover:border-success transition-all flex-shrink-0 group/btn relative overflow-hidden"
+            >
+              <motion.div
+                className="absolute inset-0 rounded-full"
+                style={{ background: "linear-gradient(135deg, rgba(16,185,129,0.2), rgba(45,190,160,0.1))" }}
+                initial={{ scale: 0 }} whileHover={{ scale: 1 }}
+              />
+              <Check className="w-4 h-4 text-transparent group-hover/btn:text-success transition-colors relative z-10" />
+            </motion.button>
+          </div>
+
+          {/* Title + description */}
+          <div className="flex-1 min-w-0">
+            {isEditing ? (
+              <input
+                autoFocus value={title}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                onBlur={handleTitleBlur}
+                onKeyDown={(e) => e.key === "Enter" && handleTitleBlur()}
+                className="w-full bg-transparent text-foreground text-base outline-none border-b-2 border-primary/50 pb-0.5"
+              />
+            ) : (
+              <span onClick={() => setIsEditing(true)} className="text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-semibold">
+                {task.title}
+              </span>
+            )}
+            {task.description && !expanded && (
+              <p className="text-xs text-muted-foreground/60 truncate mt-0.5">{task.description}</p>
+            )}
+            <div className="flex items-center gap-1 mt-0.5">
+              <Clock className="w-3 h-3 text-muted-foreground/30" />
+              <span className="text-[10px] text-muted-foreground/40">{getTaskAge(task.created_at)}</span>
             </div>
           </div>
-        ) : (
-          <>
-            {/* Main row */}
-            <div className="flex items-center gap-4 px-5 py-4 pl-6">
-              <div {...dragHandleProps} className="flex-shrink-0 cursor-grab active:cursor-grabbing">
-                <GripVertical className="w-5 h-5 text-muted-foreground/20 hover:text-muted-foreground/50 transition-colors" />
-              </div>
 
-              {/* Position badge */}
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: 3 }}
-                className={`flex items-center justify-center min-w-[36px] h-9 rounded-lg font-mono text-sm font-bold relative overflow-hidden ${
-                  isTop3 ? "text-primary-foreground" : "bg-secondary/60 text-muted-foreground"
-                }`}
-                style={isTop3 ? { background: "var(--gradient-primary)" } : {}}
-              >
-                {isTop3 && (
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                    animate={{ x: ["-200%", "200%"] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                  />
-                )}
-                <span className="relative z-10">#{index + 1}</span>
-              </motion.div>
+          {saving && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1 text-xs text-primary/60">
+              <Loader2 className="w-3 h-3 animate-spin" />
+            </motion.div>
+          )}
 
-              {isTop3 && (
-                <motion.div animate={{ rotate: [0, -15, 15, 0], scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-                  <Flame className="w-5 h-5 text-primary flex-shrink-0 drop-shadow-[0_0_8px_rgba(14,165,195,0.6)]" />
-                </motion.div>
-              )}
-
-              {/* Complete button */}
-              <div className="relative">
-                <motion.button
-                  onClick={handleComplete}
-                  whileHover={{ scale: 1.2 }}
-                  whileTap={{ scale: 0.85 }}
-                  className="w-8 h-8 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center hover:border-success transition-all flex-shrink-0 group/btn relative overflow-hidden"
-                >
-                  <motion.div
-                    className="absolute inset-0 rounded-full"
-                    style={{ background: "linear-gradient(135deg, rgba(16,185,129,0.2), rgba(45,190,160,0.1))" }}
-                    initial={{ scale: 0 }} whileHover={{ scale: 1 }}
-                  />
-                  <Check className="w-4 h-4 text-transparent group-hover/btn:text-success transition-colors relative z-10" />
-                </motion.button>
-              </div>
-
-              {/* Title + description */}
-              <div className="flex-1 min-w-0">
-                {isEditing ? (
-                  <input
-                    autoFocus value={title}
-                    onChange={(e) => handleTitleChange(e.target.value)}
-                    onBlur={handleTitleBlur}
-                    onKeyDown={(e) => e.key === "Enter" && handleTitleBlur()}
-                    className="w-full bg-transparent text-foreground text-base outline-none border-b-2 border-primary/50 pb-0.5"
-                  />
-                ) : (
-                  <span onClick={() => setIsEditing(true)} className="text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-semibold">
-                    {task.title}
-                  </span>
-                )}
-                {task.description && !expanded && (
-                  <p className="text-xs text-muted-foreground/60 truncate mt-0.5">{task.description}</p>
-                )}
-                {/* Task age */}
-                <div className="flex items-center gap-1 mt-0.5">
-                  <Clock className="w-3 h-3 text-muted-foreground/30" />
-                  <span className="text-[10px] text-muted-foreground/40">{getTaskAge(task.created_at)}</span>
-                </div>
-              </div>
-
-              {saving && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1 text-xs text-primary/60">
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                </motion.div>
-              )}
-
-              {/* Subtask progress */}
-              {totalSubtasks > 0 && (
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <div className="w-20 h-2.5 bg-secondary/60 rounded-full overflow-hidden relative">
-                    <motion.div
-                      className="h-full rounded-full relative overflow-hidden"
-                      style={{
-                        background: subtaskProgress === 100
-                          ? "linear-gradient(90deg, hsl(var(--success)), hsl(172 66% 45%))"
-                          : "var(--gradient-primary)",
-                      }}
-                      initial={{ width: 0 }} animate={{ width: `${subtaskProgress}%` }}
-                      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                        animate={{ x: ["-100%", "100%"] }}
-                        transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
-                      />
-                    </motion.div>
-                  </div>
-                  <span className="text-xs text-muted-foreground font-mono">{completedSubtasks}/{totalSubtasks}</span>
-                </div>
-              )}
-
-              {/* Project badge */}
-              {task.project ? (
-                <motion.span
-                  whileHover={{ scale: 1.08, y: -1 }}
-                  className="text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0 cursor-default relative overflow-hidden"
-                  style={{
-                    background: `linear-gradient(135deg, ${task.project.color}20, ${task.project.color}08)`,
-                    color: task.project.color,
-                    border: `1px solid ${task.project.color}25`,
-                    boxShadow: `0 0 16px ${task.project.color}12`,
-                  }}
-                >
-                  {task.project.name}
-                </motion.span>
-              ) : (
-                <span className="text-xs font-medium px-2.5 py-1 rounded-lg flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/30">
-                  Sem projeto
-                </span>
-              )}
-
-              {/* Deadline */}
-              {task.deadline && (
-                <motion.span
-                  whileHover={{ scale: 1.05 }}
-                  className={`text-xs font-mono flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg ${
-                    isOverdue
-                      ? "text-destructive bg-destructive/10 border border-destructive/20"
-                      : daysUntilDeadline !== null && daysUntilDeadline <= 2
-                        ? "text-yellow-400 bg-yellow-400/10 border border-yellow-400/15"
-                        : "text-muted-foreground bg-secondary/50 border border-border/20"
-                  }`}
-                >
-                  {isOverdue ? (
-                    <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 0.5, repeat: Infinity }}>
-                      <AlertTriangle className="w-3.5 h-3.5" />
-                    </motion.div>
-                  ) : <Clock className="w-3.5 h-3.5" />}
-                  {isOverdue && <span className="text-[10px] font-bold mr-1">Atrasado</span>}
-                  {new Date(task.deadline).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
-                </motion.span>
-              )}
-
-              {/* Expand */}
-              <motion.button
-                onClick={handleExpand}
-                whileHover={{ scale: 1.15, backgroundColor: "rgba(14,165,195,0.08)" }}
-                className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg"
-              >
-                <motion.div animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
-                  <ChevronRight className="w-4 h-4" />
-                </motion.div>
-              </motion.button>
-
-              {/* Delete (visible on hover) */}
-              <motion.button
-                onClick={() => setConfirmDelete(true)}
-                whileHover={{ scale: 1.15, backgroundColor: "rgba(239,68,68,0.08)" }}
-                className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100"
-              >
-                <Trash2 className="w-4 h-4" />
-              </motion.button>
-            </div>
-
-            {/* Expanded content */}
-            <AnimatePresence>
-              {expanded && (
+          {totalSubtasks > 0 && (
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="w-20 h-2.5 bg-secondary/60 rounded-full overflow-hidden relative">
                 <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                  className="overflow-hidden"
+                  className="h-full rounded-full relative overflow-hidden"
+                  style={{
+                    background: subtaskProgress === 100
+                      ? "linear-gradient(90deg, hsl(var(--success)), hsl(172 66% 45%))"
+                      : "var(--gradient-primary)",
+                  }}
+                  initial={{ width: 0 }} animate={{ width: `${subtaskProgress}%` }}
+                  transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                 >
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                    animate={{ x: ["-100%", "100%"] }}
+                    transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
+                  />
+                </motion.div>
+              </div>
+              <span className="text-xs text-muted-foreground font-mono">{completedSubtasks}/{totalSubtasks}</span>
+            </div>
+          )}
+
+          {task.project ? (
+            <motion.span
+              whileHover={{ scale: 1.08, y: -1 }}
+              className="text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0 cursor-default relative overflow-hidden"
+              style={{
+                background: `linear-gradient(135deg, ${task.project.color}20, ${task.project.color}08)`,
+                color: task.project.color,
+                border: `1px solid ${task.project.color}25`,
+                boxShadow: `0 0 16px ${task.project.color}12`,
+              }}
+            >
+              {task.project.name}
+            </motion.span>
+          ) : (
+            <span className="text-xs font-medium px-2.5 py-1 rounded-lg flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/30">
+              Sem projeto
+            </span>
+          )}
+
+          {task.deadline && (
+            <motion.span
+              whileHover={{ scale: 1.05 }}
+              className={`text-xs font-mono flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg ${
+                isOverdue
+                  ? "text-destructive bg-destructive/10 border border-destructive/20"
+                  : daysUntilDeadline !== null && daysUntilDeadline <= 2
+                    ? "text-yellow-400 bg-yellow-400/10 border border-yellow-400/15"
+                    : "text-muted-foreground bg-secondary/50 border border-border/20"
+              }`}
+            >
+              {isOverdue ? (
+                <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 0.5, repeat: Infinity }}>
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                </motion.div>
+              ) : <Clock className="w-3.5 h-3.5" />}
+              {isOverdue && <span className="text-[10px] font-bold mr-1">Atrasado</span>}
+              {new Date(task.deadline).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
+            </motion.span>
+          )}
+
+          <motion.button
+            onClick={handleExpand}
+            whileHover={{ scale: 1.15, backgroundColor: "rgba(14,165,195,0.08)" }}
+            className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg"
+          >
+            <motion.div animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
+              <ChevronRight className="w-4 h-4" />
+            </motion.div>
+          </motion.button>
+
+          <motion.button
+            onClick={handleDelete}
+            whileHover={{ scale: 1.15, backgroundColor: "rgba(239,68,68,0.08)" }}
+            className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100"
+          >
+            <Trash2 className="w-4 h-4" />
+          </motion.button>
+        </div>
                   <div className="px-5 pb-5 pt-2 ml-[76px] border-t border-border/15 relative">
                     <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent pointer-events-none" />
 
