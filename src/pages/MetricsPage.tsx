@@ -259,7 +259,7 @@ const MetricsPage = () => {
                   {task.completed_at ? new Date(task.completed_at).toLocaleDateString("pt-BR", { month: "short", day: "numeric" }) : "—"}
                 </span>
                 <span className="text-muted-foreground font-mono text-xs hidden sm:block">
-                  {new Date(task.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  {new Date(task.created_at).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })}
                 </span>
               </motion.div>
             ))}
