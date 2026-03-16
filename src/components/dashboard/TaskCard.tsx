@@ -380,7 +380,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               </motion.span>
             ) : (
               <span className="text-[10px] font-medium px-2 py-0.5 rounded-md flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/30 hidden sm:inline-flex">
-                No project
+                Sem projeto
               </span>
             )}
 
