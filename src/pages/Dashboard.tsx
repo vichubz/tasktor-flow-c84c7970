@@ -150,6 +150,40 @@ const Dashboard = () => {
     }
   };
 
+  const handleMoveToTop = async (taskId: string) => {
+    const taskIndex = filteredTasks.findIndex(t => t.id === taskId);
+    if (taskIndex <= 0) return;
+
+    const items = Array.from(filteredTasks);
+    const [moved] = items.splice(taskIndex, 1);
+    items.unshift(moved);
+
+    const changes: { id: string; position: number }[] = [];
+    const updatedTasks = items.map((t, i) => {
+      if (t.position !== i) changes.push({ id: t.id, position: i });
+      return { ...t, position: i };
+    });
+
+    setTasks(prev => {
+      const otherTasks = prev.filter(t => !updatedTasks.find(u => u.id === t.id));
+      return [...updatedTasks, ...otherTasks].sort((a, b) => a.position - b.position);
+    });
+
+    if (changes.length === 0) return;
+    skipRealtimeRef.current = true;
+
+    try {
+      const { error } = await supabase.rpc("reorder_tasks", {
+        task_ids: changes.map(c => c.id),
+        new_positions: changes.map(c => c.position),
+      });
+      if (error) throw error;
+    } catch {
+      toast.error("Failed to move task");
+      fetchData();
+    }
+  };
+
   const handleDelete = async (taskId: string) => {
     const deletedTask = tasks.find(t => t.id === taskId);
     const prev = [...tasks];
@@ -378,6 +412,7 @@ const Dashboard = () => {
                               onComplete={handleComplete}
                               onDelete={handleDelete}
                               onUpdate={fetchData}
+                              onMoveToTop={handleMoveToTop}
                               dragHandleProps={provided.dragHandleProps}
                             />
                           </div>
