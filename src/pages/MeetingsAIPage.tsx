@@ -107,7 +107,7 @@ const MeetingsAIPage = () => {
         return;
       }
       if (resp.status === 402) {
-        toast.error("Insufficient credits. Add credits to your workspace.");
+        toast.error("Créditos insuficientes. Adicione créditos ao seu workspace.");
         setProcessing(false);
         return;
       }
