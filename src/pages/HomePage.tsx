@@ -79,7 +79,7 @@ const HomePage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 1 }}
-          className="mb-12"
+          className="mb-8 sm:mb-12"
         >
           <p className="text-[10px] uppercase tracking-[0.35em] text-white/25 font-mono">
             Produtividade Premium
