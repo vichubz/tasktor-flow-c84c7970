@@ -159,7 +159,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
               className="text-xs text-muted-foreground/50 hover:text-destructive transition-colors flex items-center gap-1"
             >
               <Trash2 className="w-3 h-3" />
-              Clear all
+              Limpar tudo
             </motion.button>
           )
         )}
