@@ -190,10 +190,10 @@ const MetricsPage = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="glass-gradient rounded-xl p-4 sm:p-6">
           <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tempo por Projeto</h3>
           {projectTimeData.length > 0 ? (
-            <div className="flex items-center gap-4">
-              <ResponsiveContainer width="60%" height={220}>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <ResponsiveContainer width="100%" height={180} className="sm:max-w-[60%]">
                 <PieChart>
-                  <Pie data={projectTimeData} innerRadius={50} outerRadius={80} paddingAngle={4} dataKey="value">
+                  <Pie data={projectTimeData} innerRadius={40} outerRadius={70} paddingAngle={4} dataKey="value">
                     {projectTimeData.map((entry, i) => (
                       <Cell key={i} fill={entry.color} stroke="transparent" />
                     ))}
