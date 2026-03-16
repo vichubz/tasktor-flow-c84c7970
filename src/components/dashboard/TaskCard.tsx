@@ -299,7 +299,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
             className="flex-shrink-0 cursor-grab touch-none active:cursor-grabbing"
             title="Arrastar tarefa"
           >
-            <GripVertical className="w-5 h-5 text-muted-foreground/20 hover:text-muted-foreground/60 transition-colors" />
+            <GripVertical className="w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground/20 hover:text-muted-foreground/60 transition-colors" />
           </div>
 
           {/* Position badge */}
