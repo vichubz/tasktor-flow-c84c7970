@@ -165,7 +165,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     const pid = newProjectId === "none" ? null : newProjectId;
     setSaving(true);
     const { error } = await supabase.from("tasks").update({ project_id: pid }).eq("id", task.id);
-    if (error) toast.error("Failed to change project");
+    if (error) toast.error("Falha ao alterar projeto");
     setSaving(false);
     onUpdate();
   };
