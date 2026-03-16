@@ -71,6 +71,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   const [showSubtaskDropdown, setShowSubtaskDropdown] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [highlighted, setHighlighted] = useState(!!(task as any).is_highlighted);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   const handleToggleHighlight = async () => {
     const newVal = !highlighted;
@@ -341,7 +342,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               <Check className="w-3.5 h-3.5 text-transparent group-hover/btn:text-success transition-colors relative z-10" />
             </motion.button>
 
-            {/* Title */}
+            {/* Title + Description preview */}
             <div className="flex-1 min-w-0">
               {isEditing ? (
                 <input
@@ -352,11 +353,30 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                   className="w-full bg-transparent text-foreground text-base font-bold outline-none border-b-2 border-primary/50 pb-0.5"
                 />
               ) : (
-                <span onClick={() => setIsEditing(true)} className="text-sm sm:text-base text-foreground cursor-text truncate block hover:text-primary transition-colors font-bold">
-                  {task.title}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span onClick={() => setIsEditing(true)} className="text-sm sm:text-base text-foreground cursor-text truncate hover:text-primary transition-colors font-bold">
+                    {task.title}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground/50 font-mono flex-shrink-0 hidden sm:inline">{getTaskAge(task.created_at)}</span>
+                </div>
               )}
-              <span className="text-[9px] text-muted-foreground/50 font-mono flex-shrink-0 hidden sm:inline">{getTaskAge(task.created_at)}</span>
+              {task.description && !isEditing && (
+                <div className="mt-0.5">
+                  <span
+                    className={`text-[11px] sm:text-xs text-muted-foreground/60 leading-tight ${descExpanded ? "whitespace-pre-wrap" : "truncate block"}`}
+                  >
+                    {descExpanded ? task.description : task.description}
+                  </span>
+                  {task.description.length > 80 && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setDescExpanded(!descExpanded); }}
+                      className="text-[10px] text-primary/60 hover:text-primary transition-colors font-medium ml-1"
+                    >
+                      {descExpanded ? "ver menos" : "ver mais"}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {saving && (
