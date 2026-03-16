@@ -89,7 +89,7 @@ const MetricsPage = () => {
 
   const timeByDay: Record<string, number> = {};
   timeEntries.forEach(e => {
-    const day = new Date(e.date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const day = new Date(e.date).toLocaleDateString("pt-BR", { month: "short", day: "numeric" });
     timeByDay[day] = (timeByDay[day] || 0) + e.duration_seconds / 3600;
   });
   const timeChartData = Object.entries(timeByDay).map(([date, hours]) => ({ date, hours: Number(hours.toFixed(1)) }));
