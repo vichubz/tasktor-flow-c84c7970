@@ -72,7 +72,7 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
                 <CheckCircle2 className="w-3.5 h-3.5 text-success icon-pulse" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[9px] text-foreground/60 leading-none font-medium uppercase tracking-wider">Completed</span>
+                <span className="text-[9px] text-foreground/60 leading-none font-medium uppercase tracking-wider">Concluídas</span>
                 <motion.span
                   key={todayCompleted}
                   initial={{ opacity: 0, scale: 2 }}
@@ -95,7 +95,7 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
               className="flex items-center gap-1.5 rounded-lg px-3 py-2 stat-card text-muted-foreground hover:text-foreground transition-colors"
             >
               <History className="w-4 h-4" />
-              <span className="text-xs font-semibold hidden sm:inline">History</span>
+              <span className="text-xs font-semibold hidden sm:inline">Histórico</span>
             </motion.button>
 
             {/* Collapse toggle */}

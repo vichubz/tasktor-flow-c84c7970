@@ -58,7 +58,7 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
     }).select().single();
 
     if (error) {
-      toast.error("Failed to create task");
+      toast.error("Falha ao criar task");
       setLoading(false);
       return;
     }
@@ -69,7 +69,7 @@ const NewTaskDialog = ({ open, onOpenChange, projects, onCreated }: NewTaskDialo
       );
     }
 
-    toast.success("Task created!");
+    toast.success("Task criada!");
     setTitle("");
     setDescription("");
     setProjectId("");

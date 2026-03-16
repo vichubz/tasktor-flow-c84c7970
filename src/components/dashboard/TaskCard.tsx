@@ -28,11 +28,11 @@ interface TaskCardProps {
 }
 
 const SUCCESS_MESSAGES = [
-  "Task completed! Nice work! 🎉",
-  "Another one done! Keep going! 🚀",
-  "Done! You're on fire today! ✈️",
-  "Completed! Total focus! 🎯",
-  "Great! Next one! ⚡",
+  "Task concluída! Bom trabalho! 🎉",
+  "Mais uma feita! Continue assim! 🚀",
+  "Feito! Você está on fire hoje! ✈️",
+  "Concluída! Foco total! 🎯",
+  "Ótimo! Próxima! ⚡",
 ];
 
 function getTaskAge(createdAt: string): string {
@@ -42,12 +42,12 @@ function getTaskAge(createdAt: string): string {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffHours < 1) return "now";
+  if (diffHours < 1) return "agora";
   if (diffHours < 24) return `${diffHours}h`;
   if (diffDays === 1) return "1d";
   if (diffDays < 7) return `${diffDays}d`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w`;
-  return `${Math.floor(diffDays / 30)}mo`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}sem`;
+  return `${Math.floor(diffDays / 30)}m`;
 }
 
 // Cache for subtasks
@@ -98,7 +98,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
       const { data, error } = await supabase.from("subtasks").select("*").eq("task_id", task.id).order("position");
       if (error) throw error;
       if (data) { setSubtasks(data); subtaskCache.set(task.id, data); }
-    } catch { toast.error("Failed to load subtasks"); }
+    } catch { toast.error("Falha ao carregar subtasks"); }
     setLoadingSubtasks(false);
   }, [task.id]);
 
@@ -165,7 +165,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     const pid = newProjectId === "none" ? null : newProjectId;
     setSaving(true);
     const { error } = await supabase.from("tasks").update({ project_id: pid }).eq("id", task.id);
-    if (error) toast.error("Failed to change project");
+    if (error) toast.error("Falha ao alterar projeto");
     setSaving(false);
     onUpdate();
   };
@@ -175,7 +175,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     const deadlineStr = date ? format(date, "yyyy-MM-dd") : null;
     setSaving(true);
     const { error } = await supabase.from("tasks").update({ deadline: deadlineStr }).eq("id", task.id);
-    if (error) toast.error("Failed to change deadline");
+    if (error) toast.error("Falha ao alterar prazo");
     setSaving(false);
     onUpdate();
   };
@@ -186,7 +186,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     subtaskCache.delete(task.id);
     const { error } = await supabase.from("subtasks").update({ is_completed: !completed }).eq("id", subtaskId);
     if (error) {
-      toast.error("Failed to update subtask");
+      toast.error("Falha ao atualizar subtask");
       setSubtasks(prev => prev.map(s => s.id === subtaskId ? { ...s, is_completed: completed } : s));
     }
   };
@@ -196,7 +196,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     setAddingSubtask(true);
     const position = subtasks.length;
     const { data, error } = await supabase.from("subtasks").insert({ task_id: task.id, title: newSubtaskTitle.trim(), position }).select().single();
-    if (error) { toast.error("Failed to add subtask"); }
+    if (error) { toast.error("Falha ao adicionar subtask"); }
     else if (data) { setSubtasks(prev => [...prev, data]); subtaskCache.delete(task.id); }
     setNewSubtaskTitle("");
     setAddingSubtask(false);
@@ -207,7 +207,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     setSubtasks(s => s.filter(x => x.id !== subtaskId));
     subtaskCache.delete(task.id);
     const { error } = await supabase.from("subtasks").delete().eq("id", subtaskId);
-    if (error) { toast.error("Failed to delete subtask"); setSubtasks(prev); }
+    if (error) { toast.error("Falha ao excluir subtask"); setSubtasks(prev); }
   };
 
   const handleEditSubtask = (sub: Tables<"subtasks">) => {
@@ -380,7 +380,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               </motion.span>
             ) : (
               <span className="text-[10px] font-medium px-2 py-0.5 rounded-md flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/30 hidden sm:inline-flex">
-                No project
+                Sem projeto
               </span>
             )}
 
@@ -400,8 +400,8 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     <AlertTriangle className="w-3 h-3" />
                   </motion.div>
                 ) : <Clock className="w-3 h-3" />}
-                {isOverdue && <span className="text-[9px] font-bold mr-0.5">Late</span>}
-                {new Date(task.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                {isOverdue && <span className="text-[9px] font-bold mr-0.5">Atrasada</span>}
+                {new Date(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })}
               </span>
             )}
 
@@ -424,7 +424,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               onClick={handleExpand}
               whileHover={{ scale: 1.15, backgroundColor: "rgba(14,165,195,0.08)" }}
               className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md"
-              title="Edit details"
+              title="Editar detalhes"
             >
               <Sparkles className="w-3.5 h-3.5" />
             </motion.button>
@@ -439,7 +439,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                   ? "text-amber-400"
                   : "text-muted-foreground/20 hover:text-amber-400/60 opacity-0 group-hover:opacity-100"
               }`}
-              title={highlighted ? "Remove highlight" : "Highlight task"}
+              title={highlighted ? "Remover destaque" : "Destacar task"}
             >
               <Star className={`w-3.5 h-3.5 ${highlighted ? "fill-amber-400" : ""}`} />
             </motion.button>
@@ -450,7 +450,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 initial={{ scale: 0.8 }} animate={{ scale: 1 }}
                 className="text-destructive text-[10px] font-bold px-2 py-0.5 rounded-md bg-destructive/10 border border-destructive/20 flex-shrink-0"
               >
-                Confirm?
+                Confirmar?
               </motion.button>
             ) : (
               <motion.button

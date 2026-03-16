@@ -42,7 +42,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
         .order("completed_at", { ascending: false });
       if (error) throw error;
       if (data) setTasks(data as Task[]);
-    } catch { toast.error("Failed to load completed tasks"); }
+    } catch { toast.error("Falha ao carregar tasks concluídas"); }
     setLoading(false);
     setHasFetched(true);
   }, [user, today]);
@@ -61,8 +61,8 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
     const prev = [...tasks];
     setTasks(t => t.filter(x => x.id !== taskId));
     const { error } = await supabase.from("tasks").update({ is_completed: false, completed_at: null }).eq("id", taskId);
-    if (error) { toast.error("Failed to restore task"); setTasks(prev); }
-    else { toast.success("Task restored to active list"); onTaskRestored?.(); }
+    if (error) { toast.error("Falha ao restaurar task"); setTasks(prev); }
+    else { toast.success("Task restaurada para lista ativa"); onTaskRestored?.(); }
   };
 
   const handleDelete = async (taskId: string) => {
@@ -71,11 +71,11 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
     const prev = [...tasks];
     setTasks(t => t.filter(x => x.id !== taskId));
     const { error } = await supabase.from("tasks").delete().eq("id", taskId);
-    if (error) { toast.error("Failed to delete task"); setTasks(prev); }
+    if (error) { toast.error("Falha ao excluir task"); setTasks(prev); }
     else {
-      toast("Task deleted", {
+      toast("Task excluída", {
         action: deletedTask ? {
-          label: "Undo",
+          label: "Desfazer",
           onClick: async () => {
             await supabase.from("tasks").insert({
               user_id: deletedTask.user_id,
@@ -102,9 +102,9 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
     setTasks([]);
     for (const id of ids) {
       const { error } = await supabase.from("tasks").delete().eq("id", id);
-      if (error) { toast.error("Failed to clear tasks"); setTasks(prev); return; }
+      if (error) { toast.error("Falha ao limpar tasks"); setTasks(prev); return; }
     }
-    toast.success("All completed tasks cleared");
+    toast.success("Todas as tasks concluídas foram removidas");
   };
 
   const startEdit = (task: Task) => {
@@ -120,8 +120,8 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
     setTasks(t => t.map(x => x.id === taskId ? { ...x, title: editTitle.trim(), project_id: newProjectId } : x));
     setEditingId(null);
     const { error } = await supabase.from("tasks").update({ title: editTitle.trim(), project_id: newProjectId }).eq("id", taskId);
-    if (error) { toast.error("Failed to save"); setTasks(prev); }
-    else { toast.success("Task updated"); fetchCompleted(); }
+    if (error) { toast.error("Falha ao salvar"); setTasks(prev); }
+    else { toast.success("Task atualizada"); fetchCompleted(); }
   };
 
   return (
@@ -135,7 +135,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
           <motion.div animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
             <ChevronRight className="w-4 h-4" />
           </motion.div>
-          <span>Completed today</span>
+          <span>Concluídas hoje</span>
           {hasFetched && tasks.length > 0 && (
             <span className="text-xs font-mono bg-success/10 text-success px-2 py-0.5 rounded-md">{tasks.length}</span>
           )}
@@ -144,12 +144,12 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
         {expanded && tasks.length > 0 && (
           confirmClearAll ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-destructive font-semibold">Delete all?</span>
+              <span className="text-xs text-destructive font-semibold">Excluir todas?</span>
               <motion.button onClick={handleClearAll} whileHover={{ scale: 1.05 }} className="px-3 py-1 rounded-lg bg-destructive text-destructive-foreground text-xs font-bold">
-                Confirm
+                Confirmar
               </motion.button>
               <motion.button onClick={() => setConfirmClearAll(false)} whileHover={{ scale: 1.05 }} className="px-3 py-1 rounded-lg bg-secondary text-foreground text-xs font-bold">
-                Cancel
+                Cancelar
               </motion.button>
             </div>
           ) : (
@@ -159,7 +159,7 @@ const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
               className="text-xs text-muted-foreground/50 hover:text-destructive transition-colors flex items-center gap-1"
             >
               <Trash2 className="w-3 h-3" />
-              Clear all
+              Limpar tudo
             </motion.button>
           )
         )}

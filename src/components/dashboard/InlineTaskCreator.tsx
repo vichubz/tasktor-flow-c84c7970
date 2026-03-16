@@ -59,9 +59,9 @@ const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorP
     });
 
     if (error) {
-      toast.error("Failed to create task");
+      toast.error("Falha ao criar task");
     } else {
-      toast.success("Task created!");
+      toast.success("Task criada!");
       await onCreated();
     }
 

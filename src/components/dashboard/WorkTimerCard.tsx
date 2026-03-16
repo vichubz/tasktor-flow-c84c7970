@@ -82,7 +82,7 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
           }
         }
       } catch {
-        toast.error("Failed to load timer");
+        toast.error("Falha ao carregar timer");
       }
     };
     loadActive();
@@ -112,7 +112,7 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
 
   const handleStart = async () => {
     if (!user || !selectedProject) {
-      if (!selectedProject) toast.error("Select a project first");
+      if (!selectedProject) toast.error("Selecione um projeto primeiro");
       return;
     }
     try {
@@ -138,10 +138,10 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
         pausedSecondsRef.current = 0;
         setIsRunning(true);
         setIsPaused(false);
-        toast.success("Timer started!");
+        toast.success("Timer iniciado!");
       }
     } catch {
-      toast.error("Failed to start timer");
+      toast.error("Falha ao iniciar timer");
     }
   };
 
@@ -151,9 +151,9 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
     pausedSecondsRef.current = seconds;
     if (activeEntryId) {
       const { error } = await supabase.from("time_entries").update({ duration_seconds: seconds }).eq("id", activeEntryId);
-      if (error) toast.error("Failed to pause timer");
+      if (error) toast.error("Falha ao pausar timer");
     }
-    toast("Timer paused", { icon: "⏸️" });
+    toast("Timer pausado", { icon: "⏸️" });
   };
 
   const handleStop = async () => {
@@ -163,9 +163,9 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
     if (activeEntryId) {
       const { error } = await supabase.from("time_entries").update({ ended_at: new Date().toISOString(), duration_seconds: prevSeconds }).eq("id", activeEntryId);
       if (error) {
-        toast.error("Failed to save time");
+        toast.error("Falha ao salvar tempo");
       } else {
-        toast.success("Time saved!");
+        toast.success("Tempo salvo!");
       }
     }
     setActiveEntryId(null);

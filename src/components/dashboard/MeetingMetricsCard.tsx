@@ -83,8 +83,8 @@ const MeetingMetricsCard = ({ projects = [] }: MeetingMetricsCardProps) => {
       summary_id: summaryId === "none" ? null : summaryId,
     });
     setSaving(false);
-    if (error) { toast.error("Failed to save meeting"); return; }
-    toast.success("Meeting saved!");
+    if (error) { toast.error("Falha ao salvar reunião"); return; }
+    toast.success("Reunião salva!");
     setTitle(""); setDurationH("0"); setDurationM("30"); setProjectId("none"); setSummaryId("none");
     setShowForm(false);
     loadMetrics();

@@ -33,12 +33,12 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
   useEffect(() => { fetchProjects(); }, [user]);
 
   const links = [
-    { to: "/home", icon: Rocket, label: "Home" },
+    { to: "/home", icon: Rocket, label: "Início" },
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { to: "/calendar", icon: Calendar, label: "Calendar" },
-    { to: "/meetings-ai", icon: BrainCircuit, label: "Meet Agent" },
-    { to: "/meetings", icon: Video, label: "Meetings" },
-    { to: "/metrics", icon: BarChart3, label: "Metrics" },
+    { to: "/calendar", icon: Calendar, label: "Calendário" },
+    { to: "/meetings-ai", icon: BrainCircuit, label: "Agente IA" },
+    { to: "/meetings", icon: Video, label: "Reuniões" },
+    { to: "/metrics", icon: BarChart3, label: "Métricas" },
   ];
 
   return (
@@ -88,8 +88,8 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
             transition={{ duration: 0.3 }}
             className="px-4 py-3 border-b border-border/10"
           >
-            <p className="text-[11px] text-muted-foreground/70 font-medium">Hello,</p>
-            <p className="text-sm font-medium text-foreground truncate">{profile.name || "User"}</p>
+            <p className="text-[11px] text-muted-foreground/70 font-medium">Olá,</p>
+            <p className="text-sm font-medium text-foreground truncate">{profile.name || "Usuário"}</p>
           </motion.div>
         )}
 
@@ -159,7 +159,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
               </motion.div>
               {!collapsed && (
                 <>
-                  <span className="flex-1 text-left">Projects</span>
+                  <span className="flex-1 text-left">Projetos</span>
                   <div className="flex items-center gap-1">
                     <motion.button
                       onClick={(e) => { e.stopPropagation(); setShowProjects(true); }}
@@ -218,7 +218,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
             }`}
           >
             <Settings className="w-[17px] h-[17px] flex-shrink-0" />
-            {!collapsed && <span>Settings</span>}
+            {!collapsed && <span>Configurações</span>}
           </NavLink>
 
           <button
@@ -226,7 +226,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-muted-foreground/50 hover:text-destructive/70 hover:bg-destructive/[0.05] transition-all duration-200 w-full"
           >
             <LogOut className="w-[17px] h-[17px] flex-shrink-0" />
-            {!collapsed && <span>Sign Out</span>}
+            {!collapsed && <span>Sair</span>}
           </button>
 
           <button

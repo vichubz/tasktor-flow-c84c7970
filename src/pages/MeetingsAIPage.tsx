@@ -102,12 +102,12 @@ const MeetingsAIPage = () => {
       );
 
       if (resp.status === 429) {
-        toast.error("Rate limit exceeded. Try again in a few minutes.");
+        toast.error("Limite de requisições excedido. Tente novamente em alguns minutos.");
         setProcessing(false);
         return;
       }
       if (resp.status === 402) {
-        toast.error("Insufficient credits. Add credits to your workspace.");
+        toast.error("Créditos insuficientes. Adicione créditos ao seu workspace.");
         setProcessing(false);
         return;
       }
@@ -115,7 +115,7 @@ const MeetingsAIPage = () => {
       const data = await resp.json();
 
       if (!data.success) {
-        toast.error(data.error || "Failed to process transcription");
+        toast.error(data.error || "Falha ao processar transcrição");
         setProcessing(false);
         return;
       }
@@ -134,10 +134,10 @@ const MeetingsAIPage = () => {
         result: data.result,
       });
       fetchHistory();
-      toast.success("Transcription processed successfully!");
+      toast.success("Transcrição processada com sucesso!");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to process transcription");
+      toast.error("Falha ao processar transcrição");
     }
     setProcessing(false);
   };
@@ -145,7 +145,7 @@ const MeetingsAIPage = () => {
   const handleCopy = async (text: string, field: string) => {
     await navigator.clipboard.writeText(text);
     setCopiedField(field);
-    toast.success("Copied to clipboard!");
+    toast.success("Copiado para a área de transferência!");
     setTimeout(() => setCopiedField(null), 2000);
   };
 
@@ -174,13 +174,13 @@ const MeetingsAIPage = () => {
     const prev = [...history];
     setHistory(h => h.filter(x => x.id !== id));
     const { error } = await supabase.from("meeting_summaries").delete().eq("id", id);
-    if (error) { toast.error("Failed to delete"); setHistory(prev); }
+    if (error) { toast.error("Falha ao excluir"); setHistory(prev); }
   };
 
   const handleStartEdit = (e: React.MouseEvent, item: MeetingSummary) => {
     e.stopPropagation();
     setEditingId(item.id);
-    setEditingTitle(item.title || item.client || item.objective || "Untitled meeting");
+    setEditingTitle(item.title || item.client || item.objective || "Reunião sem título");
   };
 
   const handleSaveTitle = async (e: React.MouseEvent, id: string) => {
@@ -190,7 +190,7 @@ const MeetingsAIPage = () => {
     setHistory(h => h.map(x => x.id === id ? { ...x, title: editingTitle.trim() } : x));
     setEditingId(null);
     const { error } = await supabase.from("meeting_summaries").update({ title: editingTitle.trim() }).eq("id", id);
-    if (error) { toast.error("Failed to save title"); setHistory(prev); }
+    if (error) { toast.error("Falha ao salvar título"); setHistory(prev); }
   };
 
   const handleCancelEdit = (e: React.MouseEvent) => {
