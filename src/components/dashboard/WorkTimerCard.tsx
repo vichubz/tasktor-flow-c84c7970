@@ -82,7 +82,7 @@ const WorkTimerCard = ({ projects }: { projects: Project[] }) => {
           }
         }
       } catch {
-        toast.error("Failed to load timer");
+        toast.error("Falha ao carregar timer");
       }
     };
     loadActive();
