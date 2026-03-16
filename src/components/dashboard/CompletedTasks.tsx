@@ -8,7 +8,11 @@ import { toast } from "sonner";
 
 type Task = Tables<"tasks"> & { project?: Tables<"projects"> };
 
-const CompletedTasks = () => {
+interface CompletedTasksProps {
+  onTaskRestored?: () => void;
+}
+
+const CompletedTasks = ({ onTaskRestored }: CompletedTasksProps = {}) => {
   const { user } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -46,7 +50,7 @@ const CompletedTasks = () => {
     setTasks(t => t.filter(x => x.id !== taskId));
     const { error } = await supabase.from("tasks").update({ is_completed: false, completed_at: null }).eq("id", taskId);
     if (error) { toast.error("Erro ao restaurar tarefa"); setTasks(prev); }
-    else toast.success("Tarefa restaurada para a lista ativa");
+    else { toast.success("Tarefa restaurada para a lista ativa"); onTaskRestored?.(); }
   };
 
   const handleDelete = async (taskId: string) => {
