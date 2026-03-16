@@ -69,6 +69,15 @@ const AnimatedRoutes = () => {
             </PageTransition>
           </AppLayout>
         } />
+        <Route path="/calendar" element={
+          <AppLayout>
+            <PageTransition>
+              <Suspense fallback={<LoadingFallback />}>
+                <CalendarPage />
+              </Suspense>
+            </PageTransition>
+          </AppLayout>
+        } />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>

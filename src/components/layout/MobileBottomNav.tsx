@@ -43,15 +43,6 @@ const MobileBottomNav = () => {
           </NavLink>
         );
       })}
-      <button
-        onClick={onCalendarToggle}
-        className={`flex flex-col items-center gap-0.5 py-2.5 px-3 min-w-[56px] transition-colors ${
-          calendarOpen ? "text-primary" : "text-muted-foreground/60"
-        }`}
-      >
-        <Calendar className={`w-5 h-5 ${calendarOpen ? "drop-shadow-[0_0_8px_rgba(14,165,195,0.5)]" : ""}`} />
-        <span className="text-[10px] font-medium">Agenda</span>
-      </button>
     </nav>
   );
 };
