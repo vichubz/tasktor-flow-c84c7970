@@ -297,12 +297,6 @@ const Dashboard = () => {
             </div>
           </motion.div>
         )}
-                  );
-                })}
-              </div>
-            </div>
-          </motion.div>
-        )}
 
         {loading && (
           <div className="space-y-3">
