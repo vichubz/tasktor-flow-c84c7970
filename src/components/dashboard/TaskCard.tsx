@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import ConfettiExplosion from "./ConfettiExplosion";
 import { format } from "date-fns";
+import { playCompletionSound } from "@/lib/sounds";
 
 type Task = Tables<"tasks"> & { subtasks?: Tables<"subtasks">[], project?: Tables<"projects"> };
 type Project = Tables<"projects">;
@@ -217,6 +218,7 @@ const TaskCard = ({ task, index, isTop3, isDragging, projects, onComplete, onDel
   const handleComplete = useCallback(() => {
     setShowConfetti(true);
     setCompleting(true);
+    playCompletionSound();
     const msg = SUCCESS_MESSAGES[Math.floor(Math.random() * SUCCESS_MESSAGES.length)];
     toast.success(msg);
     setTimeout(() => {
