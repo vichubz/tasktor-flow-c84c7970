@@ -105,11 +105,11 @@ const MetricsPage = () => {
     : "—";
 
   const statCards = [
-    { icon: CheckCircle2, label: "Tasks Completed", value: animatedCompleted.toString(), color: "text-success", glow: "from-success/10" },
-    { icon: Clock, label: "Time Worked", value: formatHours(totalWorkSeconds), color: "text-primary", glow: "from-primary/10" },
-    { icon: CalendarDays, label: "Meeting Hours", value: `${totalMeetingHours.toFixed(1)}h`, color: "text-accent", glow: "from-accent/10" },
-    { icon: TrendingUp, label: "Avg Tasks/Day", value: avgTasksPerDay, color: "text-primary", glow: "from-primary/10" },
-    { icon: Award, label: "Most Worked", value: mostWorked, color: "text-accent", glow: "from-accent/10" },
+    { icon: CheckCircle2, label: "Tasks Concluídas", value: animatedCompleted.toString(), color: "text-success", glow: "from-success/10" },
+    { icon: Clock, label: "Tempo Trabalhado", value: formatHours(totalWorkSeconds), color: "text-primary", glow: "from-primary/10" },
+    { icon: CalendarDays, label: "Horas de Reunião", value: `${totalMeetingHours.toFixed(1)}h`, color: "text-accent", glow: "from-accent/10" },
+    { icon: TrendingUp, label: "Média Tasks/Dia", value: avgTasksPerDay, color: "text-primary", glow: "from-primary/10" },
+    { icon: Award, label: "Mais Trabalhado", value: mostWorked, color: "text-accent", glow: "from-accent/10" },
   ];
 
   const tooltipStyle = {
