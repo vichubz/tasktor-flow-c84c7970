@@ -401,7 +401,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                   </motion.div>
                 ) : <Clock className="w-3 h-3" />}
                 {isOverdue && <span className="text-[9px] font-bold mr-0.5">Atrasada</span>}
-                {new Date(task.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                {new Date(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })}
               </span>
             )}
 
