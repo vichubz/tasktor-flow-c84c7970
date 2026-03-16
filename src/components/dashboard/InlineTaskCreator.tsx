@@ -101,9 +101,10 @@ const InlineTaskCreator = forwardRef<InlineTaskCreatorHandle, InlineTaskCreatorP
         <div className="w-8 h-8 rounded-full border-2 border-dashed border-muted-foreground/20 flex items-center justify-center group-hover:border-primary/40 transition-colors">
           <Plus className="w-4 h-4 text-muted-foreground/30 group-hover:text-primary/60 transition-colors" />
         </div>
-        <span className="text-sm text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors font-medium">
+        <span className="text-sm text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors font-medium flex-1">
           Adicionar tarefa...
         </span>
+        <kbd className="text-[10px] text-muted-foreground/30 bg-secondary/60 px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
       </motion.button>
     );
   }
