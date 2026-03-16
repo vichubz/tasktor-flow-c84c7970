@@ -47,13 +47,13 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
         transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
         className="h-screen flex flex-col overflow-hidden relative flex-shrink-0"
         style={{
-          background: "linear-gradient(180deg, hsl(var(--card) / 0.6), hsl(var(--card) / 0.4))",
+          background: "linear-gradient(180deg, hsl(200 25% 4.5%), hsl(200 25% 3.5%))",
           borderRight: "1px solid hsl(var(--border) / 0.15)",
           backdropFilter: "blur(24px)",
         }}
       >
         {/* Soft top glow */}
-        <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-primary/[0.03] to-transparent pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-primary/[0.05] to-transparent pointer-events-none" />
 
         {/* Logo */}
         <div className="flex items-center justify-center px-3 py-5 border-b border-border/10 relative z-10">
@@ -72,7 +72,7 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
               transition={{ duration: 0.4 }}
               className="flex items-center justify-center"
             >
-              <img src={logoCompleto} alt="Tasktor" className="h-8 object-contain opacity-90" />
+              <img src={logoCompleto} alt="Tasktor" className="h-8 object-contain" style={{ filter: "drop-shadow(0 0 12px rgba(14,165,195,0.2))" }} />
             </motion.div>
           )}
         </div>
@@ -86,7 +86,7 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
             className="px-4 py-3 border-b border-border/10"
           >
             <p className="text-[11px] text-muted-foreground/50 font-medium">Olá,</p>
-            <p className="text-sm font-medium text-foreground/80 truncate">{profile.name || "Usuário"}</p>
+            <p className="text-sm font-medium text-foreground truncate">{profile.name || "Usuário"}</p>
           </motion.div>
         )}
 
@@ -98,24 +98,48 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
               <NavLink
                 key={link.to}
                 to={link.to}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 relative ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 relative group ${
                   isActive
-                    ? "text-primary"
-                    : "text-muted-foreground/60 hover:text-foreground/80 hover:bg-foreground/[0.04]"
+                    ? "text-foreground"
+                    : "text-muted-foreground/60 hover:text-foreground/90 hover:bg-foreground/[0.04]"
                 }`}
               >
-                <link.icon className="w-[17px] h-[17px] flex-shrink-0" />
-                {!collapsed && <span>{link.label}</span>}
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  className="flex-shrink-0"
+                >
+                  <link.icon className={`w-[17px] h-[17px] ${isActive ? "text-primary" : "group-hover:text-primary transition-colors"}`} />
+                </motion.div>
+                {!collapsed && (
+                  <motion.span
+                    className="transition-all duration-200"
+                    style={{ transform: isActive ? "translateX(0)" : undefined }}
+                    whileHover={{ x: 3 }}
+                  >
+                    {link.label}
+                  </motion.span>
+                )}
                 {isActive && (
-                  <motion.div
-                    layoutId="nav-indicator"
-                    className="absolute inset-0 rounded-xl -z-10"
-                    style={{
-                      background: "hsl(var(--primary) / 0.08)",
-                      border: "1px solid hsl(var(--primary) / 0.1)",
-                    }}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
+                  <>
+                    <motion.div
+                      layoutId="nav-indicator"
+                      className="absolute inset-0 rounded-xl -z-10"
+                      style={{
+                        background: "linear-gradient(90deg, hsl(var(--primary) / 0.12), transparent)",
+                        border: "1px solid hsl(var(--primary) / 0.12)",
+                      }}
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                    <motion.div
+                      layoutId="nav-accent"
+                      className="absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-full -z-10"
+                      style={{
+                        background: "var(--gradient-primary)",
+                        boxShadow: "var(--glow-primary)",
+                      }}
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  </>
                 )}
               </NavLink>
             );
@@ -124,22 +148,26 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
           {/* Calendar */}
           <button
             onClick={onCalendarToggle}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 w-full ${
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 w-full group ${
               calendarOpen
-                ? "text-primary bg-primary/[0.08]"
-                : "text-muted-foreground/60 hover:text-foreground/80 hover:bg-foreground/[0.04]"
+                ? "text-foreground bg-primary/[0.08]"
+                : "text-muted-foreground/60 hover:text-foreground/90 hover:bg-foreground/[0.04]"
             }`}
           >
-            <Calendar className="w-[17px] h-[17px] flex-shrink-0" />
-            {!collapsed && <span>Calendário</span>}
+            <motion.div whileHover={{ scale: 1.1 }} className="flex-shrink-0">
+              <Calendar className={`w-[17px] h-[17px] ${calendarOpen ? "text-primary" : "group-hover:text-primary transition-colors"}`} />
+            </motion.div>
+            {!collapsed && <span>{collapsed ? "" : "Calendário"}</span>}
           </button>
 
           {/* Projects */}
           <button
             onClick={() => setShowProjects(true)}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-muted-foreground/60 hover:text-foreground/80 hover:bg-foreground/[0.04] transition-all duration-200 w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-muted-foreground/60 hover:text-foreground/90 hover:bg-foreground/[0.04] transition-all duration-200 w-full group"
           >
-            <FolderKanban className="w-[17px] h-[17px] flex-shrink-0" />
+            <motion.div whileHover={{ scale: 1.1 }} className="flex-shrink-0">
+              <FolderKanban className="w-[17px] h-[17px] group-hover:text-primary transition-colors" />
+            </motion.div>
             {!collapsed && <span>Projetos</span>}
           </button>
 
@@ -149,12 +177,12 @@ const AppSidebar = ({ onProjectsChange, onCalendarToggle, calendarOpen }: AppSid
               {projects.slice(0, 5).map(p => (
                 <motion.div
                   key={p.id}
-                  whileHover={{ x: 3 }}
-                  className="flex items-center gap-2.5 px-3 py-1.5 text-[12px] text-muted-foreground/45 rounded-lg hover:text-muted-foreground/70 hover:bg-foreground/[0.02] transition-all duration-200 cursor-default"
+                  whileHover={{ x: 4 }}
+                  className="flex items-center gap-2.5 px-3 py-1.5 text-[12px] text-muted-foreground/50 rounded-lg hover:text-muted-foreground/80 hover:bg-foreground/[0.02] transition-all duration-200 cursor-default"
                 >
                   <span
-                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: p.color, boxShadow: `0 0 4px ${p.color}30` }}
+                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: p.color, boxShadow: `0 0 8px ${p.color}40` }}
                   />
                   <span className="truncate">{p.name}</span>
                 </motion.div>

@@ -59,12 +59,10 @@ const Dashboard = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Keyboard shortcut: N = inline task creator
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
       const isInput = tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable;
-
       if ((e.key === "n" || e.key === "N") && !isInput && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
         inlineCreatorRef.current?.activate();
@@ -74,7 +72,6 @@ const Dashboard = () => {
     return () => document.removeEventListener("keydown", handler);
   }, []);
 
-  // Realtime
   useEffect(() => {
     if (!user) return;
     const channel = supabase
@@ -142,7 +139,6 @@ const Dashboard = () => {
   const handleDelete = async (taskId: string) => {
     const deletedTask = tasks.find(t => t.id === taskId);
     const prev = [...tasks];
-    // Remove immediately from UI
     setTasks(p => p.filter(t => t.id !== taskId));
     skipRealtimeRef.current = true;
 
@@ -175,13 +171,25 @@ const Dashboard = () => {
 
   return (
     <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
-      {/* Ambient background */}
+      {/* Ambient background orbs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
-          className="absolute w-[500px] h-[500px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(14,165,195,0.04), transparent 70%)", top: "-10%", right: "-10%" }}
+          className="absolute w-[600px] h-[600px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(14,165,195,0.07), transparent 70%)", top: "-10%", right: "-10%" }}
           animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute w-[400px] h-[400px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(45,190,160,0.06), transparent 70%)", bottom: "5%", left: "-5%" }}
+          animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        />
+        <motion.div
+          className="absolute w-[350px] h-[350px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(16,185,129,0.05), transparent 70%)", bottom: "15%", left: "20%" }}
+          animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.6, 0.3] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 4 }}
         />
       </div>
 
@@ -189,15 +197,17 @@ const Dashboard = () => {
 
       <div className="flex-1 overflow-y-auto px-6 pb-6 relative z-10">
         {/* Task controls */}
-        <div className="flex items-center justify-between mb-6 mt-5">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="flex items-center justify-between mb-6 mt-5"
+        >
           <div className="flex items-center gap-3">
-            <motion.h2
-              initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
-              className="text-xl font-extrabold text-tight font-display gradient-text flex items-center gap-2"
-            >
+            <h2 className="text-xl font-extrabold text-tight font-display gradient-text flex items-center gap-2">
               <Zap className="w-5 h-5 text-primary" />
               Tarefas
-            </motion.h2>
+            </h2>
             <motion.span
               key={filteredTasks.length}
               initial={{ scale: 1.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
@@ -240,7 +250,7 @@ const Dashboard = () => {
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent"
                   animate={{ x: ["-200%", "200%"] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 4 }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                 />
                 <Plus className="w-4 h-4 relative z-10" />
                 <span className="relative z-10">Nova Tarefa</span>
@@ -248,7 +258,7 @@ const Dashboard = () => {
               </Button>
             </motion.div>
           </div>
-        </div>
+        </motion.div>
 
         {loading && (
           <div className="space-y-3">
@@ -276,11 +286,15 @@ const Dashboard = () => {
 
         {!loading && (
           <>
-            {/* Inline task creator */}
             {projects.length > 0 && (
-              <div className="mb-3">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mb-3"
+              >
                 <InlineTaskCreator ref={inlineCreatorRef} projects={projects} onCreated={fetchData} />
-              </div>
+              </motion.div>
             )}
 
             <DragDropContext onDragEnd={handleDragEnd}>
