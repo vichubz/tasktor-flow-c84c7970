@@ -89,7 +89,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
             className="px-4 py-3 border-b border-border/10"
           >
             <p className="text-[11px] text-muted-foreground/70 font-medium">Olá,</p>
-            <p className="text-sm font-medium text-foreground truncate">{profile.name || "User"}</p>
+            <p className="text-sm font-medium text-foreground truncate">{profile.name || "Usuário"}</p>
           </motion.div>
         )}
 
