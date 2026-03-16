@@ -745,10 +745,39 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
                   {/* Subtasks in expanded view */}
                   <div className="space-y-1.5 relative z-10">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      <Sparkles className="w-3 h-3 text-primary/50" />
-                      Subtasks
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
+                        <Sparkles className="w-3 h-3 text-primary/50" />
+                        Subtasks
+                      </span>
+                      <div className="flex items-center gap-1 ml-auto">
+                        {subtasks.length > 0 && (
+                          <motion.button
+                            onClick={handleCopySubtasks}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all"
+                            title="Copiar subtasks"
+                          >
+                            <Copy className="w-3 h-3" />
+                          </motion.button>
+                        )}
+                        {hasClipboard && (
+                          <motion.button
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            onClick={handlePasteSubtasks}
+                            disabled={pastingSubtasks}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all disabled:opacity-30"
+                            title="Colar subtasks"
+                          >
+                            {pastingSubtasks ? <Loader2 className="w-3 h-3 animate-spin" /> : <ClipboardPaste className="w-3 h-3" />}
+                          </motion.button>
+                        )}
+                      </div>
+                    </div>
 
                     {loadingSubtasks && (
                       <div className="space-y-1.5">
