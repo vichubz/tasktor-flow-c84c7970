@@ -5,22 +5,22 @@
 @layer base {
   :root {
     --background: 200 25% 3%;
-    --foreground: 185 30% 95%;
+    --foreground: 210 40% 98%;
 
     --card: 200 22% 7%;
-    --card-foreground: 185 30% 95%;
+    --card-foreground: 210 40% 98%;
 
     --popover: 200 22% 7%;
-    --popover-foreground: 185 30% 95%;
+    --popover-foreground: 210 40% 98%;
 
     --primary: 192 80% 40%;
     --primary-foreground: 200 30% 98%;
 
     --secondary: 200 18% 10%;
-    --secondary-foreground: 185 30% 90%;
+    --secondary-foreground: 210 20% 88%;
 
     --muted: 200 14% 13%;
-    --muted-foreground: 195 14% 50%;
+    --muted-foreground: 210 15% 58%;
 
     --accent: 172 66% 45%;
     --accent-foreground: 200 30% 98%;
@@ -38,17 +38,17 @@
     --radius: 0.75rem;
 
     --sidebar-background: 200 25% 4%;
-    --sidebar-foreground: 195 14% 50%;
+    --sidebar-foreground: 210 15% 58%;
     --sidebar-primary: 192 80% 40%;
     --sidebar-primary-foreground: 200 30% 98%;
     --sidebar-accent: 200 16% 10%;
-    --sidebar-accent-foreground: 185 30% 90%;
+    --sidebar-accent-foreground: 210 20% 88%;
     --sidebar-border: 200 12% 10%;
     --sidebar-ring: 192 80% 40%;
 
     /* Custom tokens — petrol blue palette */
     --glass-bg: rgba(8, 18, 22, 0.75);
-    --glass-border: rgba(40, 180, 200, 0.08);
+    --glass-border: rgba(40, 180, 200, 0.1);
     --glow-primary: 0 0 20px rgba(14, 165, 195, 0.3);
     --glow-accent: 0 0 20px rgba(45, 190, 160, 0.3);
     --glow-success: 0 0 16px rgba(16, 185, 129, 0.3);
@@ -56,7 +56,7 @@
     --gradient-hero: linear-gradient(135deg, hsl(200 80% 20%), hsl(192 80% 35%), hsl(172 66% 40%));
     --gradient-gold: linear-gradient(135deg, hsl(45 93% 47%), hsl(192 80% 50%));
     --gradient-surface: linear-gradient(180deg, rgba(14, 165, 195, 0.06), transparent);
-    --gradient-card: linear-gradient(145deg, rgba(14, 165, 195, 0.04), rgba(45, 190, 160, 0.02), transparent);
+    --gradient-card: linear-gradient(145deg, rgba(14, 165, 195, 0.06), rgba(45, 190, 160, 0.03), transparent);
     --gradient-sidebar: linear-gradient(180deg, hsl(200 25% 4%), hsl(200 25% 6%));
     --neon-primary: 0 0 7px rgba(14, 165, 195, 0.7), 0 0 20px rgba(14, 165, 195, 0.35), 0 0 40px rgba(14, 165, 195, 0.12);
     --neon-accent: 0 0 7px rgba(45, 190, 160, 0.7), 0 0 20px rgba(45, 190, 160, 0.35);
@@ -99,27 +99,27 @@
 @layer utilities {
   .glass {
     background: var(--glass-bg);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(24px);
     border: 1px solid var(--glass-border);
   }
 
   .glass-hover {
     background: var(--glass-bg);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(24px);
     border: 1px solid var(--glass-border);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .glass-hover:hover {
     background: rgba(12, 28, 34, 0.85);
-    border-color: rgba(14, 165, 195, 0.15);
+    border-color: rgba(14, 165, 195, 0.2);
     transform: translateY(-2px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), var(--glow-primary);
   }
 
   .glass-gradient {
     background: linear-gradient(145deg, rgba(14, 165, 195, 0.06), rgba(45, 190, 160, 0.03), var(--glass-bg));
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(24px);
     border: 1px solid var(--glass-border);
   }
 
@@ -209,13 +209,13 @@
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: var(--gradient-gold);
+    background: conic-gradient(from var(--border-angle, 0deg), #0EA5C3, #2DBEA0, #7C3AED, #0EA5C3);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
-    animation: border-rotate 4s linear infinite;
+    animation: rotating-border 6s linear infinite;
   }
 
   .shimmer {
@@ -235,6 +235,7 @@
     filter: blur(80px);
     animation: float 10s ease-in-out infinite;
     pointer-events: none;
+    will-change: transform, opacity;
   }
 
   .card-lift {
@@ -242,8 +243,9 @@
   }
 
   .card-lift:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 24px rgba(14, 165, 195, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 24px rgba(14, 165, 195, 0.12);
+    border-color: rgba(14, 165, 195, 0.2) !important;
   }
 
   .input-glow:focus-within {
@@ -265,7 +267,7 @@
     background: linear-gradient(
       to right,
       transparent 0%,
-      rgba(255, 255, 255, 0.12) 50%,
+      rgba(255, 255, 255, 0.15) 50%,
       transparent 100%
     );
     transform: rotate(30deg) translateX(-100%);
@@ -304,33 +306,112 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 300px;
-    background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(14, 165, 195, 0.08), transparent);
+    height: 400px;
+    background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(14, 165, 195, 0.1), transparent);
     pointer-events: none;
     z-index: 0;
   }
 
-  /* Mesh gradient background */
+  /* Mesh gradient background — more dimension */
   .mesh-gradient {
     background: 
-      radial-gradient(at 20% 20%, rgba(14, 165, 195, 0.06) 0%, transparent 50%),
-      radial-gradient(at 80% 80%, rgba(45, 190, 160, 0.04) 0%, transparent 50%),
-      radial-gradient(at 50% 50%, rgba(14, 165, 195, 0.02) 0%, transparent 50%),
-      hsl(var(--background));
+      radial-gradient(ellipse 60% 50% at 20% 20%, rgba(14, 165, 195, 0.07) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(45, 190, 160, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse 40% 40% at 60% 40%, rgba(124, 58, 237, 0.03) 0%, transparent 50%),
+      linear-gradient(135deg, hsl(200 25% 3.5%), hsl(200 20% 4.5%), hsl(200 25% 3%));
+  }
+
+  /* Dot grid overlay */
+  .dot-grid::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, hsl(var(--primary) / 0.04) 1px, transparent 1px);
+    background-size: 30px 30px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Animated gradient line */
+  .gradient-line-top {
+    position: relative;
+  }
+  .gradient-line-top::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary)), hsl(var(--accent)), transparent);
+    background-size: 200% 100%;
+    animation: gradient-line-move 8s linear infinite;
+    z-index: 50;
+  }
+
+  /* Scroll fade at top */
+  .scroll-fade-top {
+    position: relative;
+  }
+  .scroll-fade-top::before {
+    content: '';
+    position: sticky;
+    top: 0;
+    display: block;
+    height: 24px;
+    margin-bottom: -24px;
+    background: linear-gradient(to bottom, hsl(var(--background)), transparent);
+    pointer-events: none;
+    z-index: 10;
   }
 
   /* Stat card gradient */
   .stat-card {
-    background: linear-gradient(145deg, rgba(14, 165, 195, 0.05), rgba(8, 18, 22, 0.8));
-    border: 1px solid rgba(14, 165, 195, 0.08);
+    background: linear-gradient(145deg, rgba(14, 165, 195, 0.06), rgba(8, 18, 22, 0.85));
+    border: 1px solid rgba(14, 165, 195, 0.12);
   }
 
   .stat-card:hover {
     background: linear-gradient(145deg, rgba(14, 165, 195, 0.1), rgba(8, 18, 22, 0.9));
-    border-color: rgba(14, 165, 195, 0.15);
-    box-shadow: 0 0 30px rgba(14, 165, 195, 0.08);
+    border-color: rgba(14, 165, 195, 0.2);
+    box-shadow: 0 0 30px rgba(14, 165, 195, 0.1);
+  }
+
+  /* Per-type metric card gradients */
+  .stat-card-meeting {
+    background: linear-gradient(145deg, rgba(45, 190, 160, 0.06), rgba(45, 190, 160, 0.02), rgba(8, 18, 22, 0.85));
+    border: 1px solid rgba(45, 190, 160, 0.12);
+  }
+  .stat-card-meeting:hover {
+    border-color: rgba(45, 190, 160, 0.2);
+    box-shadow: 0 0 30px rgba(45, 190, 160, 0.1);
+  }
+
+  .stat-card-calendar {
+    background: linear-gradient(145deg, rgba(14, 165, 195, 0.06), rgba(14, 165, 195, 0.02), rgba(8, 18, 22, 0.85));
+    border: 1px solid rgba(14, 165, 195, 0.12);
+  }
+  .stat-card-calendar:hover {
+    border-color: rgba(14, 165, 195, 0.2);
+    box-shadow: 0 0 30px rgba(14, 165, 195, 0.1);
+  }
+
+  .stat-card-timer {
+    background: linear-gradient(145deg, rgba(124, 58, 237, 0.06), rgba(124, 58, 237, 0.02), rgba(8, 18, 22, 0.85));
+    border: 1px solid rgba(124, 58, 237, 0.12);
+  }
+  .stat-card-timer:hover {
+    border-color: rgba(124, 58, 237, 0.2);
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.1);
+  }
+
+  /* Icon pulse — very subtle */
+  .icon-pulse {
+    animation: icon-breathe 3s ease-in-out infinite;
   }
 }
+
+/* ═══ Keyframes ═══ */
 
 @keyframes pulse-glow {
   0%, 100% {
@@ -339,6 +420,17 @@
   50% {
     box-shadow: 0 0 24px rgba(14, 165, 195, 0.7), 0 0 48px rgba(14, 165, 195, 0.2);
   }
+}
+
+@keyframes rotating-border {
+  from { --border-angle: 0deg; }
+  to { --border-angle: 360deg; }
+}
+
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
 }
 
 @keyframes confetti-pop {
@@ -364,26 +456,31 @@
   50% { opacity: 1; }
 }
 
-@keyframes border-rotate {
-  0% { filter: hue-rotate(0deg); }
-  100% { filter: hue-rotate(360deg); }
-}
-
-@keyframes ring-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(14, 165, 195, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(14, 165, 195, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(14, 165, 195, 0); }
-}
-
 @keyframes gradient-shift {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
+@keyframes gradient-line-move {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes icon-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
 @keyframes breathe {
   0%, 100% { opacity: 0.5; transform: scale(1); }
   50% { opacity: 0.8; transform: scale(1.02); }
+}
+
+@keyframes ring-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(14, 165, 195, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(14, 165, 195, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(14, 165, 195, 0); }
 }
 
 /* ═══ Home Background — Mesh Gradient ═══ */
@@ -446,9 +543,10 @@
 .prose-meeting h1 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #F1F5F9;
+  color: #F8FAFC;
   margin-top: 1.75rem;
   margin-bottom: 1rem;
+  text-shadow: 0 0 20px rgba(14, 165, 195, 0.15);
 }
 .prose-meeting h1:first-child {
   margin-top: 0;
@@ -476,7 +574,7 @@
   line-height: 1.7;
 }
 .prose-meeting strong {
-  color: #F1F5F9;
+  color: #F8FAFC;
   font-weight: 700;
 }
 .prose-meeting ul, .prose-meeting ol {
@@ -512,7 +610,7 @@
   font-size: 0.8125rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #F1F5F9;
+  color: #F8FAFC;
   background: hsl(var(--primary) / 0.1);
   border-bottom: 1px solid hsl(var(--primary) / 0.2);
 }
