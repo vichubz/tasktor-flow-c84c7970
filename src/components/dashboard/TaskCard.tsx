@@ -495,6 +495,29 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               <Sparkles className="w-3.5 h-3.5" />
             </motion.button>
 
+            {/* Difficulty selector */}
+            <div className="flex items-center flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ opacity: difficulty > 0 ? 1 : undefined }}>
+              {[1, 2, 3].map(level => (
+                <motion.button
+                  key={level}
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    const newVal = difficulty === level ? 0 : level;
+                    setDifficulty(newVal);
+                    await supabase.from("tasks").update({ difficulty: newVal } as any).eq("id", task.id);
+                  }}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.85 }}
+                  className={`w-4 h-4 sm:w-[18px] sm:h-[18px] flex items-center justify-center transition-colors ${
+                    level <= difficulty ? "text-orange-400" : "text-muted-foreground/15 hover:text-orange-400/40"
+                  }`}
+                  title={`Dificuldade ${level}`}
+                >
+                  <Zap className={`w-3 h-3 ${level <= difficulty ? "fill-orange-400" : ""}`} />
+                </motion.button>
+              ))}
+            </div>
+
             {/* Highlight toggle */}
             <motion.button
               onClick={handleToggleHighlight}
