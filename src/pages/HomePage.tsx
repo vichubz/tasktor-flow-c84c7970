@@ -36,16 +36,16 @@ const HomePage = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
-        className="absolute top-6 right-8 text-right"
+        className="absolute top-4 right-4 sm:top-6 sm:right-8 text-right"
         style={{ zIndex: 10 }}
       >
-        <div className="font-mono text-sm text-white/40 tracking-wider">
+        <div className="font-mono text-xs sm:text-sm text-white/40 tracking-wider">
           {hours}
           <span className="animate-pulse">:</span>
           {minutes}
           <span className="text-white/20">:{seconds}</span>
         </div>
-        <p className="text-[11px] text-white/20 capitalize mt-0.5">{dateStr}</p>
+        <p className="text-[10px] sm:text-[11px] text-white/20 capitalize mt-0.5 hidden sm:block">{dateStr}</p>
       </motion.div>
 
       {/* ═══ CENTRAL CONTENT ═══ */}
