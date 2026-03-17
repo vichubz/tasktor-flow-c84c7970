@@ -880,7 +880,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Projeto</span>
                     <Select value={task.project_id || "none"} onValueChange={handleProjectChange}>
                       <SelectTrigger className="bg-secondary/40 border-border/30 h-8 text-sm w-full max-w-xs">
-                        <SelectValue placeholder="Select project" />
+                        <SelectValue placeholder="Selecionar projeto" />
                       </SelectTrigger>
                       <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
                         <SelectItem value="none"><span className="text-muted-foreground">No project</span></SelectItem>
