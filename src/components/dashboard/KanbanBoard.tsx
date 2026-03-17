@@ -82,14 +82,13 @@ const KanbanBoard = ({ tasks, projects, filterDifficulty, onComplete, onDelete, 
     }
 
     const unassigned = filteredTasks.filter(t => !t.project_id).sort((a, b) => a.position - b.position);
-    if (unassigned.length > 0 || cols.length === 0) {
-      cols.push({
-        id: "__none__",
-        name: "Sem projeto",
-        color: "hsl(var(--muted-foreground))",
-        tasks: unassigned,
-      });
-    }
+    // Always show "Sem projeto" column so users can drop tasks there
+    cols.push({
+      id: "__none__",
+      name: "Sem projeto",
+      color: "hsl(var(--muted-foreground))",
+      tasks: unassigned,
+    });
 
     return cols;
   }, [filteredTasks, projects]);
