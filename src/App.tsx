@@ -62,7 +62,7 @@ const AnimatedRoutes = () => {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><AuthPage /></PageTransition>} />
         <Route path="/home" element={<WrappedLazy><HomePage /></WrappedLazy>} />
-        <Route path="/dashboard" element={<AppLayout><PageTransition><Dashboard /></PageTransition></AppLayout>} />
+        <Route path="/dashboard" element={<WrappedLazy><Dashboard /></WrappedLazy>} />
         <Route path="/metrics" element={<WrappedLazy><MetricsPage /></WrappedLazy>} />
         <Route path="/meetings-ai" element={<WrappedLazy><MeetingsAIPage /></WrappedLazy>} />
         <Route path="/meetings" element={<WrappedLazy><MeetingsPage /></WrappedLazy>} />

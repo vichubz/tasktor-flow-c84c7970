@@ -33,12 +33,9 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
       <div className="absolute inset-0 bg-gradient-to-r from-primary/8 via-accent/5 to-primary/8 bg-[length:200%_100%] animate-gradient-shift" />
       
       {/* Scanning light effect */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent"
-        animate={{ x: ["-100%", "100%"] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-        style={{ width: "50%" }}
-      />
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent animate-scanning-light" style={{ width: "50%" }} />
+      </div>
 
       {/* Dot pattern overlay */}
       <div className="absolute inset-0 opacity-[0.04]" style={{
