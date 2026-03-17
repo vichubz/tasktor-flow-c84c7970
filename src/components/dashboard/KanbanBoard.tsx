@@ -449,6 +449,7 @@ const KanbanBoard = ({ tasks, projects, filterDifficulty, onComplete, onDelete, 
           </div>
         )}
       </Droppable>
+      </div>
     </DragDropContext>
   );
 };
