@@ -1,12 +1,109 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { motion, AnimatePresence } from "framer-motion";
-import { Inbox, Plus, X, GripVertical } from "lucide-react";
+import { Inbox, Plus, X, GripVertical, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import TaskCard from "./TaskCard";
 import type { Tables } from "@/integrations/supabase/types";
+
+/* Inline task creator for each kanban column */
+const ColumnTaskCreator = ({
+  projectId,
+  userId,
+  onCreated,
+}: {
+  projectId: string | null;
+  userId: string;
+  onCreated: () => void;
+}) => {
+  const [active, setActive] = useState(false);
+  const [title, setTitle] = useState("");
+  const [creating, setCreating] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleCreate = async () => {
+    if (!title.trim() || creating) return;
+    setCreating(true);
+
+    const { data: lastTask } = await supabase
+      .from("tasks")
+      .select("position")
+      .eq("user_id", userId)
+      .eq("is_completed", false)
+      .order("position", { ascending: false })
+      .limit(1);
+
+    const position = lastTask && lastTask.length > 0 ? lastTask[0].position + 1 : 0;
+
+    const { error } = await supabase.from("tasks").insert({
+      user_id: userId,
+      project_id: projectId,
+      title: title.trim(),
+      position,
+    });
+
+    if (error) toast.error("Falha ao criar task");
+    else {
+      toast.success("Task criada!");
+      onCreated();
+    }
+    setTitle("");
+    setCreating(false);
+    inputRef.current?.focus();
+  };
+
+  if (!active) {
+    return (
+      <button
+        onClick={() => {
+          setActive(true);
+          setTimeout(() => inputRef.current?.focus(), 50);
+        }}
+        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground/40 hover:text-muted-foreground/70 hover:bg-secondary/30 transition-all text-xs"
+      >
+        <Plus className="w-3.5 h-3.5" />
+        <span>Add task</span>
+      </button>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex items-center gap-1.5 px-1.5"
+    >
+      <input
+        ref={inputRef}
+        autoFocus
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") { e.preventDefault(); handleCreate(); }
+          if (e.key === "Escape") { setActive(false); setTitle(""); }
+        }}
+        placeholder="Nova task..."
+        disabled={creating}
+        className="flex-1 bg-secondary/50 border border-border/30 rounded-md px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/40 outline-none focus:ring-1 focus:ring-primary/30"
+      />
+      <button
+        onClick={handleCreate}
+        disabled={!title.trim() || creating}
+        className="w-6 h-6 rounded-md flex items-center justify-center bg-primary/15 text-primary hover:bg-primary/25 transition-all disabled:opacity-30 flex-shrink-0"
+      >
+        <Check className="w-3 h-3" />
+      </button>
+      <button
+        onClick={() => { setActive(false); setTitle(""); }}
+        className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all flex-shrink-0"
+      >
+        <X className="w-3 h-3" />
+      </button>
+    </motion.div>
+  );
+};
 
 type Task = Tables<"tasks"> & { subtasks?: Tables<"subtasks">[]; project?: Tables<"projects"> };
 type Project = Tables<"projects">;
@@ -303,6 +400,11 @@ const KanbanBoard = ({ tasks, projects, filterDifficulty, onComplete, onDelete, 
                             </Draggable>
                           ))}
                           {provided.placeholder}
+                          <ColumnTaskCreator
+                            projectId={col.id}
+                            userId={user!.id}
+                            onCreated={onUpdate}
+                          />
                         </div>
                       )}
                     </Droppable>
@@ -379,6 +481,11 @@ const KanbanBoard = ({ tasks, projects, filterDifficulty, onComplete, onDelete, 
                         </Draggable>
                       ))}
                       {provided.placeholder}
+                      <ColumnTaskCreator
+                        projectId={null}
+                        userId={user!.id}
+                        onCreated={onUpdate}
+                      />
                     </div>
                   )}
                 </Droppable>
