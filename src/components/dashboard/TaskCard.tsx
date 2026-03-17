@@ -52,8 +52,16 @@ function getTaskAge(createdAt: string): string {
   return `${Math.floor(diffDays / 30)}m`;
 }
 
-// Cache for subtasks
+// LRU cache for subtasks (max 50 entries)
+const CACHE_MAX = 50;
 const subtaskCache = new Map<string, Tables<"subtasks">[]>();
+function setCacheEntry(key: string, value: Tables<"subtasks">[]) {
+  if (subtaskCache.size >= CACHE_MAX) {
+    const firstKey = subtaskCache.keys().next().value;
+    if (firstKey) subtaskCache.delete(firstKey);
+  }
+  subtaskCache.set(key, value);
+}
 
 // Module-level clipboard for subtasks
 let subtaskClipboard: { titles: string[] } | null = null;
