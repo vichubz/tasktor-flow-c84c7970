@@ -285,7 +285,7 @@ const Dashboard = () => {
                 border: "1px solid rgba(14,165,195,0.1)",
               }}
             >
-              {filteredTasks.length} pending
+              {filteredTasks.length} pendentes
             </motion.span>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
