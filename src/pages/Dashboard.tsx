@@ -295,7 +295,7 @@ const Dashboard = () => {
                 <SelectValue placeholder="Filter" />
               </SelectTrigger>
               <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
-                <SelectItem value="all">All projects</SelectItem>
+                <SelectItem value="all">Todos os projetos</SelectItem>
                 {projects.map(p => (
                   <SelectItem key={p.id} value={p.id}>
                     <span className="flex items-center gap-2">
