@@ -216,14 +216,15 @@ const KanbanBoard = ({ tasks, projects, filterDifficulty, onComplete, onDelete, 
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId="kanban-columns" direction="horizontal" type="COLUMN">
-        {(provided) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory"
-            style={{ minHeight: 300 }}
-          >
+      <div className="overflow-x-auto pb-4" style={{ minHeight: 300 }}>
+        <Droppable droppableId="kanban-columns" direction="horizontal" type="COLUMN">
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className="flex gap-4 snap-x snap-mandatory"
+              style={{ minWidth: "min-content" }}
+            >
             {draggableColumns.map((col, colIdx) => (
               <Draggable key={col.id} draggableId={`col-${col.id}`} index={colIdx}>
                 {(colProvided, colSnapshot) => (
