@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { ChevronDown, ArrowRight, RefreshCw } from "lucide-react";
-import logoCompleto from "@/assets/logo_completo_tasktor.png";
+import logoText from "@/assets/tasktor_logo_text.png";
+import logoSpinVideo from "@/assets/tasktor_logo_spin.mp4";
 import HomeBackground from "@/components/home/HomeBackground";
 import { getDailyQuote, getRandomQuote } from "@/lib/quotes";
 
