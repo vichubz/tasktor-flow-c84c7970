@@ -45,7 +45,7 @@ const Dashboard = () => {
           .eq("user_id", user.id)
           .eq("is_completed", false)
           .order("position", { ascending: true }),
-        supabase.from("projects").select("id, name, color, icon, created_at, user_id").eq("user_id", user.id).order("created_at"),
+        supabase.from("projects").select("*").eq("user_id", user.id).order("position", { ascending: true }),
         supabase
           .from("tasks")
           .select("id", { count: "exact", head: true })
