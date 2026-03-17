@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Trash2, GripVertical, ChevronDown, AlertTriangle, Clock, Sparkles, Plus, X, Loader2, CalendarIcon, Star, Copy, ClipboardPaste, Zap } from "lucide-react";
+import { Check, Trash2, GripVertical, ChevronDown, AlertTriangle, Clock, Sparkles, Plus, X, Loader2, CalendarIcon, Star, Copy, ClipboardPaste, Zap, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Input } from "@/components/ui/input";
@@ -608,7 +608,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               {/* Deadline badge */}
               {task.deadline && (
                 <span
-                  className={`text-[10px] font-mono flex-shrink-0 items-center gap-1 px-2 py-0.5 rounded-md hidden sm:flex ${
+                  className={`text-[9px] font-mono flex-shrink-0 items-center gap-0.5 px-1.5 py-0.5 rounded hidden sm:flex ${
                     isOverdue
                       ? "text-destructive bg-destructive/10 border border-destructive/20"
                       : daysUntilDeadline !== null && daysUntilDeadline <= 2
@@ -618,10 +618,10 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 >
                   {isOverdue ? (
                     <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 0.5, repeat: Infinity }}>
-                      <AlertTriangle className="w-3 h-3" />
+                      <AlertTriangle className="w-2.5 h-2.5" />
                     </motion.div>
-                  ) : <Clock className="w-3 h-3" />}
-                  {isOverdue && <span className="text-[9px] font-bold mr-0.5">Atrasada</span>}
+                  ) : <Clock className="w-2.5 h-2.5" />}
+                  {isOverdue && <span className="text-[8px] font-bold mr-0.5">Atrasada</span>}
                   {new Date(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })}
                 </span>
               )}
@@ -631,23 +631,24 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 <motion.button
                   onClick={handleToggleSubtaskDropdown}
                   whileHover={{ scale: 1.1 }}
-                  className="flex items-center gap-1 flex-shrink-0 px-1.5 py-0.5 rounded-md hover:bg-primary/10 transition-colors"
+                  className="flex items-center gap-0.5 flex-shrink-0 px-1 py-0.5 rounded hover:bg-primary/10 transition-colors"
                 >
                   <motion.div animate={{ rotate: showSubtaskDropdown ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                    <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                    <ChevronDown className="w-3 h-3 text-muted-foreground" />
                   </motion.div>
-                  <span className="text-[10px] font-mono text-muted-foreground">{completedSubtasks}/{totalSubtasks}</span>
+                  <span className="text-[9px] font-mono text-muted-foreground">{completedSubtasks}/{totalSubtasks}</span>
                 </motion.button>
               )}
 
               {/* Edit expand button */}
               <motion.button
                 onClick={handleExpand}
-                whileHover={{ scale: 1.15, backgroundColor: "rgba(14,165,195,0.08)" }}
-                className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md"
+                whileHover={{ scale: 1.15, x: 2 }}
+                whileTap={{ scale: 0.9 }}
+                className="text-foreground/70 hover:text-foreground transition-all flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md bg-secondary/50 hover:bg-secondary/80 border border-border/20"
                 title="Editar detalhes"
               >
-                <Sparkles className="w-3.5 h-3.5" />
+                <ChevronRight className="w-4 h-4" strokeWidth={2.5} />
               </motion.button>
 
               {/* Difficulty selector */}
