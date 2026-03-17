@@ -474,8 +474,8 @@ const Dashboard = () => {
             >
               <Inbox className="w-10 h-10 text-success/50" />
             </motion.div>
-            <p className="text-lg font-display font-extrabold gradient-text">No pending tasks</p>
-            <p className="text-sm mt-1">Click "New Task" to get started</p>
+            <p className="text-lg font-display font-extrabold gradient-text">Nenhuma task pendente</p>
+            <p className="text-sm mt-1">Clique em "Nova Task" para começar</p>
           </motion.div>
         )}
 
