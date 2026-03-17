@@ -200,7 +200,7 @@ const Dashboard = () => {
       setTasks(prev);
       return;
     }
-    toast("Task deleted", {
+    toast("Task excluída", {
       action: deletedTask ? {
         label: "Desfazer",
         onClick: async () => {
