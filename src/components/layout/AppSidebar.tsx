@@ -229,7 +229,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
 
           <button
             onClick={signOut}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-muted-foreground/50 hover:text-destructive/70 hover:bg-destructive/[0.05] transition-all duration-200 w-full"
+            className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-[13px] text-muted-foreground/50 hover:text-destructive/70 hover:bg-destructive/[0.05] transition-all duration-200 w-full"
           >
             <LogOut className="w-[17px] h-[17px] flex-shrink-0" />
             {!collapsed && <span>Sair</span>}
