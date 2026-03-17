@@ -9,7 +9,8 @@ import NewTaskDialog from "@/components/dashboard/NewTaskDialog";
 import CompletedTasks from "@/components/dashboard/CompletedTasks";
 import InlineTaskCreator, { type InlineTaskCreatorHandle } from "@/components/dashboard/InlineTaskCreator";
 import SkeletonTaskCard from "@/components/dashboard/SkeletonTaskCard";
-import { Plus, Filter, Inbox, Sparkles, Zap } from "lucide-react";
+import KanbanBoard from "@/components/dashboard/KanbanBoard";
+import { Plus, Filter, Inbox, Sparkles, Zap, List, Columns } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Tables } from "@/integrations/supabase/types";
@@ -26,6 +27,9 @@ const Dashboard = () => {
   const [filterDifficulty, setFilterDifficulty] = useState<string>("all");
   const [showNewTask, setShowNewTask] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<"list" | "kanban">(() => 
+    (localStorage.getItem("taskViewMode") as "list" | "kanban") || "list"
+  );
   const [todayCompleted, setTodayCompleted] = useState(0);
   const skipRealtimeRef = useRef(false);
   const inlineCreatorRef = useRef<InlineTaskCreatorHandle>(null);
@@ -256,6 +260,22 @@ const Dashboard = () => {
               <Zap className="w-4 sm:w-5 h-4 sm:h-5 text-primary" />
               Tasks
             </h2>
+            <div className="flex items-center rounded-lg p-0.5" style={{ background: "hsl(var(--secondary) / 0.4)", border: "1px solid hsl(var(--border) / 0.2)" }}>
+              <button
+                onClick={() => { setViewMode("list"); localStorage.setItem("taskViewMode", "list"); }}
+                className={`p-1.5 rounded-md transition-all ${viewMode === "list" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                title="Visualização em lista"
+              >
+                <List className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => { setViewMode("kanban"); localStorage.setItem("taskViewMode", "kanban"); }}
+                className={`p-1.5 rounded-md transition-all ${viewMode === "kanban" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                title="Visualização Kanban"
+              >
+                <Columns className="w-3.5 h-3.5" />
+              </button>
+            </div>
             <motion.span
               key={filteredTasks.length}
               initial={{ scale: 1.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
@@ -385,7 +405,7 @@ const Dashboard = () => {
 
         {!loading && (
           <>
-            {projects.length > 0 && (
+            {projects.length > 0 && viewMode === "list" && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -396,34 +416,47 @@ const Dashboard = () => {
               </motion.div>
             )}
 
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="tasks">
-                {(provided) => (
-                  <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-3">
-                    {filteredTasks.map((task, index) => (
-                      <Draggable key={task.id} draggableId={task.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div ref={provided.innerRef} {...provided.draggableProps}>
-                            <TaskCard
-                              task={task}
-                              index={index}
-                              isDragging={snapshot.isDragging}
-                              projects={projects}
-                              onComplete={handleComplete}
-                              onDelete={handleDelete}
-                              onUpdate={fetchData}
-                              onMoveToTop={handleMoveToTop}
-                              dragHandleProps={provided.dragHandleProps}
-                            />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+            {viewMode === "list" ? (
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <Droppable droppableId="tasks">
+                  {(provided) => (
+                    <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-3">
+                      {filteredTasks.map((task, index) => (
+                        <Draggable key={task.id} draggableId={task.id} index={index}>
+                          {(provided, snapshot) => (
+                            <div ref={provided.innerRef} {...provided.draggableProps}>
+                              <TaskCard
+                                task={task}
+                                index={index}
+                                isDragging={snapshot.isDragging}
+                                projects={projects}
+                                onComplete={handleComplete}
+                                onDelete={handleDelete}
+                                onUpdate={fetchData}
+                                onMoveToTop={handleMoveToTop}
+                                dragHandleProps={provided.dragHandleProps}
+                              />
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            ) : (
+              <KanbanBoard
+                tasks={tasks}
+                projects={projects}
+                filterDifficulty={filterDifficulty}
+                onComplete={handleComplete}
+                onDelete={handleDelete}
+                onUpdate={fetchData}
+                onMoveToTop={handleMoveToTop}
+                setTasks={setTasks}
+              />
+            )}
           </>
         )}
 
