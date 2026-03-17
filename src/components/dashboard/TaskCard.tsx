@@ -138,6 +138,14 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   const titleDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const descDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Cleanup debounce timers on unmount
+  useEffect(() => {
+    return () => {
+      if (titleDebounceRef.current) clearTimeout(titleDebounceRef.current);
+      if (descDebounceRef.current) clearTimeout(descDebounceRef.current);
+    };
+  }, []);
+
   useEffect(() => { setTitle(task.title); }, [task.title]);
   useEffect(() => { setDescription(task.description || ""); }, [task.description]);
   useEffect(() => { if (task.subtasks) setSubtasks(task.subtasks); }, [task.subtasks]);
