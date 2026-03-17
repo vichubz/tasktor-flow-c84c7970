@@ -27,6 +27,9 @@ const Dashboard = () => {
   const [filterDifficulty, setFilterDifficulty] = useState<string>("all");
   const [showNewTask, setShowNewTask] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<"list" | "kanban">(() => 
+    (localStorage.getItem("taskViewMode") as "list" | "kanban") || "list"
+  );
   const [todayCompleted, setTodayCompleted] = useState(0);
   const skipRealtimeRef = useRef(false);
   const inlineCreatorRef = useRef<InlineTaskCreatorHandle>(null);
