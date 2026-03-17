@@ -121,6 +121,9 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     const newVal = !highlighted;
     setHighlighted(newVal);
     await supabase.from("tasks").update({ is_highlighted: newVal } as any).eq("id", task.id);
+    if (newVal && index > 0 && onMoveToTop) {
+      onMoveToTop(task.id);
+    }
   };
 
   const titleDebounceRef = useRef<NodeJS.Timeout | null>(null);
