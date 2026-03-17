@@ -321,6 +321,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
       >
         <div
           className="rounded-xl overflow-hidden relative"
+          onDoubleClick={(e) => { e.preventDefault(); handleExpand(); }}
           style={{
             background: highlighted
               ? "linear-gradient(145deg, hsl(var(--primary) / 0.06), hsl(var(--accent) / 0.03), hsl(var(--card)))"
