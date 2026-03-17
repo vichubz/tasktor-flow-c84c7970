@@ -855,7 +855,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
                   {/* Description */}
                   <div className="mb-3 relative z-10">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Description</span>
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Descrição</span>
                     {isEditingDesc ? (
                       <textarea
                         autoFocus value={description}
