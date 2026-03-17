@@ -44,7 +44,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
   return (
     <>
       <motion.div
-        animate={{ width: collapsed ? 56 : 200 }}
+        animate={{ width: collapsed ? 52 : 180 }}
         transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
         className="h-screen flex flex-col overflow-hidden relative flex-shrink-0"
         style={{
