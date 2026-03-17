@@ -450,6 +450,10 @@
     --glow-c1: rgba(124, 58, 237, 0.5);
     --glow-c2: rgba(14, 165, 195, 0.35);
   }
+  .glow-card-amber {
+    --glow-c1: rgba(245, 158, 11, 0.5);
+    --glow-c2: rgba(234, 88, 12, 0.35);
+  }
 
   /* Per-type metric card gradients */
   .stat-card-meeting {
