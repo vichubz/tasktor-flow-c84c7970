@@ -214,7 +214,7 @@ const Dashboard = () => {
             deadline: deletedTask.deadline,
           });
           if (!restoreError) fetchData();
-          else toast.error("Failed to restore task");
+          else toast.error("Falha ao restaurar task");
         },
       } : undefined,
       duration: 5000,
