@@ -63,7 +63,7 @@ function setSubtaskClipboard(data: { titles: string[] } | null) {
   clipboardListeners.forEach(fn => fn());
 }
 
-const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onUpdate, onMoveToTop, dragHandleProps }: TaskCardProps) => {
+const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onUpdate, onMoveToTop, dragHandleProps, compact }: TaskCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
