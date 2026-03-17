@@ -400,6 +400,11 @@ const KanbanBoard = ({ tasks, projects, filterDifficulty, onComplete, onDelete, 
                             </Draggable>
                           ))}
                           {provided.placeholder}
+                          <ColumnTaskCreator
+                            projectId={col.id}
+                            userId={user!.id}
+                            onCreated={onUpdate}
+                          />
                         </div>
                       )}
                     </Droppable>
