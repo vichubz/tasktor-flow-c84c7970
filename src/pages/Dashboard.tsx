@@ -312,11 +312,11 @@ const Dashboard = () => {
                 <SelectValue placeholder="Difficulty" />
               </SelectTrigger>
               <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
-                <SelectItem value="all">All levels</SelectItem>
-                <SelectItem value="0">No level</SelectItem>
-                <SelectItem value="1"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Easy</span></SelectItem>
-                <SelectItem value="2"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Medium</span></SelectItem>
-                <SelectItem value="3"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Hard</span></SelectItem>
+                <SelectItem value="all">Todos os níveis</SelectItem>
+                <SelectItem value="0">Sem nível</SelectItem>
+                <SelectItem value="1"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Fácil</span></SelectItem>
+                <SelectItem value="2"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Médio</span></SelectItem>
+                <SelectItem value="3"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Difícil</span></SelectItem>
               </SelectContent>
             </Select>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
