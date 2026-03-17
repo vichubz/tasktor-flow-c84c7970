@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Trash2, GripVertical, ChevronDown, AlertTriangle, Clock, Sparkles, Plus, X, Loader2, CalendarIcon, Star, Copy, ClipboardPaste, Zap, ArrowUpToLine } from "lucide-react";
+import { Check, Trash2, GripVertical, ChevronDown, AlertTriangle, Clock, Sparkles, Plus, X, Loader2, CalendarIcon, Star, Copy, ClipboardPaste, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Input } from "@/components/ui/input";
