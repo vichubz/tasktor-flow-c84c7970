@@ -183,6 +183,7 @@ export type Database = {
           icon: string | null
           id: string
           name: string
+          position: number
           user_id: string
         }
         Insert: {
@@ -191,6 +192,7 @@ export type Database = {
           icon?: string | null
           id?: string
           name: string
+          position?: number
           user_id: string
         }
         Update: {
@@ -199,6 +201,7 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string
+          position?: number
           user_id?: string
         }
         Relationships: []
@@ -331,6 +334,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      reorder_projects: {
+        Args: { new_positions: number[]; project_ids: string[] }
+        Returns: undefined
+      }
       reorder_tasks: {
         Args: { new_positions: number[]; task_ids: string[] }
         Returns: undefined
