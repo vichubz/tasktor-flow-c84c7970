@@ -41,7 +41,7 @@ const Dashboard = () => {
       const [tasksRes, projectsRes, completedRes] = await Promise.all([
         supabase
           .from("tasks")
-          .select("*, project:projects(id, name, color)")
+          .select("*, project:projects(id, name, color), subtasks(*)")
           .eq("user_id", user.id)
           .eq("is_completed", false)
           .order("position", { ascending: true }),
@@ -65,7 +65,7 @@ const Dashboard = () => {
         // Retry once after 2s on network failure
         setTimeout(() => fetchData(false), 2000);
       } else {
-        toast.error("Failed to load data. Please reload the page.");
+        toast.error("Falha ao carregar dados. Recarregue a página.");
         setLoading(false);
       }
     }
@@ -131,7 +131,7 @@ const Dashboard = () => {
       });
       if (error) throw error;
     } catch {
-      toast.error("Failed to reorder tasks");
+      toast.error("Falha ao reordenar tasks");
       fetchData();
     }
   };
@@ -148,7 +148,7 @@ const Dashboard = () => {
     }).eq("id", taskId);
 
     if (error) {
-      toast.error("Failed to complete task");
+      toast.error("Falha ao concluir task");
       setTasks(prev);
       setTodayCompleted(p => p - 1);
     }
@@ -183,7 +183,7 @@ const Dashboard = () => {
       });
       if (error) throw error;
     } catch {
-      toast.error("Failed to move task");
+      toast.error("Falha ao mover task");
       fetchData();
     }
   };
@@ -196,13 +196,13 @@ const Dashboard = () => {
 
     const { error } = await supabase.from("tasks").delete().eq("id", taskId);
     if (error) {
-      toast.error("Failed to delete task");
+      toast.error("Falha ao excluir task");
       setTasks(prev);
       return;
     }
-    toast("Task deleted", {
+    toast("Task excluída", {
       action: deletedTask ? {
-        label: "Undo",
+        label: "Desfazer",
         onClick: async () => {
           skipRealtimeRef.current = true;
           const { error: restoreError } = await supabase.from("tasks").insert({
@@ -214,7 +214,7 @@ const Dashboard = () => {
             deadline: deletedTask.deadline,
           });
           if (!restoreError) fetchData();
-          else toast.error("Failed to restore task");
+          else toast.error("Falha ao restaurar task");
         },
       } : undefined,
       duration: 5000,
@@ -285,7 +285,7 @@ const Dashboard = () => {
                 border: "1px solid rgba(14,165,195,0.1)",
               }}
             >
-              {filteredTasks.length} pending
+              {filteredTasks.length} pendentes
             </motion.span>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
@@ -295,7 +295,7 @@ const Dashboard = () => {
                 <SelectValue placeholder="Filter" />
               </SelectTrigger>
               <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
-                <SelectItem value="all">All projects</SelectItem>
+                <SelectItem value="all">Todos os projetos</SelectItem>
                 {projects.map(p => (
                   <SelectItem key={p.id} value={p.id}>
                     <span className="flex items-center gap-2">
@@ -312,11 +312,11 @@ const Dashboard = () => {
                 <SelectValue placeholder="Difficulty" />
               </SelectTrigger>
               <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
-                <SelectItem value="all">All levels</SelectItem>
-                <SelectItem value="0">No level</SelectItem>
-                <SelectItem value="1"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Easy</span></SelectItem>
-                <SelectItem value="2"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Medium</span></SelectItem>
-                <SelectItem value="3"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Hard</span></SelectItem>
+                <SelectItem value="all">Todos os níveis</SelectItem>
+                <SelectItem value="0">Sem nível</SelectItem>
+                <SelectItem value="1"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Fácil</span></SelectItem>
+                <SelectItem value="2"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Médio</span></SelectItem>
+                <SelectItem value="3"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Difícil</span></SelectItem>
               </SelectContent>
             </Select>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
@@ -334,8 +334,8 @@ const Dashboard = () => {
                   transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                 />
                 <Plus className="w-4 h-4 relative z-10" />
-                <span className="relative z-10 hidden sm:inline">New Task</span>
-                <span className="relative z-10 sm:hidden">New</span>
+                <span className="relative z-10 hidden sm:inline">Nova Task</span>
+                <span className="relative z-10 sm:hidden">Nova</span>
                 <kbd className="relative z-10 ml-1 text-[10px] bg-white/10 px-1.5 py-0.5 rounded font-mono hidden sm:inline">N</kbd>
               </Button>
             </motion.div>
@@ -398,8 +398,8 @@ const Dashboard = () => {
             >
               <Sparkles className="w-10 h-10 text-primary/60" />
             </motion.div>
-            <p className="text-lg mb-2 font-display font-extrabold gradient-text">Create your first project to get started</p>
-            <p className="text-sm">Use the sidebar to manage your projects</p>
+            <p className="text-lg mb-2 font-display font-extrabold gradient-text">Crie seu primeiro projeto para começar</p>
+            <p className="text-sm">Use a barra lateral para gerenciar seus projetos</p>
           </motion.div>
         )}
 
@@ -474,8 +474,8 @@ const Dashboard = () => {
             >
               <Inbox className="w-10 h-10 text-success/50" />
             </motion.div>
-            <p className="text-lg font-display font-extrabold gradient-text">No pending tasks</p>
-            <p className="text-sm mt-1">Click "New Task" to get started</p>
+            <p className="text-lg font-display font-extrabold gradient-text">Nenhuma task pendente</p>
+            <p className="text-sm mt-1">Clique em "Nova Task" para começar</p>
           </motion.div>
         )}
 

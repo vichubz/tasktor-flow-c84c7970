@@ -515,7 +515,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               <div
                 {...dragHandleProps}
                 className="flex-shrink-0 cursor-grab touch-none active:cursor-grabbing"
-                title="Drag task"
+                title="Arrastar task"
               >
                 <GripVertical className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-muted-foreground/20 hover:text-muted-foreground/60 transition-colors" />
               </div>
@@ -822,7 +822,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     <Input
                       value={newSubtaskTitle}
                       onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                      placeholder="Add subtask..."
+                      placeholder="Adicionar subtask..."
                       className="bg-secondary/40 border-border/30 h-7 text-xs"
                       onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSubtask())}
                     />
@@ -855,7 +855,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
                   {/* Description */}
                   <div className="mb-3 relative z-10">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Description</span>
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Descrição</span>
                     {isEditingDesc ? (
                       <textarea
                         autoFocus value={description}
@@ -866,24 +866,24 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                           if (e.key === "Escape") { setDescription(task.description || ""); setIsEditingDesc(false); }
                         }}
                         className="w-full bg-secondary/40 text-sm text-foreground rounded-lg p-2.5 outline-none border border-primary/20 min-h-[50px] resize-none"
-                        placeholder="Add a description... (Enter to save, Shift+Enter for new line)"
+                        placeholder="Adicione uma descrição... (Enter para salvar, Shift+Enter para nova linha)"
                       />
                     ) : (
                       <p onClick={() => setIsEditingDesc(true)} className="text-sm text-muted-foreground leading-relaxed cursor-text hover:text-foreground transition-colors min-h-[20px] p-1.5 rounded-md hover:bg-secondary/30">
-                        {task.description || "Click to add description..."}
+                        {task.description || "Clique para adicionar descrição..."}
                       </p>
                     )}
                   </div>
 
                   {/* Project selector */}
                   <div className="mb-3 relative z-10">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Project</span>
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Projeto</span>
                     <Select value={task.project_id || "none"} onValueChange={handleProjectChange}>
                       <SelectTrigger className="bg-secondary/40 border-border/30 h-8 text-sm w-full max-w-xs">
-                        <SelectValue placeholder="Select project" />
+                        <SelectValue placeholder="Selecionar projeto" />
                       </SelectTrigger>
                       <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
-                        <SelectItem value="none"><span className="text-muted-foreground">No project</span></SelectItem>
+                        <SelectItem value="none"><span className="text-muted-foreground">Sem projeto</span></SelectItem>
                         {projects.map(p => (
                           <SelectItem key={p.id} value={p.id}>
                             <span className="flex items-center gap-2">
@@ -898,15 +898,15 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
                   {/* Deadline editor */}
                   <div className="mb-3 relative z-10">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Deadline</span>
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Prazo</span>
                     <div className="flex items-center gap-2">
                       <Popover>
                         <PopoverTrigger asChild>
                           <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-secondary/40 border border-border/30 text-sm hover:border-primary/30 transition-colors">
                             <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground" />
                             {task.deadline
-                              ? new Date(task.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                              : <span className="text-muted-foreground/50">Set deadline</span>}
+                              ? new Date(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric", year: "numeric" })
+                              : <span className="text-muted-foreground/50">Definir prazo</span>}
                           </button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
@@ -1027,7 +1027,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       <Input
                         value={newSubtaskTitle}
                         onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                        placeholder="Add subtask..."
+                        placeholder="Adicionar subtask..."
                         className="bg-secondary/40 border-border/30 h-7 text-xs"
                         onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSubtask())}
                       />
