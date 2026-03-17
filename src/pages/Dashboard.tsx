@@ -196,7 +196,7 @@ const Dashboard = () => {
 
     const { error } = await supabase.from("tasks").delete().eq("id", taskId);
     if (error) {
-      toast.error("Failed to delete task");
+      toast.error("Falha ao excluir task");
       setTasks(prev);
       return;
     }
