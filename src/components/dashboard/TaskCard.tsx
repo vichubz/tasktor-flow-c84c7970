@@ -883,7 +883,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                         <SelectValue placeholder="Selecionar projeto" />
                       </SelectTrigger>
                       <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
-                        <SelectItem value="none"><span className="text-muted-foreground">No project</span></SelectItem>
+                        <SelectItem value="none"><span className="text-muted-foreground">Sem projeto</span></SelectItem>
                         {projects.map(p => (
                           <SelectItem key={p.id} value={p.id}>
                             <span className="flex items-center gap-2">
