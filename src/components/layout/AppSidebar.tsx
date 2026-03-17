@@ -100,7 +100,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 px-2.5 space-y-0.5 relative z-10">
+        <nav className="flex-1 py-3 px-2 space-y-0.5 relative z-10 overflow-y-auto">
           {links.map(link => {
             const isActive = location.pathname === link.to;
             return (
