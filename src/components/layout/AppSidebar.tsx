@@ -44,7 +44,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
   return (
     <>
       <motion.div
-        animate={{ width: collapsed ? 64 : 224 }}
+        animate={{ width: collapsed ? 56 : 200 }}
         transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
         className="h-screen flex flex-col overflow-hidden relative flex-shrink-0"
         style={{
@@ -56,14 +56,20 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
         {/* Soft top glow */}
         <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-primary/[0.05] to-transparent pointer-events-none" />
 
-        {/* Logo with spin effect */}
-        <div className="flex items-center px-3 py-5 border-b border-border/10 relative z-10" style={{ justifyContent: collapsed ? "center" : "flex-start" }}>
+        {/* Logo */}
+        <div
+          className="flex items-center border-b border-border/10 relative z-10"
+          style={{
+            justifyContent: collapsed ? "center" : "flex-start",
+            padding: collapsed ? "16px 0" : "16px 14px",
+          }}
+        >
           <div className="logo-icon-wrapper relative flex-shrink-0">
             <div className="logo-glow absolute -inset-2 rounded-full pointer-events-none" />
             <img
               src={logoIcone}
               alt="Tasktor"
-              className="w-9 h-9 object-contain logo-float"
+              className="w-8 h-8 object-contain logo-float"
               style={{ filter: "drop-shadow(0 0 14px hsl(192 80% 40% / 0.35))" }}
             />
           </div>
@@ -74,7 +80,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.35 }}
-              className="h-[1.875rem] object-contain ml-2.5"
+              className="h-7 object-contain ml-2"
               style={{ filter: "drop-shadow(0 0 10px hsl(192 80% 40% / 0.15))" }}
             />
           )}
