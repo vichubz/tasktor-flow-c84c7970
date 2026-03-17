@@ -877,7 +877,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
                   {/* Project selector */}
                   <div className="mb-3 relative z-10">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Project</span>
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Projeto</span>
                     <Select value={task.project_id || "none"} onValueChange={handleProjectChange}>
                       <SelectTrigger className="bg-secondary/40 border-border/30 h-8 text-sm w-full max-w-xs">
                         <SelectValue placeholder="Select project" />
