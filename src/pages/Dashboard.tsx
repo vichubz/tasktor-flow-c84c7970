@@ -183,7 +183,7 @@ const Dashboard = () => {
       });
       if (error) throw error;
     } catch {
-      toast.error("Failed to move task");
+      toast.error("Falha ao mover task");
       fetchData();
     }
   };
