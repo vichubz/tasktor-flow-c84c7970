@@ -455,6 +455,7 @@ const Dashboard = () => {
                 onUpdate={fetchData}
                 onMoveToTop={handleMoveToTop}
                 setTasks={setTasks}
+                setProjects={setProjects}
               />
             )}
           </>
