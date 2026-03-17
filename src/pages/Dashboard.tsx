@@ -225,24 +225,9 @@ const Dashboard = () => {
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
       {/* Ambient background orbs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <motion.div
-          className="absolute w-[600px] h-[600px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(14,165,195,0.07), transparent 70%)", top: "-10%", right: "-10%" }}
-          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute w-[400px] h-[400px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(45,190,160,0.06), transparent 70%)", bottom: "5%", left: "-5%" }}
-          animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        />
-        <motion.div
-          className="absolute w-[350px] h-[350px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(16,185,129,0.05), transparent 70%)", bottom: "15%", left: "20%" }}
-          animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 4 }}
-        />
+        <div className="absolute w-[600px] h-[600px] rounded-full animate-orb-pulse" style={{ background: "radial-gradient(circle, rgba(14,165,195,0.07), transparent 70%)", top: "-10%", right: "-10%" }} />
+        <div className="absolute w-[400px] h-[400px] rounded-full animate-orb-pulse-slow" style={{ background: "radial-gradient(circle, rgba(45,190,160,0.06), transparent 70%)", bottom: "5%", left: "-5%" }} />
+        <div className="absolute w-[350px] h-[350px] rounded-full animate-orb-pulse-slower" style={{ background: "radial-gradient(circle, rgba(16,185,129,0.05), transparent 70%)", bottom: "15%", left: "20%" }} />
       </div>
 
       <DashboardHeader projects={projects} todayCompleted={todayCompleted} />

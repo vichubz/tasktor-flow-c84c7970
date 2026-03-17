@@ -52,8 +52,16 @@ function getTaskAge(createdAt: string): string {
   return `${Math.floor(diffDays / 30)}m`;
 }
 
-// Cache for subtasks
+// LRU cache for subtasks (max 50 entries)
+const CACHE_MAX = 50;
 const subtaskCache = new Map<string, Tables<"subtasks">[]>();
+function setCacheEntry(key: string, value: Tables<"subtasks">[]) {
+  if (subtaskCache.size >= CACHE_MAX) {
+    const firstKey = subtaskCache.keys().next().value;
+    if (firstKey) subtaskCache.delete(firstKey);
+  }
+  subtaskCache.set(key, value);
+}
 
 // Module-level clipboard for subtasks
 let subtaskClipboard: { titles: string[] } | null = null;
@@ -130,6 +138,14 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   const titleDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const descDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Cleanup debounce timers on unmount
+  useEffect(() => {
+    return () => {
+      if (titleDebounceRef.current) clearTimeout(titleDebounceRef.current);
+      if (descDebounceRef.current) clearTimeout(descDebounceRef.current);
+    };
+  }, []);
+
   useEffect(() => { setTitle(task.title); }, [task.title]);
   useEffect(() => { setDescription(task.description || ""); }, [task.description]);
   useEffect(() => { if (task.subtasks) setSubtasks(task.subtasks); }, [task.subtasks]);
@@ -146,7 +162,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     try {
       const { data, error } = await supabase.from("subtasks").select("*").eq("task_id", task.id).order("position");
       if (error) throw error;
-      if (data) { setSubtasks(data); subtaskCache.set(task.id, data); }
+      if (data) { setSubtasks(data); setCacheEntry(task.id, data); }
     } catch { toast.error("Falha ao carregar subtasks"); }
     setLoadingSubtasks(false);
   }, [task.id]);
@@ -305,7 +321,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   return (
     <AnimatePresence>
       <motion.div
-        layout
+        layout={false}
         initial={{ opacity: 0, y: 16, scale: 0.97 }}
         animate={completing
           ? { scale: [1, 1.02, 0.95], x: [0, 0, 200], opacity: [1, 1, 0] }
@@ -935,7 +951,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
                         <Sparkles className="w-3 h-3 text-primary/50" />
-                        Subtasks
+                        Subtarefas
                       </span>
                       <div className="flex items-center gap-1 ml-auto">
                         {subtasks.length > 0 && (

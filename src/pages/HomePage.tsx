@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { ChevronDown, ArrowRight, RefreshCw } from "lucide-react";
+import { ArrowRight, RefreshCw } from "lucide-react";
 import logoCompleto from "@/assets/logo_completo_tasktor.png";
 import HomeBackground from "@/components/home/HomeBackground";
 import { getDailyQuote, getRandomQuote } from "@/lib/quotes";
@@ -143,18 +143,6 @@ const HomePage = () => {
           </motion.div>
         </motion.div>
 
-        {/* Tagline */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8, duration: 1 }}
-          className="mb-8 sm:mb-12">
-          
-          
-
-          
-        </motion.div>
-
         {/* Quote */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -203,21 +191,6 @@ const HomePage = () => {
         </motion.button>
       </div>
 
-      {/* ═══ BOTTOM CHEVRON ═══ */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        style={{ zIndex: 10 }}>
-        
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-          
-          <ChevronDown className="w-5 h-5 text-white/15" />
-        </motion.div>
-      </motion.div>
     </div>);
 
 };
