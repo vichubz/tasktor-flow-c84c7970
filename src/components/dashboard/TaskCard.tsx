@@ -520,7 +520,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               {/* Position badge */}
               <motion.div
                 whileHover={{ scale: 1.1 }}
-                className="flex items-center justify-center min-w-[24px] sm:min-w-[28px] h-6 sm:h-7 rounded-md font-mono text-[10px] sm:text-xs font-bold bg-secondary/60 text-muted-foreground"
+                className="flex items-center justify-center min-w-[20px] sm:min-w-[22px] h-5 sm:h-6 rounded-md font-mono text-[9px] sm:text-[10px] font-bold bg-secondary/60 text-muted-foreground -ml-0.5"
               >
                 <span className="relative z-10">#{index + 1}</span>
               </motion.div>
@@ -530,7 +530,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 onClick={handleComplete}
                 whileHover={{ scale: 1.2 }}
                 whileTap={{ scale: 0.85 }}
-                className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center hover:border-success transition-all flex-shrink-0 group/btn relative overflow-hidden"
+                className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center hover:border-success transition-all flex-shrink-0 group/btn relative overflow-hidden -ml-0.5"
               >
                 <motion.div
                   className="absolute inset-0 rounded-full"
