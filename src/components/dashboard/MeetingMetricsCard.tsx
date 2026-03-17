@@ -34,7 +34,10 @@ const MeetingMetricsCard = ({ projects = [] }: MeetingMetricsCardProps) => {
   const [summaryId, setSummaryId] = useState("none");
   const [summaries, setSummaries] = useState<Summary[]>([]);
 
-  const today = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const today = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }, []);
 
   const loadMetrics = async () => {
     if (!user) return;
