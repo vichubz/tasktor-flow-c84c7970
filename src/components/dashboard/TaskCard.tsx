@@ -590,7 +590,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               {task.project ? (
                 <motion.span
                   whileHover={{ scale: 1.08 }}
-                  className="text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:py-1 rounded-md flex-shrink-0 cursor-default hidden sm:inline-flex"
+                  className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0 cursor-default hidden sm:inline-flex"
                   style={{
                     background: `linear-gradient(135deg, ${task.project.color}20, ${task.project.color}08)`,
                     color: task.project.color,
@@ -600,7 +600,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                   {task.project.name}
                 </motion.span>
               ) : (
-                <span className="text-[10px] font-medium px-2 py-0.5 rounded-md flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/30 hidden sm:inline-flex">
+                <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-md flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/30 hidden sm:inline-flex">
                   Sem projeto
                 </span>
               )}
