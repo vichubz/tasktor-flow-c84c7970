@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
-import { motion } from "framer-motion";
-import { Inbox } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Inbox, Plus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 import TaskCard from "./TaskCard";
 import type { Tables } from "@/integrations/supabase/types";
 
