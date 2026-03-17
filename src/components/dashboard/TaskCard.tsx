@@ -898,7 +898,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
                   {/* Deadline editor */}
                   <div className="mb-3 relative z-10">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Deadline</span>
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Prazo</span>
                     <div className="flex items-center gap-2">
                       <Popover>
                         <PopoverTrigger asChild>
