@@ -10,6 +10,7 @@ import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/NotFound";
 
 const MetricsPage = lazy(() => import("@/pages/MetricsPage"));
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const HomePage = lazy(() => import("@/pages/HomePage"));
 const MeetingsAIPage = lazy(() => import("@/pages/MeetingsAIPage"));
 const CalendarPage = lazy(() => import("@/pages/CalendarPage"));
