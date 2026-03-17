@@ -7,7 +7,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { lazy, Suspense } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import AuthPage from "@/pages/AuthPage";
-import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/NotFound";
 
 const MetricsPage = lazy(() => import("@/pages/MetricsPage"));
