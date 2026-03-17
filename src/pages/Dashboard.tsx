@@ -9,6 +9,7 @@ import NewTaskDialog from "@/components/dashboard/NewTaskDialog";
 import CompletedTasks from "@/components/dashboard/CompletedTasks";
 import InlineTaskCreator, { type InlineTaskCreatorHandle } from "@/components/dashboard/InlineTaskCreator";
 import SkeletonTaskCard from "@/components/dashboard/SkeletonTaskCard";
+import KanbanBoard from "@/components/dashboard/KanbanBoard";
 import { Plus, Filter, Inbox, Sparkles, Zap, List, Columns } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
