@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
-import { CalendarDays, Clock, CheckCircle2, TrendingUp, Award } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { CalendarDays, CheckCircle2, TrendingUp, Award, Zap } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
@@ -27,7 +27,6 @@ const MetricsPage = () => {
   const [period, setPeriod] = useState("week");
   const [projects, setProjects] = useState<{ id: string; name: string; color: string }[]>([]);
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
-  const [timeEntries, setTimeEntries] = useState<any[]>([]);
   const [meetingLogs, setMeetingLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,19 +42,17 @@ const MetricsPage = () => {
       const startStr = startDate.toISOString();
 
       try {
-        const [tasksRes, projectsRes, timeRes, meetingRes] = await Promise.all([
-          supabase.from("tasks").select("id, title, completed_at, created_at, project_id, project:projects(name, color)").eq("user_id", user.id).eq("is_completed", true).gte("completed_at", startStr).order("completed_at", { ascending: false }),
+        const [tasksRes, projectsRes, meetingRes] = await Promise.all([
+          supabase.from("tasks").select("id, title, completed_at, created_at, difficulty, project_id, project:projects(name, color)").eq("user_id", user.id).eq("is_completed", true).gte("completed_at", startStr).order("completed_at", { ascending: false }),
           supabase.from("projects").select("id, name, color").eq("user_id", user.id),
-          supabase.from("time_entries").select("id, project_id, date, duration_seconds").eq("user_id", user.id).gte("date", startDate.toISOString().split("T")[0]),
           supabase.from("meeting_logs").select("id, date, hours, meeting_count").eq("user_id", user.id).gte("date", startDate.toISOString().split("T")[0]),
         ]);
 
-        if (tasksRes.error || projectsRes.error || timeRes.error || meetingRes.error) {
+        if (tasksRes.error || projectsRes.error || meetingRes.error) {
           toast.error("Falha ao carregar métricas");
         }
         if (tasksRes.data) setCompletedTasks(tasksRes.data);
         if (projectsRes.data) setProjects(projectsRes.data);
-        if (timeRes.data) setTimeEntries(timeRes.data);
         if (meetingRes.data) setMeetingLogs(meetingRes.data);
       } catch {
         toast.error("Falha ao carregar métricas");
@@ -66,20 +63,29 @@ const MetricsPage = () => {
   }, [user, period]);
 
   const totalCompleted = completedTasks.length;
-  const totalWorkSeconds = timeEntries.reduce((sum, e) => sum + e.duration_seconds, 0);
+  const totalEffort = completedTasks.reduce((sum, t) => sum + Math.max(t.difficulty || 0, 1), 0);
   const totalMeetingHours = meetingLogs.reduce((sum, m) => sum + Number(m.hours), 0);
   const daysInPeriod = period === "today" ? 1 : period === "week" ? 7 : 30;
   const avgTasksPerDay = daysInPeriod > 0 ? (totalCompleted / daysInPeriod).toFixed(1) : "0";
 
   const animatedCompleted = useCountUp(totalCompleted);
-  const animatedWorkHours = useCountUp(Math.floor(totalWorkSeconds / 3600));
+  const animatedEffort = useCountUp(totalEffort);
 
-  const projectTimeData = projects.map(p => ({
+  // Effort by project
+  const projectEffortData = projects.map(p => ({
     name: p.name,
-    value: timeEntries.filter(e => e.project_id === p.id).reduce((s, e) => s + e.duration_seconds, 0) / 3600,
+    value: completedTasks
+      .filter(t => t.project_id === p.id)
+      .reduce((sum: number, t: any) => sum + Math.max(t.difficulty || 0, 1), 0),
     color: p.color,
   })).filter(d => d.value > 0);
 
+  // Most effort project
+  const mostEffort = projectEffortData.length > 0
+    ? projectEffortData.reduce((a, b) => a.value > b.value ? a : b).name
+    : "—";
+
+  // Tasks by day
   const tasksByDay: Record<string, number> = {};
   completedTasks.forEach(t => {
     const day = new Date(t.completed_at).toLocaleDateString("pt-BR", { month: "short", day: "numeric" });
@@ -87,29 +93,20 @@ const MetricsPage = () => {
   });
   const tasksChartData = Object.entries(tasksByDay).map(([date, count]) => ({ date, count }));
 
-  const timeByDay: Record<string, number> = {};
-  timeEntries.forEach(e => {
-    const day = new Date(e.date).toLocaleDateString("pt-BR", { month: "short", day: "numeric" });
-    timeByDay[day] = (timeByDay[day] || 0) + e.duration_seconds / 3600;
+  // Effort by day
+  const effortByDay: Record<string, number> = {};
+  completedTasks.forEach(t => {
+    const day = new Date(t.completed_at).toLocaleDateString("pt-BR", { month: "short", day: "numeric" });
+    effortByDay[day] = (effortByDay[day] || 0) + Math.max(t.difficulty || 0, 1);
   });
-  const timeChartData = Object.entries(timeByDay).map(([date, hours]) => ({ date, hours: Number(hours.toFixed(1)) }));
-
-  const formatHours = (seconds: number) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    return `${h}h ${m}m`;
-  };
-
-  const mostWorked = projectTimeData.length > 0
-    ? projectTimeData.reduce((a, b) => a.value > b.value ? a : b).name
-    : "—";
+  const effortChartData = Object.entries(effortByDay).map(([date, points]) => ({ date, points }));
 
   const statCards = [
-    { icon: CheckCircle2, label: "Tasks Concluídas", value: animatedCompleted.toString(), color: "text-success", glow: "from-success/10" },
-    { icon: Clock, label: "Tempo Trabalhado", value: formatHours(totalWorkSeconds), color: "text-primary", glow: "from-primary/10" },
+    { icon: CheckCircle2, label: "Tarefas Concluídas", value: animatedCompleted.toString(), color: "text-success", glow: "from-success/10" },
+    { icon: Zap, label: "Esforço Total", value: `${animatedEffort} pts`, color: "text-amber-500", glow: "from-amber-500/10" },
     { icon: CalendarDays, label: "Horas de Reunião", value: `${totalMeetingHours.toFixed(1)}h`, color: "text-accent", glow: "from-accent/10" },
-    { icon: TrendingUp, label: "Média Tasks/Dia", value: avgTasksPerDay, color: "text-primary", glow: "from-primary/10" },
-    { icon: Award, label: "Mais Trabalhado", value: mostWorked, color: "text-accent", glow: "from-accent/10" },
+    { icon: TrendingUp, label: "Média Tarefas/Dia", value: avgTasksPerDay, color: "text-primary", glow: "from-primary/10" },
+    { icon: Award, label: "Mais Esforçado", value: mostEffort, color: "text-amber-500", glow: "from-amber-500/10" },
   ];
 
   const tooltipStyle = {
@@ -170,7 +167,7 @@ const MetricsPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-gradient rounded-xl p-4 sm:p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tasks Concluídas por Dia</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tarefas Concluídas por Dia</h3>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={tasksChartData}>
               <defs>
@@ -188,59 +185,59 @@ const MetricsPage = () => {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="glass-gradient rounded-xl p-4 sm:p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tempo por Projeto</h3>
-          {projectTimeData.length > 0 ? (
+          <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Esforço por Projeto</h3>
+          {projectEffortData.length > 0 ? (
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <ResponsiveContainer width="100%" height={180} className="sm:max-w-[60%]">
                 <PieChart>
-                  <Pie data={projectTimeData} innerRadius={40} outerRadius={70} paddingAngle={4} dataKey="value">
-                    {projectTimeData.map((entry, i) => (
+                  <Pie data={projectEffortData} innerRadius={40} outerRadius={70} paddingAngle={4} dataKey="value">
+                    {projectEffortData.map((entry, i) => (
                       <Cell key={i} fill={entry.color} stroke="transparent" />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => `${Number(v).toFixed(1)}h`} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => `${v} pts`} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex-1 space-y-2.5">
-                {projectTimeData.map(p => (
+                {projectEffortData.map(p => (
                   <div key={p.name} className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: p.color, boxShadow: `0 0 8px ${p.color}40` }} />
                     <span className="text-xs text-muted-foreground truncate flex-1">{p.name}</span>
-                    <span className="text-xs font-mono text-foreground font-semibold">{p.value.toFixed(1)}h</span>
+                    <span className="text-xs font-mono text-foreground font-semibold">{p.value} pts</span>
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            <div className="h-[180px] flex items-center justify-center text-muted-foreground text-sm">Sem dados de tempo</div>
+            <div className="h-[180px] flex items-center justify-center text-muted-foreground text-sm">Sem dados de esforço</div>
           )}
         </motion.div>
       </div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-gradient rounded-xl p-4 sm:p-6 mb-6 sm:mb-8">
-        <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Tempo Trabalhado por Dia</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Esforço por Dia</h3>
         <ResponsiveContainer width="100%" height={180}>
-          <AreaChart data={timeChartData}>
+          <BarChart data={effortChartData}>
             <defs>
-              <linearGradient id="colorHours" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(192 80% 40%)" stopOpacity={0.35} />
-                <stop offset="95%" stopColor="hsl(192 80% 40%)" stopOpacity={0} />
+              <linearGradient id="effortGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="hsl(38 92% 50%)" />
+                <stop offset="100%" stopColor="hsl(25 95% 53%)" />
               </linearGradient>
             </defs>
             <XAxis dataKey="date" stroke="hsl(210 15% 58%)" fontSize={11} />
             <YAxis stroke="hsl(210 15% 58%)" fontSize={11} />
-            <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => `${v}h`} />
-            <Area type="monotone" dataKey="hours" stroke="hsl(192 80% 40%)" strokeWidth={2.5} fill="url(#colorHours)" dot={{ fill: "hsl(192 80% 40%)", strokeWidth: 0, r: 4 }} activeDot={{ r: 6, fill: "hsl(192 80% 40%)", stroke: "hsl(192 80% 60%)", strokeWidth: 2 }} />
-          </AreaChart>
+            <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => `${v} pts`} />
+            <Bar dataKey="points" fill="url(#effortGrad)" radius={[6, 6, 0, 0]} />
+          </BarChart>
         </ResponsiveContainer>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="glass-gradient rounded-xl p-4 sm:p-6">
-        <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Histórico de Tasks</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-4 text-tight font-display">Histórico de Tarefas</h3>
         {completedTasks.length > 0 ? (
           <div className="space-y-1">
-            <div className="hidden sm:grid grid-cols-4 text-xs text-foreground/50 font-medium px-3 pb-2 uppercase tracking-wider">
-              <span>Título</span><span>Projeto</span><span>Concluída</span><span>Criada</span>
+            <div className="hidden sm:grid grid-cols-5 text-xs text-foreground/50 font-medium px-3 pb-2 uppercase tracking-wider">
+              <span>Título</span><span>Projeto</span><span>Dificuldade</span><span>Concluída</span><span>Criada</span>
             </div>
             {completedTasks.slice(0, 20).map((task: any, i: number) => (
               <motion.div
@@ -248,12 +245,17 @@ const MetricsPage = () => {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.03 }}
-                className="grid grid-cols-1 sm:grid-cols-4 text-sm px-3 py-2.5 rounded-lg hover:bg-primary/5 transition-all group gap-1 sm:gap-0"
+                className="grid grid-cols-1 sm:grid-cols-5 text-sm px-3 py-2.5 rounded-lg hover:bg-primary/5 transition-all group gap-1 sm:gap-0"
               >
                 <span className="text-foreground truncate group-hover:text-primary transition-colors font-medium sm:font-normal">{task.title}</span>
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: task.project?.color, boxShadow: `0 0 6px ${task.project?.color}40` }} />
                   <span className="text-muted-foreground truncate text-xs sm:text-sm">{task.project?.name || "Sem projeto"}</span>
+                </span>
+                <span className="flex items-center gap-0.5">
+                  {Array.from({ length: Math.max(task.difficulty || 0, 1) }, (_, j) => (
+                    <Zap key={j} className="w-3 h-3 text-amber-500" />
+                  ))}
                 </span>
                 <span className="text-muted-foreground font-mono text-xs hidden sm:block">
                   {task.completed_at ? new Date(task.completed_at).toLocaleDateString("pt-BR", { month: "short", day: "numeric" }) : "—"}
@@ -265,7 +267,7 @@ const MetricsPage = () => {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground text-sm text-center py-8">Nenhuma task concluída neste período</p>
+          <p className="text-muted-foreground text-sm text-center py-8">Nenhuma tarefa concluída neste período</p>
         )}
       </motion.div>
     </div>

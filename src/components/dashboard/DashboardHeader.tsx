@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import DigitalClock from "./DigitalClock";
-import WorkTimerCard from "./WorkTimerCard";
 import MeetingMetricsCard from "./MeetingMetricsCard";
 import GoogleCalendarCard from "./GoogleCalendarCard";
+import EffortScoreCard from "./EffortScoreCard";
 import { CheckCircle2, History, ChevronUp, ChevronDown } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import HistoryModal from "./HistoryModal";
@@ -34,7 +34,7 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
       
       {/* Scanning light effect */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent animate-scanning-light" style={{ width: "50%" }} />
+        <div className="absolute inset-0 animate-scanning-light" style={{ width: "50%", background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.05), transparent)" }} />
       </div>
 
       {/* Dot pattern overlay */}
@@ -124,8 +124,8 @@ const DashboardHeader = ({ projects, todayCompleted }: DashboardHeaderProps) => 
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glow-card glow-card-cyan rounded-xl h-full">
                   <GoogleCalendarCard />
                 </motion.div>
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glow-card glow-card-purple rounded-xl h-full">
-                  <WorkTimerCard projects={projects} />
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glow-card glow-card-amber rounded-xl h-full">
+                  <EffortScoreCard refreshKey={todayCompleted} />
                 </motion.div>
               </div>
             </motion.div>
