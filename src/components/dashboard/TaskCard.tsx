@@ -400,11 +400,11 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     if (e.key === "Enter") handleTitleBlur();
                     if (e.key === "Escape") { setTitle(task.title); setIsEditing(false); }
                   }}
-                  className="w-full bg-transparent text-foreground text-base font-bold outline-none border-b-2 border-primary/50 pb-0.5"
+                  className="w-full bg-transparent text-foreground text-sm font-bold outline-none border-b-2 border-primary/50 pb-0.5"
                 />
               ) : (
                 <div className="flex items-center gap-1.5">
-                  <span onClick={() => setIsEditing(true)} className="text-sm sm:text-base text-foreground cursor-text truncate hover:text-primary transition-colors font-bold">
+                  <span onClick={() => setIsEditing(true)} className="text-xs sm:text-sm text-foreground cursor-text truncate hover:text-primary transition-colors font-bold">
                     {task.title}
                   </span>
                   <span className="text-[9px] text-muted-foreground/50 font-mono flex-shrink-0 hidden sm:inline">{getTaskAge(task.created_at)}</span>
