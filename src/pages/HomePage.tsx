@@ -67,18 +67,29 @@ const HomePage = () => {
           Bem-vindo de volta, <span className="text-white/80 font-semibold">{profile?.name || "Usuário"}</span>
         </motion.p>
 
-        {/* Logo */}
+        {/* Logo: Spinning Video + Text */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5, duration: 1.2, type: "spring", stiffness: 100, damping: 15 }}
-          className="mb-4">
+          className="mb-4 flex flex-col items-center gap-2">
           
+          <div className="rounded-full" style={{ background: "#000", lineHeight: 0 }}>
+            <video
+              src={logoSpinVideo}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-[120px] h-[120px] sm:w-[140px] sm:h-[140px] object-contain"
+              style={{ mixBlendMode: "screen" }}
+            />
+          </div>
           <img
-            src={logoCompleto}
+            src={logoText}
             alt="Tasktor"
-            className="h-16 sm:h-20 md:h-24 object-contain drop-shadow-[0_0_40px_rgba(14,165,195,0.3)]" />
-          
+            className="h-6 sm:h-7 md:h-8 object-contain drop-shadow-[0_0_40px_rgba(14,165,195,0.3)]"
+          />
         </motion.div>
 
         {/* Tagline */}
