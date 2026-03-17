@@ -26,6 +26,7 @@ interface TaskCardProps {
   onUpdate: () => void;
   onMoveToTop?: (id: string) => void;
   dragHandleProps?: any;
+  compact?: boolean;
 }
 
 const SUCCESS_MESSAGES = [
