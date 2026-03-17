@@ -260,9 +260,75 @@ const KanbanBoard = ({ tasks, projects, filterDifficulty, onComplete, onDelete, 
             </Droppable>
           </motion.div>
         ))}
-      </div>
-    </DragDropContext>
-  );
-};
+          {/* Add project column */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: columns.length * 0.05 }}
+            className="flex-shrink-0 w-[280px] sm:w-[300px] snap-start"
+          >
+            <AnimatePresence mode="wait">
+              {showNewProject ? (
+                <motion.div
+                  key="form"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="rounded-xl p-3 space-y-2.5"
+                  style={{ background: "hsl(var(--card) / 0.5)", border: "1px dashed hsl(var(--border) / 0.4)" }}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-foreground">Novo projeto</span>
+                    <button onClick={() => setShowNewProject(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <input
+                    autoFocus
+                    value={newProjectName}
+                    onChange={(e) => setNewProjectName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleCreateProject()}
+                    placeholder="Nome do projeto"
+                    className="w-full bg-secondary/60 border border-border/30 rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                  <div className="flex flex-wrap gap-1">
+                    {COLORS.map(c => (
+                      <button
+                        key={c}
+                        onClick={() => setNewProjectColor(c)}
+                        className={`w-5 h-5 rounded-full transition-all ${newProjectColor === c ? "scale-125 ring-2 ring-foreground/30 ring-offset-1 ring-offset-card" : "hover:scale-110"}`}
+                        style={{ backgroundColor: c }}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    onClick={handleCreateProject}
+                    disabled={!newProjectName.trim() || creatingProject}
+                    className="w-full py-2 rounded-lg text-sm font-bold text-primary-foreground gradient-primary disabled:opacity-50 transition-opacity"
+                  >
+                    Criar Projeto
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.button
+                  key="button"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setShowNewProject(true)}
+                  className="w-full h-[120px] rounded-xl flex flex-col items-center justify-center gap-2 text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"
+                  style={{ background: "hsl(var(--card) / 0.2)", border: "1px dashed hsl(var(--border) / 0.3)" }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <Plus className="w-6 h-6" />
+                  <span className="text-xs font-medium">Novo projeto</span>
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </div>
+      </DragDropContext>
+    );
+  };
 
 export default KanbanBoard;

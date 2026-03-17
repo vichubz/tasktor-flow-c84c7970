@@ -357,9 +357,145 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
             transition={{ duration: 0.4, delay: index * 0.05 }}
           />
 
-          {/* Main row — compact single line */}
-          <div className="flex items-center gap-2 sm:gap-2.5 px-1.5 sm:px-2.5 py-1 pl-2.5 sm:pl-3.5">
-            {!compact && (
+          {/* Main content */}
+          {compact ? (
+            /* ── KANBAN COMPACT LAYOUT ── */
+            <div className="px-3 py-2.5 pl-3.5 space-y-1.5">
+              {/* Top row: complete + title + actions */}
+              <div className="flex items-start gap-2">
+                <motion.button
+                  onClick={handleComplete}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.85 }}
+                  className="w-5 h-5 mt-0.5 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center hover:border-success transition-all flex-shrink-0 group/btn relative overflow-hidden"
+                >
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    style={{ background: "linear-gradient(135deg, rgba(16,185,129,0.2), rgba(45,190,160,0.1))" }}
+                    initial={{ scale: 0 }} whileHover={{ scale: 1 }}
+                  />
+                  <Check className="w-3 h-3 text-transparent group-hover/btn:text-success transition-colors relative z-10" />
+                </motion.button>
+
+                <div className="flex-1 min-w-0">
+                  {isEditing ? (
+                    <input
+                      autoFocus value={title}
+                      onChange={(e) => handleTitleChange(e.target.value)}
+                      onBlur={handleTitleBlur}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleTitleBlur();
+                        if (e.key === "Escape") { setTitle(task.title); setIsEditing(false); }
+                      }}
+                      className="w-full bg-transparent text-foreground text-sm font-bold outline-none border-b-2 border-primary/50 pb-0.5"
+                    />
+                  ) : (
+                    <span onClick={() => setIsEditing(true)} className="text-sm text-foreground cursor-text hover:text-primary transition-colors font-bold leading-tight line-clamp-2">
+                      {task.title}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-0.5 flex-shrink-0">
+                  <motion.button
+                    onClick={handleToggleHighlight}
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.9 }}
+                    className={`w-5 h-5 flex items-center justify-center rounded transition-all ${
+                      highlighted ? "text-amber-400" : "text-muted-foreground/20 hover:text-amber-400/60 opacity-0 group-hover:opacity-100"
+                    }`}
+                  >
+                    <Star className={`w-3 h-3 ${highlighted ? "fill-amber-400" : ""}`} />
+                  </motion.button>
+                  {confirmDelete ? (
+                    <motion.button
+                      onClick={handleDelete}
+                      initial={{ scale: 0.8 }} animate={{ scale: 1 }}
+                      className="text-destructive text-[9px] font-bold px-1.5 py-0.5 rounded bg-destructive/10 border border-destructive/20 flex-shrink-0"
+                    >
+                      Confirmar?
+                    </motion.button>
+                  ) : (
+                    <motion.button
+                      onClick={handleDelete}
+                      whileHover={{ scale: 1.15 }}
+                      className="text-muted-foreground/20 hover:text-destructive w-5 h-5 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </motion.button>
+                  )}
+                </div>
+              </div>
+
+              {/* Description preview */}
+              {task.description && !isEditing && (
+                <p className="text-[11px] text-muted-foreground/60 leading-snug line-clamp-2 pl-7">
+                  {task.description}
+                </p>
+              )}
+
+              {/* Metadata footer */}
+              <div className="flex items-center gap-1.5 flex-wrap pl-7">
+                {/* Deadline */}
+                {task.deadline && (
+                  <span
+                    className={`text-[9px] font-mono flex items-center gap-0.5 px-1.5 py-0.5 rounded ${
+                      isOverdue
+                        ? "text-destructive bg-destructive/10 border border-destructive/20"
+                        : daysUntilDeadline !== null && daysUntilDeadline <= 2
+                          ? "text-yellow-400 bg-yellow-400/10 border border-yellow-400/15"
+                          : "text-muted-foreground bg-secondary/50 border border-border/20"
+                    }`}
+                  >
+                    {isOverdue ? <AlertTriangle className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />}
+                    {new Date(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })}
+                  </span>
+                )}
+
+                {/* Subtask count */}
+                {totalSubtasks > 0 && (
+                  <motion.button
+                    onClick={handleToggleSubtaskDropdown}
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center gap-0.5 px-1.5 py-0.5 rounded hover:bg-primary/10 transition-colors"
+                  >
+                    <ChevronDown className={`w-2.5 h-2.5 text-muted-foreground transition-transform ${showSubtaskDropdown ? "rotate-180" : ""}`} />
+                    <span className="text-[9px] font-mono text-muted-foreground">{completedSubtasks}/{totalSubtasks}</span>
+                  </motion.button>
+                )}
+
+                {/* Difficulty */}
+                <div className="flex items-center" style={{ opacity: difficulty > 0 ? 1 : 0 }}>
+                  {[1, 2, 3].map(level => (
+                    <Zap
+                      key={level}
+                      className={`w-2.5 h-2.5 ${level <= difficulty ? "text-orange-400 fill-orange-400" : "text-muted-foreground/15"}`}
+                    />
+                  ))}
+                </div>
+
+                {/* Age */}
+                <span className="text-[9px] text-muted-foreground/40 font-mono ml-auto">{getTaskAge(task.created_at)}</span>
+
+                {/* Edit button */}
+                <motion.button
+                  onClick={handleExpand}
+                  whileHover={{ scale: 1.1 }}
+                  className="text-muted-foreground/40 hover:text-foreground w-4 h-4 flex items-center justify-center rounded"
+                >
+                  <Sparkles className="w-3 h-3" />
+                </motion.button>
+              </div>
+
+              {saving && (
+                <div className="flex items-center text-xs text-primary/60 pl-7">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                </div>
+              )}
+            </div>
+          ) : (
+            /* ── LIST LAYOUT (original) ── */
+            <div className="flex items-center gap-2 sm:gap-2.5 px-1.5 sm:px-2.5 py-2 sm:py-2.5 pl-2.5 sm:pl-3.5">
               <div
                 {...dragHandleProps}
                 className="flex-shrink-0 cursor-grab touch-none active:cursor-grabbing"
@@ -367,198 +503,198 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               >
                 <GripVertical className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-muted-foreground/20 hover:text-muted-foreground/60 transition-colors" />
               </div>
-            )}
 
-            {/* Position badge */}
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              className="flex items-center justify-center min-w-[24px] sm:min-w-[28px] h-6 sm:h-7 rounded-md font-mono text-[10px] sm:text-xs font-bold bg-secondary/60 text-muted-foreground"
-            >
-              <span className="relative z-10">#{index + 1}</span>
-            </motion.div>
-
-            {/* Complete button */}
-            <motion.button
-              onClick={handleComplete}
-              whileHover={{ scale: 1.2 }}
-              whileTap={{ scale: 0.85 }}
-              className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center hover:border-success transition-all flex-shrink-0 group/btn relative overflow-hidden"
-            >
+              {/* Position badge */}
               <motion.div
-                className="absolute inset-0 rounded-full"
-                style={{ background: "linear-gradient(135deg, rgba(16,185,129,0.2), rgba(45,190,160,0.1))" }}
-                initial={{ scale: 0 }} whileHover={{ scale: 1 }}
-              />
-              <Check className="w-3.5 h-3.5 text-transparent group-hover/btn:text-success transition-colors relative z-10" />
-            </motion.button>
-
-            {/* Title + Description preview */}
-            <div className="flex-1 min-w-0">
-              {isEditing ? (
-                <input
-                  autoFocus value={title}
-                  onChange={(e) => handleTitleChange(e.target.value)}
-                  onBlur={handleTitleBlur}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleTitleBlur();
-                    if (e.key === "Escape") { setTitle(task.title); setIsEditing(false); }
-                  }}
-                  className="w-full bg-transparent text-foreground text-sm font-bold outline-none border-b-2 border-primary/50 pb-0.5"
-                />
-              ) : (
-                <div className="flex items-center gap-1.5">
-                  <span onClick={() => setIsEditing(true)} className="text-xs sm:text-sm text-foreground cursor-text truncate hover:text-primary transition-colors font-bold">
-                    {task.title}
-                  </span>
-                  <span className="text-[9px] text-muted-foreground/50 font-mono flex-shrink-0 hidden sm:inline">{getTaskAge(task.created_at)}</span>
-                </div>
-              )}
-              {task.description && !isEditing && (
-                <div className="mt-0.5">
-                  <span
-                    className={`text-[11px] sm:text-xs text-muted-foreground/60 leading-tight ${descExpanded ? "whitespace-pre-wrap" : "truncate block"}`}
-                  >
-                    {descExpanded ? task.description : task.description}
-                  </span>
-                  {task.description.length > 80 && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setDescExpanded(!descExpanded); }}
-                      className="text-[10px] text-primary/60 hover:text-primary transition-colors font-medium ml-1"
-                    >
-                      {descExpanded ? "ver menos" : "ver mais"}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {saving && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center text-xs text-primary/60">
-                <Loader2 className="w-3 h-3 animate-spin" />
-              </motion.div>
-            )}
-
-            {/* Project badge */}
-            {task.project ? (
-              <motion.span
-                whileHover={{ scale: 1.08 }}
-                className="text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:py-1 rounded-md flex-shrink-0 cursor-default hidden sm:inline-flex"
-                style={{
-                  background: `linear-gradient(135deg, ${task.project.color}20, ${task.project.color}08)`,
-                  color: task.project.color,
-                  border: `1px solid ${task.project.color}25`,
-                }}
-              >
-                {task.project.name}
-              </motion.span>
-            ) : (
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-md flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/30 hidden sm:inline-flex">
-                Sem projeto
-              </span>
-            )}
-
-            {/* Deadline badge */}
-            {task.deadline && (
-              <span
-                className={`text-[10px] font-mono flex-shrink-0 items-center gap-1 px-2 py-0.5 rounded-md hidden sm:flex ${
-                  isOverdue
-                    ? "text-destructive bg-destructive/10 border border-destructive/20"
-                    : daysUntilDeadline !== null && daysUntilDeadline <= 2
-                      ? "text-yellow-400 bg-yellow-400/10 border border-yellow-400/15"
-                      : "text-muted-foreground bg-secondary/50 border border-border/20"
-                }`}
-              >
-                {isOverdue ? (
-                  <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 0.5, repeat: Infinity }}>
-                    <AlertTriangle className="w-3 h-3" />
-                  </motion.div>
-                ) : <Clock className="w-3 h-3" />}
-                {isOverdue && <span className="text-[9px] font-bold mr-0.5">Atrasada</span>}
-                {new Date(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })}
-              </span>
-            )}
-
-            {/* Subtask dropdown button */}
-            {totalSubtasks > 0 && (
-              <motion.button
-                onClick={handleToggleSubtaskDropdown}
                 whileHover={{ scale: 1.1 }}
-                className="flex items-center gap-1 flex-shrink-0 px-1.5 py-0.5 rounded-md hover:bg-primary/10 transition-colors"
+                className="flex items-center justify-center min-w-[24px] sm:min-w-[28px] h-6 sm:h-7 rounded-md font-mono text-[10px] sm:text-xs font-bold bg-secondary/60 text-muted-foreground"
               >
-                <motion.div animate={{ rotate: showSubtaskDropdown ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="relative z-10">#{index + 1}</span>
+              </motion.div>
+
+              {/* Complete button */}
+              <motion.button
+                onClick={handleComplete}
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.85 }}
+                className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center hover:border-success transition-all flex-shrink-0 group/btn relative overflow-hidden"
+              >
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  style={{ background: "linear-gradient(135deg, rgba(16,185,129,0.2), rgba(45,190,160,0.1))" }}
+                  initial={{ scale: 0 }} whileHover={{ scale: 1 }}
+                />
+                <Check className="w-3.5 h-3.5 text-transparent group-hover/btn:text-success transition-colors relative z-10" />
+              </motion.button>
+
+              {/* Title + Description preview */}
+              <div className="flex-1 min-w-0">
+                {isEditing ? (
+                  <input
+                    autoFocus value={title}
+                    onChange={(e) => handleTitleChange(e.target.value)}
+                    onBlur={handleTitleBlur}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleTitleBlur();
+                      if (e.key === "Escape") { setTitle(task.title); setIsEditing(false); }
+                    }}
+                    className="w-full bg-transparent text-foreground text-sm font-bold outline-none border-b-2 border-primary/50 pb-0.5"
+                  />
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <span onClick={() => setIsEditing(true)} className="text-xs sm:text-sm text-foreground cursor-text truncate hover:text-primary transition-colors font-bold">
+                      {task.title}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground/50 font-mono flex-shrink-0 hidden sm:inline">{getTaskAge(task.created_at)}</span>
+                  </div>
+                )}
+                {task.description && !isEditing && (
+                  <div className="mt-0.5">
+                    <span
+                      className={`text-[11px] sm:text-xs text-muted-foreground/60 leading-tight ${descExpanded ? "whitespace-pre-wrap" : "truncate block"}`}
+                    >
+                      {descExpanded ? task.description : task.description}
+                    </span>
+                    {task.description.length > 80 && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDescExpanded(!descExpanded); }}
+                        className="text-[10px] text-primary/60 hover:text-primary transition-colors font-medium ml-1"
+                      >
+                        {descExpanded ? "ver menos" : "ver mais"}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {saving && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center text-xs text-primary/60">
+                  <Loader2 className="w-3 h-3 animate-spin" />
                 </motion.div>
-                <span className="text-[10px] font-mono text-muted-foreground">{completedSubtasks}/{totalSubtasks}</span>
-              </motion.button>
-            )}
+              )}
 
-            {/* Edit expand button */}
-            <motion.button
-              onClick={handleExpand}
-              whileHover={{ scale: 1.15, backgroundColor: "rgba(14,165,195,0.08)" }}
-              className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md"
-              title="Editar detalhes"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-            </motion.button>
-
-            {/* Difficulty selector */}
-            <div className="flex items-center flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ opacity: difficulty > 0 ? 1 : undefined }}>
-              {[1, 2, 3].map(level => (
-                <motion.button
-                  key={level}
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    const newVal = difficulty === level ? 0 : level;
-                    setDifficulty(newVal);
-                    await supabase.from("tasks").update({ difficulty: newVal } as any).eq("id", task.id);
+              {/* Project badge */}
+              {task.project ? (
+                <motion.span
+                  whileHover={{ scale: 1.08 }}
+                  className="text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:py-1 rounded-md flex-shrink-0 cursor-default hidden sm:inline-flex"
+                  style={{
+                    background: `linear-gradient(135deg, ${task.project.color}20, ${task.project.color}08)`,
+                    color: task.project.color,
+                    border: `1px solid ${task.project.color}25`,
                   }}
-                  whileHover={{ scale: 1.2 }}
-                  whileTap={{ scale: 0.85 }}
-                  className={`w-4 h-4 sm:w-[18px] sm:h-[18px] flex items-center justify-center transition-colors ${
-                    level <= difficulty ? "text-orange-400" : "text-muted-foreground/15 hover:text-orange-400/40"
-                  }`}
-                  title={`Dificuldade ${level}`}
                 >
-                  <Zap className={`w-3 h-3 ${level <= difficulty ? "fill-orange-400" : ""}`} />
+                  {task.project.name}
+                </motion.span>
+              ) : (
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-md flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/30 hidden sm:inline-flex">
+                  Sem projeto
+                </span>
+              )}
+
+              {/* Deadline badge */}
+              {task.deadline && (
+                <span
+                  className={`text-[10px] font-mono flex-shrink-0 items-center gap-1 px-2 py-0.5 rounded-md hidden sm:flex ${
+                    isOverdue
+                      ? "text-destructive bg-destructive/10 border border-destructive/20"
+                      : daysUntilDeadline !== null && daysUntilDeadline <= 2
+                        ? "text-yellow-400 bg-yellow-400/10 border border-yellow-400/15"
+                        : "text-muted-foreground bg-secondary/50 border border-border/20"
+                  }`}
+                >
+                  {isOverdue ? (
+                    <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 0.5, repeat: Infinity }}>
+                      <AlertTriangle className="w-3 h-3" />
+                    </motion.div>
+                  ) : <Clock className="w-3 h-3" />}
+                  {isOverdue && <span className="text-[9px] font-bold mr-0.5">Atrasada</span>}
+                  {new Date(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })}
+                </span>
+              )}
+
+              {/* Subtask dropdown button */}
+              {totalSubtasks > 0 && (
+                <motion.button
+                  onClick={handleToggleSubtaskDropdown}
+                  whileHover={{ scale: 1.1 }}
+                  className="flex items-center gap-1 flex-shrink-0 px-1.5 py-0.5 rounded-md hover:bg-primary/10 transition-colors"
+                >
+                  <motion.div animate={{ rotate: showSubtaskDropdown ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                    <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                  </motion.div>
+                  <span className="text-[10px] font-mono text-muted-foreground">{completedSubtasks}/{totalSubtasks}</span>
                 </motion.button>
-              ))}
+              )}
+
+              {/* Edit expand button */}
+              <motion.button
+                onClick={handleExpand}
+                whileHover={{ scale: 1.15, backgroundColor: "rgba(14,165,195,0.08)" }}
+                className="text-muted-foreground hover:text-foreground transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md"
+                title="Editar detalhes"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+              </motion.button>
+
+              {/* Difficulty selector */}
+              <div className="flex items-center flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ opacity: difficulty > 0 ? 1 : undefined }}>
+                {[1, 2, 3].map(level => (
+                  <motion.button
+                    key={level}
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      const newVal = difficulty === level ? 0 : level;
+                      setDifficulty(newVal);
+                      await supabase.from("tasks").update({ difficulty: newVal } as any).eq("id", task.id);
+                    }}
+                    whileHover={{ scale: 1.2 }}
+                    whileTap={{ scale: 0.85 }}
+                    className={`w-4 h-4 sm:w-[18px] sm:h-[18px] flex items-center justify-center transition-colors ${
+                      level <= difficulty ? "text-orange-400" : "text-muted-foreground/15 hover:text-orange-400/40"
+                    }`}
+                    title={`Dificuldade ${level}`}
+                  >
+                    <Zap className={`w-3 h-3 ${level <= difficulty ? "fill-orange-400" : ""}`} />
+                  </motion.button>
+                ))}
+              </div>
+
+              {/* Highlight toggle */}
+              <motion.button
+                onClick={handleToggleHighlight}
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
+                className={`flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md transition-all ${
+                  highlighted
+                    ? "text-amber-400"
+                    : "text-muted-foreground/20 hover:text-amber-400/60 opacity-0 group-hover:opacity-100"
+                }`}
+                title={highlighted ? "Remover destaque" : "Destacar task"}
+              >
+                <Star className={`w-3.5 h-3.5 ${highlighted ? "fill-amber-400" : ""}`} />
+              </motion.button>
+
+
+              {confirmDelete ? (
+                <motion.button
+                  onClick={handleDelete}
+                  initial={{ scale: 0.8 }} animate={{ scale: 1 }}
+                  className="text-destructive text-[10px] font-bold px-2 py-0.5 rounded-md bg-destructive/10 border border-destructive/20 flex-shrink-0"
+                >
+                  Confirmar?
+                </motion.button>
+              ) : (
+                <motion.button
+                  onClick={handleDelete}
+                  whileHover={{ scale: 1.15, backgroundColor: "rgba(239,68,68,0.08)" }}
+                  className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </motion.button>
+              )}
             </div>
-
-            {/* Highlight toggle */}
-            <motion.button
-              onClick={handleToggleHighlight}
-              whileHover={{ scale: 1.15 }}
-              whileTap={{ scale: 0.9 }}
-              className={`flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md transition-all ${
-                highlighted
-                  ? "text-amber-400"
-                  : "text-muted-foreground/20 hover:text-amber-400/60 opacity-0 group-hover:opacity-100"
-              }`}
-              title={highlighted ? "Remover destaque" : "Destacar task"}
-            >
-              <Star className={`w-3.5 h-3.5 ${highlighted ? "fill-amber-400" : ""}`} />
-            </motion.button>
-
-
-            {confirmDelete ? (
-              <motion.button
-                onClick={handleDelete}
-                initial={{ scale: 0.8 }} animate={{ scale: 1 }}
-                className="text-destructive text-[10px] font-bold px-2 py-0.5 rounded-md bg-destructive/10 border border-destructive/20 flex-shrink-0"
-              >
-                Confirmar?
-              </motion.button>
-            ) : (
-              <motion.button
-                onClick={handleDelete}
-                whileHover={{ scale: 1.15, backgroundColor: "rgba(239,68,68,0.08)" }}
-                className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </motion.button>
-            )}
-          </div>
+          )}
 
           {/* Subtask dropdown panel — appears below the card row */}
           <AnimatePresence>
