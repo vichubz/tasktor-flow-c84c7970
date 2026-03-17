@@ -202,7 +202,7 @@ const Dashboard = () => {
     }
     toast("Task deleted", {
       action: deletedTask ? {
-        label: "Undo",
+        label: "Desfazer",
         onClick: async () => {
           skipRealtimeRef.current = true;
           const { error: restoreError } = await supabase.from("tasks").insert({
