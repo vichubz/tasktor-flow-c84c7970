@@ -18,7 +18,7 @@ interface AppSidebarProps {
 const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
   const { user, profile, signOut } = useAuth();
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [showProjects, setShowProjects] = useState(false);
   const [projectsExpanded, setProjectsExpanded] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
