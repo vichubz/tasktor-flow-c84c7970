@@ -530,7 +530,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 onClick={handleComplete}
                 whileHover={{ scale: 1.2 }}
                 whileTap={{ scale: 0.85 }}
-                className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center hover:border-success transition-all flex-shrink-0 group/btn relative overflow-hidden -ml-0.5"
+                className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center hover:border-success transition-all flex-shrink-0 group/btn relative overflow-hidden -ml-1 mr-1"
               >
                 <motion.div
                   className="absolute inset-0 rounded-full"
