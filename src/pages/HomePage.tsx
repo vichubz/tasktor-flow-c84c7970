@@ -66,18 +66,81 @@ const HomePage = () => {
           Bem-vindo de volta, <span className="text-white/80 font-semibold">{profile?.name || "Usuário"}</span>
         </motion.p>
 
-        {/* Logo */}
+        {/* Logo — Epic Entrance */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5, duration: 1.2, type: "spring", stiffness: 100, damping: 15 }}
-          className="mb-4">
-          
-          <img
+          initial={{ opacity: 0, scale: 0.3, rotateX: 90, y: -80 }}
+          animate={{ opacity: 1, scale: 1, rotateX: 0, y: 0 }}
+          transition={{ delay: 0.4, duration: 1.6, type: "spring", stiffness: 60, damping: 12 }}
+          className="mb-4 relative"
+          style={{ perspective: 800 }}
+        >
+          {/* Pulsing glow ring behind logo */}
+          <motion.div
+            className="absolute inset-0 -inset-x-8 -inset-y-4 rounded-full"
+            style={{
+              background: "radial-gradient(ellipse at center, rgba(14,165,195,0.25) 0%, rgba(124,58,237,0.15) 40%, transparent 70%)",
+              filter: "blur(25px)",
+            }}
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.4, 0.8, 0.4],
+            }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          />
+          {/* Secondary glow — warm accent */}
+          <motion.div
+            className="absolute inset-0 -inset-x-12 -inset-y-6 rounded-full"
+            style={{
+              background: "radial-gradient(ellipse at center, rgba(16,185,129,0.12) 0%, rgba(236,72,153,0.08) 50%, transparent 70%)",
+              filter: "blur(35px)",
+            }}
+            animate={{
+              scale: [1.2, 0.9, 1.2],
+              opacity: [0.3, 0.6, 0.3],
+              rotate: [0, 180, 360],
+            }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          />
+          {/* Logo with continuous float + subtle 3D tilt */}
+          <motion.img
             src={logoCompleto}
             alt="Tasktor"
-            className="h-16 sm:h-20 md:h-24 object-contain drop-shadow-[0_0_40px_rgba(14,165,195,0.3)]" />
-          
+            className="h-16 sm:h-20 md:h-24 object-contain relative z-10"
+            style={{
+              filter: "drop-shadow(0 0 50px rgba(14,165,195,0.4)) drop-shadow(0 0 100px rgba(124,58,237,0.2))",
+            }}
+            animate={{
+              y: [0, -6, 0, -3, 0],
+              rotateY: [0, 3, 0, -3, 0],
+              rotateX: [0, -2, 0, 2, 0],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            whileHover={{
+              scale: 1.08,
+              rotateY: 8,
+              filter: "drop-shadow(0 0 70px rgba(14,165,195,0.6)) drop-shadow(0 0 120px rgba(124,58,237,0.35))",
+              transition: { duration: 0.4 },
+            }}
+          />
+          {/* Light streak across logo */}
+          <motion.div
+            className="absolute inset-0 z-20 overflow-hidden rounded-lg pointer-events-none"
+            style={{ mixBlendMode: "overlay" }}
+          >
+            <motion.div
+              className="absolute h-full w-1/3"
+              style={{
+                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)",
+                top: 0,
+              }}
+              animate={{ x: ["-100%", "400%"] }}
+              transition={{ duration: 3, repeat: Infinity, repeatDelay: 4, ease: "easeInOut" }}
+            />
+          </motion.div>
         </motion.div>
 
         {/* Tagline */}
