@@ -143,18 +143,6 @@ const HomePage = () => {
           </motion.div>
         </motion.div>
 
-        {/* Tagline */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8, duration: 1 }}
-          className="mb-8 sm:mb-12">
-          
-          
-
-          
-        </motion.div>
-
         {/* Quote */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
