@@ -214,7 +214,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
         </nav>
 
         {/* Bottom */}
-        <div className="px-2.5 py-3 border-t border-border/10 space-y-0.5 relative z-10">
+        <div className="px-2 py-2.5 border-t border-border/10 space-y-0.5 relative z-10">
           <NavLink
             to="/settings"
             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 w-full ${
