@@ -643,12 +643,14 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               {/* Edit expand button */}
               <motion.button
                 onClick={handleExpand}
-                whileHover={{ scale: 1.15, x: 2 }}
+                whileHover={{ scale: 1.15 }}
                 whileTap={{ scale: 0.9 }}
                 className="text-foreground/70 hover:text-foreground transition-all flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md bg-secondary/50 hover:bg-secondary/80 border border-border/20"
                 title="Editar detalhes"
               >
-                <ChevronRight className="w-4 h-4" strokeWidth={2.5} />
+                <motion.span animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
+                  <ChevronRight className="w-4 h-4" strokeWidth={2.5} />
+                </motion.span>
               </motion.button>
 
               {/* Difficulty selector */}
