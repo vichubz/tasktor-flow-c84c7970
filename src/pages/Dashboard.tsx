@@ -41,7 +41,7 @@ const Dashboard = () => {
       const [tasksRes, projectsRes, completedRes] = await Promise.all([
         supabase
           .from("tasks")
-          .select("*, project:projects(id, name, color)")
+          .select("*, project:projects(id, name, color), subtasks(*)")
           .eq("user_id", user.id)
           .eq("is_completed", false)
           .order("position", { ascending: true }),
