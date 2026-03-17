@@ -405,7 +405,7 @@ const Dashboard = () => {
 
         {!loading && (
           <>
-            {projects.length > 0 && (
+            {projects.length > 0 && viewMode === "list" && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -416,34 +416,47 @@ const Dashboard = () => {
               </motion.div>
             )}
 
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="tasks">
-                {(provided) => (
-                  <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-3">
-                    {filteredTasks.map((task, index) => (
-                      <Draggable key={task.id} draggableId={task.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div ref={provided.innerRef} {...provided.draggableProps}>
-                            <TaskCard
-                              task={task}
-                              index={index}
-                              isDragging={snapshot.isDragging}
-                              projects={projects}
-                              onComplete={handleComplete}
-                              onDelete={handleDelete}
-                              onUpdate={fetchData}
-                              onMoveToTop={handleMoveToTop}
-                              dragHandleProps={provided.dragHandleProps}
-                            />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+            {viewMode === "list" ? (
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <Droppable droppableId="tasks">
+                  {(provided) => (
+                    <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-3">
+                      {filteredTasks.map((task, index) => (
+                        <Draggable key={task.id} draggableId={task.id} index={index}>
+                          {(provided, snapshot) => (
+                            <div ref={provided.innerRef} {...provided.draggableProps}>
+                              <TaskCard
+                                task={task}
+                                index={index}
+                                isDragging={snapshot.isDragging}
+                                projects={projects}
+                                onComplete={handleComplete}
+                                onDelete={handleDelete}
+                                onUpdate={fetchData}
+                                onMoveToTop={handleMoveToTop}
+                                dragHandleProps={provided.dragHandleProps}
+                              />
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            ) : (
+              <KanbanBoard
+                tasks={tasks}
+                projects={projects}
+                filterDifficulty={filterDifficulty}
+                onComplete={handleComplete}
+                onDelete={handleDelete}
+                onUpdate={fetchData}
+                onMoveToTop={handleMoveToTop}
+                setTasks={setTasks}
+              />
+            )}
           </>
         )}
 
