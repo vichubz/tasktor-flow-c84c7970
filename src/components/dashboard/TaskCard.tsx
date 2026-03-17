@@ -822,7 +822,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     <Input
                       value={newSubtaskTitle}
                       onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                      placeholder="Add subtask..."
+                      placeholder="Adicionar subtask..."
                       className="bg-secondary/40 border-border/30 h-7 text-xs"
                       onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSubtask())}
                     />
