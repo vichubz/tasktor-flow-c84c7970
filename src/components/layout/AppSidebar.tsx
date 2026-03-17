@@ -92,7 +92,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
-            className="px-4 py-3 border-b border-border/10"
+            className="px-3.5 py-2.5 border-b border-border/10"
           >
             <p className="text-[11px] text-muted-foreground/70 font-medium">Olá,</p>
             <p className="text-sm font-medium text-foreground truncate">{profile.name || "Usuário"}</p>
