@@ -82,14 +82,13 @@ const KanbanBoard = ({ tasks, projects, filterDifficulty, onComplete, onDelete, 
     }
 
     const unassigned = filteredTasks.filter(t => !t.project_id).sort((a, b) => a.position - b.position);
-    if (unassigned.length > 0 || cols.length === 0) {
-      cols.push({
-        id: "__none__",
-        name: "Sem projeto",
-        color: "hsl(var(--muted-foreground))",
-        tasks: unassigned,
-      });
-    }
+    // Always show "Sem projeto" column so users can drop tasks there
+    cols.push({
+      id: "__none__",
+      name: "Sem projeto",
+      color: "hsl(var(--muted-foreground))",
+      tasks: unassigned,
+    });
 
     return cols;
   }, [filteredTasks, projects]);
@@ -217,14 +216,15 @@ const KanbanBoard = ({ tasks, projects, filterDifficulty, onComplete, onDelete, 
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId="kanban-columns" direction="horizontal" type="COLUMN">
-        {(provided) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory"
-            style={{ minHeight: 300 }}
-          >
+      <div className="overflow-x-auto pb-4" style={{ minHeight: 300 }}>
+        <Droppable droppableId="kanban-columns" direction="horizontal" type="COLUMN">
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className="flex gap-4 snap-x snap-mandatory"
+              style={{ minWidth: "min-content" }}
+            >
             {draggableColumns.map((col, colIdx) => (
               <Draggable key={col.id} draggableId={`col-${col.id}`} index={colIdx}>
                 {(colProvided, colSnapshot) => (
@@ -449,6 +449,7 @@ const KanbanBoard = ({ tasks, projects, filterDifficulty, onComplete, onDelete, 
           </div>
         )}
       </Droppable>
+      </div>
     </DragDropContext>
   );
 };

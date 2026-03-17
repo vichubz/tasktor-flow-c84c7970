@@ -461,7 +461,7 @@ const Dashboard = () => {
           </>
         )}
 
-        {!loading && filteredTasks.length === 0 && (projects.length > 0 || tasks.length > 0) && (
+        {!loading && viewMode === "list" && filteredTasks.length === 0 && (projects.length > 0 || tasks.length > 0) && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-20 text-muted-foreground">
             <motion.div
               className="w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-5"
