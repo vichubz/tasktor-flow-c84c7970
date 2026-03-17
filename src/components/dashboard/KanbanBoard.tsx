@@ -64,7 +64,7 @@ const ColumnTaskCreator = ({
         className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground/40 hover:text-muted-foreground/70 hover:bg-secondary/30 transition-all text-xs"
       >
         <Plus className="w-3.5 h-3.5" />
-        <span>Add task</span>
+        <span>Adicionar task</span>
       </button>
     );
   }

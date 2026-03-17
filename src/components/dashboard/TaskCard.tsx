@@ -305,7 +305,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   return (
     <AnimatePresence>
       <motion.div
-        layout
+        layout={false}
         initial={{ opacity: 0, y: 16, scale: 0.97 }}
         animate={completing
           ? { scale: [1, 1.02, 0.95], x: [0, 0, 200], opacity: [1, 1, 0] }
