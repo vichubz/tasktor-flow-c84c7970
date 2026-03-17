@@ -935,7 +935,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
                         <Sparkles className="w-3 h-3 text-primary/50" />
-                        Subtasks
+                        Subtarefas
                       </span>
                       <div className="flex items-center gap-1 ml-auto">
                         {subtasks.length > 0 && (
