@@ -27,7 +27,10 @@ const GoogleCalendarCard = () => {
   const [scheduling, setScheduling] = useState(false);
 
   const [schedTitle, setSchedTitle] = useState("");
-  const [schedDate, setSchedDate] = useState(new Date().toISOString().split("T")[0]);
+  const [schedDate, setSchedDate] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  });
   const [schedStart, setSchedStart] = useState("09:00");
   const [schedEnd, setSchedEnd] = useState("10:00");
   const [schedDesc, setSchedDesc] = useState("");
