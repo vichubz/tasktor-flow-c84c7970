@@ -10,12 +10,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Pencil, Trash2, Check, X, Clock, Video, Calendar, Filter } from "lucide-react";
+import { Pencil, Trash2, Check, X, Video, Calendar, Filter, Zap } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
-type TimeEntry = Tables<"time_entries">;
 type MeetingLog = Tables<"meeting_logs">;
 
 interface HistoryModalProps {
@@ -24,16 +23,9 @@ interface HistoryModalProps {
   projects: Project[];
 }
 
-const formatDuration = (s: number) => {
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  if (h === 0) return `${m}min`;
-  return `${h}h ${m.toString().padStart(2, "0")}min`;
-};
-
 const HistoryModal = ({ open, onOpenChange, projects }: HistoryModalProps) => {
   const { user } = useAuth();
-  const [tab, setTab] = useState("time");
+  const [tab, setTab] = useState("effort");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -43,8 +35,8 @@ const HistoryModal = ({ open, onOpenChange, projects }: HistoryModalProps) => {
         </DialogHeader>
         <Tabs value={tab} onValueChange={setTab} className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="bg-secondary/50 border border-border/20">
-            <TabsTrigger value="time" className="gap-1.5 data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
-              <Clock className="w-3.5 h-3.5" /> Tempo
+            <TabsTrigger value="effort" className="gap-1.5 data-[state=active]:bg-amber-500/15 data-[state=active]:text-amber-500">
+              <Zap className="w-3.5 h-3.5" /> Esforço
             </TabsTrigger>
             <TabsTrigger value="meetings" className="gap-1.5 data-[state=active]:bg-accent/15 data-[state=active]:text-accent">
               <Video className="w-3.5 h-3.5" /> Reuniões
@@ -53,8 +45,8 @@ const HistoryModal = ({ open, onOpenChange, projects }: HistoryModalProps) => {
               <Calendar className="w-3.5 h-3.5" /> Agenda
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="time" className="flex-1 overflow-hidden mt-3">
-            <TimeHistoryTab projects={projects} />
+          <TabsContent value="effort" className="flex-1 overflow-hidden mt-3">
+            <EffortHistoryTab projects={projects} />
           </TabsContent>
           <TabsContent value="meetings" className="flex-1 overflow-hidden mt-3">
             <MeetingsHistoryTab />
@@ -68,63 +60,43 @@ const HistoryModal = ({ open, onOpenChange, projects }: HistoryModalProps) => {
   );
 };
 
-/* ===== TIME HISTORY TAB ===== */
-const TimeHistoryTab = ({ projects }: { projects: Project[] }) => {
+/* ===== EFFORT HISTORY TAB ===== */
+const EffortHistoryTab = ({ projects }: { projects: Project[] }) => {
   const { user } = useAuth();
-  const [entries, setEntries] = useState<TimeEntry[]>([]);
+  const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterProject, setFilterProject] = useState("all");
   const [filterDate, setFilterDate] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editDuration, setEditDuration] = useState("");
-  const [editProject, setEditProject] = useState("");
 
-  const fetchEntries = useCallback(async () => {
+  const fetchTasks = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     let query = supabase
-      .from("time_entries")
-      .select("*")
+      .from("tasks")
+      .select("id, title, difficulty, completed_at, project_id, project:projects(name, color)")
       .eq("user_id", user.id)
-      .not("ended_at", "is", null)
-      .order("started_at", { ascending: false })
-      .limit(100);
+      .eq("is_completed", true)
+      .order("completed_at", { ascending: false })
+      .limit(200);
     if (filterProject !== "all") query = query.eq("project_id", filterProject);
-    if (filterDate) query = query.eq("date", filterDate);
+    if (filterDate) {
+      query = query.gte("completed_at", `${filterDate}T00:00:00`).lte("completed_at", `${filterDate}T23:59:59`);
+    }
     const { data } = await query;
-    setEntries(data || []);
+    setTasks(data || []);
     setLoading(false);
   }, [user, filterProject, filterDate]);
 
-  useEffect(() => { fetchEntries(); }, [fetchEntries]);
+  useEffect(() => { fetchTasks(); }, [fetchTasks]);
 
-  const totalSeconds = entries.reduce((sum, e) => sum + e.duration_seconds, 0);
+  const totalPoints = tasks.reduce((sum, t) => sum + Math.max(t.difficulty || 0, 1), 0);
 
-  const startEdit = (entry: TimeEntry) => {
-    setEditingId(entry.id);
-    const h = Math.floor(entry.duration_seconds / 3600);
-    const m = Math.floor((entry.duration_seconds % 3600) / 60);
-    setEditDuration(`${h}:${m.toString().padStart(2, "0")}`);
-    setEditProject(entry.project_id);
+  const getDifficultyIcons = (d: number) => {
+    const level = Math.max(d || 0, 1);
+    return Array.from({ length: level }, (_, i) => (
+      <Zap key={i} className="w-3 h-3 text-amber-500 inline" />
+    ));
   };
-
-  const saveEdit = async (id: string) => {
-    const [h, m] = editDuration.split(":").map(Number);
-    const newDuration = (h || 0) * 3600 + (m || 0) * 60;
-    await supabase.from("time_entries").update({ duration_seconds: newDuration, project_id: editProject }).eq("id", id);
-    setEditingId(null);
-    toast.success("Registro atualizado");
-    fetchEntries();
-  };
-
-  const deleteEntry = async (id: string) => {
-    await supabase.from("time_entries").delete().eq("id", id);
-    toast.success("Registro excluído");
-    fetchEntries();
-  };
-
-  const getProjectName = (pid: string) => projects.find(p => p.id === pid)?.name || "—";
-  const getProjectColor = (pid: string) => projects.find(p => p.id === pid)?.color || "#666";
 
   return (
     <div className="flex flex-col gap-3 h-full">
@@ -153,7 +125,7 @@ const TimeHistoryTab = ({ projects }: { projects: Project[] }) => {
           </SelectContent>
         </Select>
         <span className="text-xs font-mono text-muted-foreground ml-auto">
-          Total: <span className="text-foreground font-bold">{formatDuration(totalSeconds)}</span>
+          Total: <span className="text-amber-500 font-bold">{totalPoints} pts</span>
         </span>
       </div>
 
@@ -163,95 +135,47 @@ const TimeHistoryTab = ({ projects }: { projects: Project[] }) => {
           <TableHeader>
             <TableRow className="border-border/20 hover:bg-transparent">
               <TableHead className="text-xs">Data</TableHead>
+              <TableHead className="text-xs">Tarefa</TableHead>
               <TableHead className="text-xs">Projeto</TableHead>
-              <TableHead className="text-xs">Duração</TableHead>
-              <TableHead className="text-xs">Início</TableHead>
-              <TableHead className="text-xs">Fim</TableHead>
-              <TableHead className="text-xs w-20"></TableHead>
+              <TableHead className="text-xs">Dificuldade</TableHead>
+              <TableHead className="text-xs">Pontos</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i} className="border-border/10">
-                  {Array.from({ length: 6 }).map((_, j) => (
+                  {Array.from({ length: 5 }).map((_, j) => (
                     <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
                   ))}
                 </TableRow>
               ))
-            ) : entries.length === 0 ? (
+            ) : tasks.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground text-sm">
-                  Nenhum registro encontrado
+                <TableCell colSpan={5} className="text-center py-12 text-muted-foreground text-sm">
+                  Nenhuma tarefa concluída encontrada
                 </TableCell>
               </TableRow>
             ) : (
-              entries.map(entry => (
-                <TableRow key={entry.id} className="border-border/10 hover:bg-secondary/20">
-                  <TableCell className="text-xs font-mono">{entry.date}</TableCell>
-                  <TableCell>
-                    {editingId === entry.id ? (
-                      <Select value={editProject} onValueChange={setEditProject}>
-                        <SelectTrigger className="h-7 text-xs bg-secondary/50 border-border/30 w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
-                          {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <span className="flex items-center gap-1.5 text-xs">
-                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getProjectColor(entry.project_id) }} />
-                        {getProjectName(entry.project_id)}
-                      </span>
-                    )}
-                  </TableCell>
+              tasks.map(task => (
+                <TableRow key={task.id} className="border-border/10 hover:bg-secondary/20">
                   <TableCell className="text-xs font-mono">
-                    {editingId === entry.id ? (
-                      <Input value={editDuration} onChange={e => setEditDuration(e.target.value)}
-                        placeholder="H:MM" className="h-7 w-20 text-xs bg-secondary/50 border-border/30" />
-                    ) : formatDuration(entry.duration_seconds)}
+                    {task.completed_at ? new Date(task.completed_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }) : "—"}
                   </TableCell>
-                  <TableCell className="text-xs font-mono text-muted-foreground">
-                    {new Date(entry.started_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                  </TableCell>
-                  <TableCell className="text-xs font-mono text-muted-foreground">
-                    {entry.ended_at ? new Date(entry.ended_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "—"}
+                  <TableCell className="text-xs text-foreground truncate max-w-[200px]">{task.title}</TableCell>
+                  <TableCell>
+                    <span className="flex items-center gap-1.5 text-xs">
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: task.project?.color || "#666" }} />
+                      {task.project?.name || "Sem projeto"}
+                    </span>
                   </TableCell>
                   <TableCell>
-                    {editingId === entry.id ? (
-                      <div className="flex gap-1">
-                        <button onClick={() => saveEdit(entry.id)} className="w-6 h-6 rounded flex items-center justify-center text-success hover:bg-success/15 transition-colors">
-                          <Check className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => setEditingId(null)} className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-secondary/50 transition-colors">
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex gap-1">
-                        <button onClick={() => startEdit(entry)} className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
-                          <Pencil className="w-3 h-3" />
-                        </button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <button className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent className="bg-card/95 backdrop-blur-xl border-border/30">
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Excluir registro?</AlertDialogTitle>
-                              <AlertDialogDescription>Tem certeza que deseja excluir este registro de tempo?</AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => deleteEntry(entry.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Excluir</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    )}
+                    <span className="flex items-center gap-0.5">
+                      {getDifficultyIcons(task.difficulty)}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-xs font-mono font-bold text-amber-500">
+                    {Math.max(task.difficulty || 0, 1)}
                   </TableCell>
                 </TableRow>
               ))
@@ -319,7 +243,6 @@ const MeetingsHistoryTab = () => {
 
   return (
     <div className="flex flex-col gap-3 h-full">
-      {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-1.5">
           <Filter className="w-3.5 h-3.5 text-muted-foreground" />
@@ -333,7 +256,6 @@ const MeetingsHistoryTab = () => {
         </div>
       </div>
 
-      {/* Table */}
       <div className="flex-1 overflow-y-auto rounded-lg border border-border/20">
         <Table>
           <TableHeader>
