@@ -870,7 +870,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       />
                     ) : (
                       <p onClick={() => setIsEditingDesc(true)} className="text-sm text-muted-foreground leading-relaxed cursor-text hover:text-foreground transition-colors min-h-[20px] p-1.5 rounded-md hover:bg-secondary/30">
-                        {task.description || "Click to add description..."}
+                        {task.description || "Clique para adicionar descrição..."}
                       </p>
                     )}
                   </div>
