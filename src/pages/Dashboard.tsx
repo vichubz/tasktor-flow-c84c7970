@@ -260,6 +260,22 @@ const Dashboard = () => {
               <Zap className="w-4 sm:w-5 h-4 sm:h-5 text-primary" />
               Tasks
             </h2>
+            <div className="flex items-center rounded-lg p-0.5" style={{ background: "hsl(var(--secondary) / 0.4)", border: "1px solid hsl(var(--border) / 0.2)" }}>
+              <button
+                onClick={() => { setViewMode("list"); localStorage.setItem("taskViewMode", "list"); }}
+                className={`p-1.5 rounded-md transition-all ${viewMode === "list" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                title="Visualização em lista"
+              >
+                <List className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => { setViewMode("kanban"); localStorage.setItem("taskViewMode", "kanban"); }}
+                className={`p-1.5 rounded-md transition-all ${viewMode === "kanban" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                title="Visualização Kanban"
+              >
+                <Columns className="w-3.5 h-3.5" />
+              </button>
+            </div>
             <motion.span
               key={filteredTasks.length}
               initial={{ scale: 1.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
