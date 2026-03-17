@@ -334,8 +334,8 @@ const Dashboard = () => {
                   transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                 />
                 <Plus className="w-4 h-4 relative z-10" />
-                <span className="relative z-10 hidden sm:inline">New Task</span>
-                <span className="relative z-10 sm:hidden">New</span>
+                <span className="relative z-10 hidden sm:inline">Nova Task</span>
+                <span className="relative z-10 sm:hidden">Nova</span>
                 <kbd className="relative z-10 ml-1 text-[10px] bg-white/10 px-1.5 py-0.5 rounded font-mono hidden sm:inline">N</kbd>
               </Button>
             </motion.div>
