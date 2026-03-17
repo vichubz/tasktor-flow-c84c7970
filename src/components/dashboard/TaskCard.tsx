@@ -154,7 +154,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     try {
       const { data, error } = await supabase.from("subtasks").select("*").eq("task_id", task.id).order("position");
       if (error) throw error;
-      if (data) { setSubtasks(data); subtaskCache.set(task.id, data); }
+      if (data) { setSubtasks(data); setCacheEntry(task.id, data); }
     } catch { toast.error("Falha ao carregar subtasks"); }
     setLoadingSubtasks(false);
   }, [task.id]);
