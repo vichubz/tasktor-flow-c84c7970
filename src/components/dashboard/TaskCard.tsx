@@ -494,9 +494,11 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 <motion.button
                   onClick={handleExpand}
                   whileHover={{ scale: 1.1 }}
-                  className="text-muted-foreground/40 hover:text-foreground w-4 h-4 flex items-center justify-center rounded"
+                  className="text-muted-foreground/40 hover:text-foreground w-5 h-5 flex items-center justify-center rounded-md bg-secondary/50 hover:bg-secondary/80 border border-border/20 transition-all"
                 >
-                  <Sparkles className="w-3 h-3" />
+                  <motion.span animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
+                    <ChevronRight className="w-3 h-3" strokeWidth={2.5} />
+                  </motion.span>
                 </motion.button>
               </div>
 
