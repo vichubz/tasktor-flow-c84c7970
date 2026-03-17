@@ -515,7 +515,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               <div
                 {...dragHandleProps}
                 className="flex-shrink-0 cursor-grab touch-none active:cursor-grabbing"
-                title="Drag task"
+                title="Arrastar task"
               >
                 <GripVertical className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-muted-foreground/20 hover:text-muted-foreground/60 transition-colors" />
               </div>
