@@ -133,6 +133,13 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     setPastingSubtasks(false);
   };
 
+  const handleToggleStandby = async () => {
+    const newVal = !standby;
+    setStandby(newVal);
+    await supabase.from("tasks").update({ is_standby: newVal } as any).eq("id", task.id);
+    toast(newVal ? "Tarefa em standby ⏳" : "Tarefa reativada ⚡");
+  };
+
   const handleToggleHighlight = async () => {
     const newVal = !highlighted;
     setHighlighted(newVal);
