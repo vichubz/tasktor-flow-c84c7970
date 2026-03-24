@@ -327,7 +327,8 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   }, [task.id, onDelete, confirmDelete]);
 
   const daysUntilDeadline = task.deadline
-    ? Math.ceil((new Date(task.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    ? Math.ceil((parseLocalDate(task.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
     : null;
 
   const projectColor = task.project?.color || "hsl(var(--primary))";
