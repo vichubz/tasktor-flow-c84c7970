@@ -479,7 +479,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     }`}
                   >
                     {isOverdue ? <AlertTriangle className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />}
-                    {new Date(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })}
+                    {parseLocalDate(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })}
                   </span>
                 )}
 
