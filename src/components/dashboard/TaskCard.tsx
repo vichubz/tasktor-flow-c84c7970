@@ -962,7 +962,24 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     </div>
                   </div>
 
-                  {/* Subtasks in expanded view */}
+                  {/* Standby toggle */}
+                  <div className="mb-3 relative z-10">
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Status</span>
+                    <motion.button
+                      onClick={handleToggleStandby}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                        standby
+                          ? "bg-amber-400/10 text-amber-400 border border-amber-400/20"
+                          : "bg-secondary/40 text-muted-foreground border border-border/30 hover:border-amber-400/30 hover:text-amber-400/80"
+                      }`}
+                    >
+                      <Hourglass className={`w-4 h-4 ${standby ? "animate-pulse" : ""}`} />
+                      {standby ? "Em standby — clique para reativar" : "Colocar em standby"}
+                    </motion.button>
+                  </div>
+
                   <div className="space-y-1.5 relative z-10">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
