@@ -421,7 +421,8 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       className="w-full bg-transparent text-foreground text-sm font-bold outline-none border-b-2 border-primary/50 pb-0.5"
                     />
                   ) : (
-                    <span onClick={() => setIsEditing(true)} className="text-sm text-foreground cursor-text hover:text-primary transition-colors font-bold leading-tight line-clamp-2">
+                    <span onClick={() => setIsEditing(true)} className={`text-sm cursor-text hover:text-primary transition-colors font-bold leading-tight line-clamp-2 ${standby ? "text-muted-foreground" : "text-foreground"}`}>
+                      {standby && <Hourglass className="w-3 h-3 text-amber-400/70 inline mr-1 animate-pulse" />}
                       {task.title}
                     </span>
                   )}
