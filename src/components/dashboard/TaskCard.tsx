@@ -942,7 +942,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                         <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
                           <Calendar
                             mode="single"
-                            selected={task.deadline ? new Date(task.deadline) : undefined}
+                            selected={task.deadline ? parseLocalDate(task.deadline) : undefined}
                             onSelect={handleDeadlineChange}
                             className="p-3 pointer-events-auto"
                           />
