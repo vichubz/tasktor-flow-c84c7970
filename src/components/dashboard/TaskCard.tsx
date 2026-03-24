@@ -935,7 +935,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                           <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-secondary/40 border border-border/30 text-sm hover:border-primary/30 transition-colors">
                             <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground" />
                             {task.deadline
-                              ? new Date(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric", year: "numeric" })
+                              ? parseLocalDate(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric", year: "numeric" })
                               : <span className="text-muted-foreground/50">Definir prazo</span>}
                           </button>
                         </PopoverTrigger>
