@@ -588,7 +588,8 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                   />
                 ) : (
                   <div className="flex items-center gap-1.5">
-                    <span onClick={() => setIsEditing(true)} className="text-xs sm:text-sm text-foreground cursor-text truncate hover:text-primary transition-colors font-bold">
+                    {standby && <Hourglass className="w-3 h-3 text-amber-400/70 flex-shrink-0 animate-pulse" />}
+                    <span onClick={() => setIsEditing(true)} className={`text-xs sm:text-sm cursor-text truncate hover:text-primary transition-colors font-bold ${standby ? "text-muted-foreground" : "text-foreground"}`}>
                       {task.title}
                     </span>
                     <span className="text-[9px] text-muted-foreground/50 font-mono flex-shrink-0 hidden sm:inline">{getTaskAge(task.created_at)}</span>
