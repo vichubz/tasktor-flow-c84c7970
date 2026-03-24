@@ -347,7 +347,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
         }
         className={`relative overflow-visible transition-all duration-300 group ${
           isDragging ? "shadow-2xl z-50 ring-2 ring-primary/30" : ""
-        } ${highlighted ? "task-highlighted" : ""}`}
+        } ${highlighted ? "task-highlighted" : ""} ${standby ? "opacity-50" : ""}`}
       >
         <div
           className="rounded-xl overflow-hidden relative"
