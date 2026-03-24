@@ -1,0 +1,1 @@
+ALTER TABLE public.tasks ADD COLUMN is_standby boolean NOT NULL DEFAULT false;

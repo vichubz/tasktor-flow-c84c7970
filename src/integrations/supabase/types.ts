@@ -248,6 +248,7 @@ export type Database = {
           id: string
           is_completed: boolean
           is_highlighted: boolean
+          is_standby: boolean
           position: number
           project_id: string | null
           title: string
@@ -262,6 +263,7 @@ export type Database = {
           id?: string
           is_completed?: boolean
           is_highlighted?: boolean
+          is_standby?: boolean
           position?: number
           project_id?: string | null
           title: string
@@ -276,6 +278,7 @@ export type Database = {
           id?: string
           is_completed?: boolean
           is_highlighted?: boolean
+          is_standby?: boolean
           position?: number
           project_id?: string | null
           title?: string

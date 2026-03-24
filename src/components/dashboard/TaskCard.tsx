@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Trash2, GripVertical, ChevronDown, AlertTriangle, Clock, Sparkles, Plus, X, Loader2, CalendarIcon, Star, Copy, ClipboardPaste, Zap, ChevronRight } from "lucide-react";
+import { Check, Trash2, GripVertical, ChevronDown, AlertTriangle, Clock, Sparkles, Plus, X, Loader2, CalendarIcon, Star, Copy, ClipboardPaste, Zap, ChevronRight, Hourglass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Input } from "@/components/ui/input";
@@ -52,6 +52,12 @@ function getTaskAge(createdAt: string): string {
   return `${Math.floor(diffDays / 30)}m`;
 }
 
+// Parse date-only strings safely (avoid UTC midnight timezone shift)
+function parseLocalDate(dateStr: string): Date {
+  if (dateStr.includes("T")) return new Date(dateStr);
+  return new Date(dateStr + "T12:00:00");
+}
+
 // LRU cache for subtasks (max 50 entries)
 const CACHE_MAX = 50;
 const subtaskCache = new Map<string, Tables<"subtasks">[]>();
@@ -93,6 +99,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   const [descExpanded, setDescExpanded] = useState(false);
   const [hasClipboard, setHasClipboard] = useState(!!subtaskClipboard);
   const [pastingSubtasks, setPastingSubtasks] = useState(false);
+  const [standby, setStandby] = useState(!!(task as any).is_standby);
 
   // Listen for clipboard changes
   useEffect(() => {
@@ -126,6 +133,13 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     setPastingSubtasks(false);
   };
 
+  const handleToggleStandby = async () => {
+    const newVal = !standby;
+    setStandby(newVal);
+    await supabase.from("tasks").update({ is_standby: newVal } as any).eq("id", task.id);
+    toast(newVal ? "Tarefa em standby ⏳" : "Tarefa reativada ⚡");
+  };
+
   const handleToggleHighlight = async () => {
     const newVal = !highlighted;
     setHighlighted(newVal);
@@ -150,7 +164,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   useEffect(() => { setDescription(task.description || ""); }, [task.description]);
   useEffect(() => { if (task.subtasks) setSubtasks(task.subtasks); }, [task.subtasks]);
 
-  const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !task.is_completed;
+  const isOverdue = task.deadline && parseLocalDate(task.deadline) < new Date() && !task.is_completed;
   const completedSubtasks = subtasks.filter(s => s.is_completed).length;
   const totalSubtasks = subtasks.length;
   const subtaskProgress = totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
@@ -313,7 +327,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   }, [task.id, onDelete, confirmDelete]);
 
   const daysUntilDeadline = task.deadline
-    ? Math.ceil((new Date(task.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    ? Math.ceil((parseLocalDate(task.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
     : null;
 
   const projectColor = task.project?.color || "hsl(var(--primary))";
@@ -333,7 +347,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
         }
         className={`relative overflow-visible transition-all duration-300 group ${
           isDragging ? "shadow-2xl z-50 ring-2 ring-primary/30" : ""
-        } ${highlighted ? "task-highlighted" : ""}`}
+        } ${highlighted ? "task-highlighted" : ""} ${standby ? "opacity-50" : ""}`}
       >
         <div
           className="rounded-xl overflow-hidden relative"
@@ -407,7 +421,8 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       className="w-full bg-transparent text-foreground text-sm font-bold outline-none border-b-2 border-primary/50 pb-0.5"
                     />
                   ) : (
-                    <span onClick={() => setIsEditing(true)} className="text-sm text-foreground cursor-text hover:text-primary transition-colors font-bold leading-tight line-clamp-2">
+                    <span onClick={() => setIsEditing(true)} className={`text-sm cursor-text hover:text-primary transition-colors font-bold leading-tight line-clamp-2 ${standby ? "text-muted-foreground" : "text-foreground"}`}>
+                      {standby && <Hourglass className="w-3 h-3 text-amber-400/70 inline mr-1 animate-pulse" />}
                       {task.title}
                     </span>
                   )}
@@ -465,7 +480,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     }`}
                   >
                     {isOverdue ? <AlertTriangle className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />}
-                    {new Date(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })}
+                    {parseLocalDate(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })}
                   </span>
                 )}
 
@@ -574,7 +589,8 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                   />
                 ) : (
                   <div className="flex items-center gap-1.5">
-                    <span onClick={() => setIsEditing(true)} className="text-xs sm:text-sm text-foreground cursor-text truncate hover:text-primary transition-colors font-bold">
+                    {standby && <Hourglass className="w-3 h-3 text-amber-400/70 flex-shrink-0 animate-pulse" />}
+                    <span onClick={() => setIsEditing(true)} className={`text-xs sm:text-sm cursor-text truncate hover:text-primary transition-colors font-bold ${standby ? "text-muted-foreground" : "text-foreground"}`}>
                       {task.title}
                     </span>
                     <span className="text-[9px] text-muted-foreground/50 font-mono flex-shrink-0 hidden sm:inline">{getTaskAge(task.created_at)}</span>
@@ -641,7 +657,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     </motion.div>
                   ) : <Clock className="w-2.5 h-2.5" />}
                   {isOverdue && <span className="text-[8px] font-bold mr-0.5">Atrasada</span>}
-                  {new Date(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })}
+                  {parseLocalDate(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })}
                 </span>
               )}
 
@@ -921,14 +937,14 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                           <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-secondary/40 border border-border/30 text-sm hover:border-primary/30 transition-colors">
                             <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground" />
                             {task.deadline
-                              ? new Date(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric", year: "numeric" })
+                              ? parseLocalDate(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric", year: "numeric" })
                               : <span className="text-muted-foreground/50">Definir prazo</span>}
                           </button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
                           <Calendar
                             mode="single"
-                            selected={task.deadline ? new Date(task.deadline) : undefined}
+                            selected={task.deadline ? parseLocalDate(task.deadline) : undefined}
                             onSelect={handleDeadlineChange}
                             className="p-3 pointer-events-auto"
                           />
@@ -946,7 +962,24 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     </div>
                   </div>
 
-                  {/* Subtasks in expanded view */}
+                  {/* Standby toggle */}
+                  <div className="mb-3 relative z-10">
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Status</span>
+                    <motion.button
+                      onClick={handleToggleStandby}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                        standby
+                          ? "bg-amber-400/10 text-amber-400 border border-amber-400/20"
+                          : "bg-secondary/40 text-muted-foreground border border-border/30 hover:border-amber-400/30 hover:text-amber-400/80"
+                      }`}
+                    >
+                      <Hourglass className={`w-4 h-4 ${standby ? "animate-pulse" : ""}`} />
+                      {standby ? "Em standby — clique para reativar" : "Colocar em standby"}
+                    </motion.button>
+                  </div>
+
                   <div className="space-y-1.5 relative z-10">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
