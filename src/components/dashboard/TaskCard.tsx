@@ -52,6 +52,12 @@ function getTaskAge(createdAt: string): string {
   return `${Math.floor(diffDays / 30)}m`;
 }
 
+// Parse date-only strings safely (avoid UTC midnight timezone shift)
+function parseLocalDate(dateStr: string): Date {
+  if (dateStr.includes("T")) return new Date(dateStr);
+  return new Date(dateStr + "T12:00:00");
+}
+
 // LRU cache for subtasks (max 50 entries)
 const CACHE_MAX = 50;
 const subtaskCache = new Map<string, Tables<"subtasks">[]>();
