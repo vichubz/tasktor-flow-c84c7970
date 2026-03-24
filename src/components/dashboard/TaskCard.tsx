@@ -164,7 +164,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   useEffect(() => { setDescription(task.description || ""); }, [task.description]);
   useEffect(() => { if (task.subtasks) setSubtasks(task.subtasks); }, [task.subtasks]);
 
-  const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !task.is_completed;
+  const isOverdue = task.deadline && parseLocalDate(task.deadline) < new Date() && !task.is_completed;
   const completedSubtasks = subtasks.filter(s => s.is_completed).length;
   const totalSubtasks = subtasks.length;
   const subtaskProgress = totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
