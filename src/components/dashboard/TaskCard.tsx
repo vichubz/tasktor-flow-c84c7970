@@ -99,6 +99,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   const [descExpanded, setDescExpanded] = useState(false);
   const [hasClipboard, setHasClipboard] = useState(!!subtaskClipboard);
   const [pastingSubtasks, setPastingSubtasks] = useState(false);
+  const [standby, setStandby] = useState(!!(task as any).is_standby);
 
   // Listen for clipboard changes
   useEffect(() => {
