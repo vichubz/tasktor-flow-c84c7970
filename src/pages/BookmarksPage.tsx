@@ -105,11 +105,12 @@ const BookmarksPage = () => {
       notes: formNotes.trim() || null,
       category: formCategory,
       position: bookmarks.length,
+      project_id: formProjectId,
     } as any).select().single();
     if (error) toast.error("Falha ao salvar");
     else {
       setBookmarks(prev => [data as BookmarkItem, ...prev]);
-      setFormTitle(""); setFormUrl(""); setFormNotes(""); setFormCategory("link");
+      setFormTitle(""); setFormUrl(""); setFormNotes(""); setFormCategory("link"); setFormProjectId(null);
       setShowForm(false);
       toast.success("Salvo!");
     }
