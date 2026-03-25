@@ -2,10 +2,16 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Link2, ExternalLink, Plus, X, Search, Trash2, KeyRound, Globe, FileText, Edit2, Check, Loader2, Bookmark } from "lucide-react";
+import { Link2, ExternalLink, Plus, X, Search, Trash2, KeyRound, Globe, FileText, Edit2, Check, Loader2, Bookmark, FolderOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+
+type ProjectItem = {
+  id: string;
+  name: string;
+  color: string;
+};
 
 type BookmarkItem = {
   id: string;
@@ -16,6 +22,7 @@ type BookmarkItem = {
   category: string;
   position: number;
   created_at: string;
+  project_id: string | null;
 };
 
 const CATEGORIES = [
@@ -42,6 +49,8 @@ const BookmarksPage = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState("all");
+  const [filterProject, setFilterProject] = useState<string>("all");
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
 
   // New bookmark form
   const [showForm, setShowForm] = useState(false);
@@ -49,6 +58,7 @@ const BookmarksPage = () => {
   const [formUrl, setFormUrl] = useState("");
   const [formNotes, setFormNotes] = useState("");
   const [formCategory, setFormCategory] = useState("link");
+  const [formProjectId, setFormProjectId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Edit state
@@ -57,6 +67,7 @@ const BookmarksPage = () => {
   const [editUrl, setEditUrl] = useState("");
   const [editNotes, setEditNotes] = useState("");
   const [editCategory, setEditCategory] = useState("link");
+  const [editProjectId, setEditProjectId] = useState<string | null>(null);
 
   const fetchBookmarks = useCallback(async () => {
     if (!user) return;
@@ -70,7 +81,17 @@ const BookmarksPage = () => {
     setLoading(false);
   }, [user]);
 
-  useEffect(() => { fetchBookmarks(); }, [fetchBookmarks]);
+  const fetchProjects = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("projects")
+      .select("id, name, color")
+      .eq("user_id", user.id)
+      .order("position");
+    setProjects(data || []);
+  }, [user]);
+
+  useEffect(() => { fetchBookmarks(); fetchProjects(); }, [fetchBookmarks, fetchProjects]);
 
   const handleAdd = async () => {
     if (!formTitle.trim() || !user) return;
@@ -84,11 +105,12 @@ const BookmarksPage = () => {
       notes: formNotes.trim() || null,
       category: formCategory,
       position: bookmarks.length,
+      project_id: formProjectId,
     } as any).select().single();
     if (error) toast.error("Falha ao salvar");
     else {
       setBookmarks(prev => [data as BookmarkItem, ...prev]);
-      setFormTitle(""); setFormUrl(""); setFormNotes(""); setFormCategory("link");
+      setFormTitle(""); setFormUrl(""); setFormNotes(""); setFormCategory("link"); setFormProjectId(null);
       setShowForm(false);
       toast.success("Salvo!");
     }
@@ -107,19 +129,24 @@ const BookmarksPage = () => {
     setEditUrl(b.url || "");
     setEditNotes(b.notes || "");
     setEditCategory(b.category);
+    setEditProjectId(b.project_id);
   };
 
   const handleSaveEdit = async () => {
     if (!editingId || !editTitle.trim()) return;
     let url = editUrl.trim() || null;
     if (url && !url.startsWith("http://") && !url.startsWith("https://")) url = "https://" + url;
-    setBookmarks(prev => prev.map(b => b.id === editingId ? { ...b, title: editTitle.trim(), url, notes: editNotes.trim() || null, category: editCategory } : b));
+    setBookmarks(prev => prev.map(b => b.id === editingId ? { ...b, title: editTitle.trim(), url, notes: editNotes.trim() || null, category: editCategory, project_id: editProjectId } : b));
     setEditingId(null);
-    await supabase.from("bookmarks").update({ title: editTitle.trim(), url, notes: editNotes.trim() || null, category: editCategory } as any).eq("id", editingId);
+    await supabase.from("bookmarks").update({ title: editTitle.trim(), url, notes: editNotes.trim() || null, category: editCategory, project_id: editProjectId } as any).eq("id", editingId);
   };
 
   const filtered = bookmarks.filter(b => {
     if (filterCat !== "all" && b.category !== filterCat) return false;
+    if (filterProject !== "all") {
+      if (filterProject === "none" && b.project_id !== null) return false;
+      if (filterProject !== "none" && b.project_id !== filterProject) return false;
+    }
     if (search) {
       const q = search.toLowerCase();
       return b.title.toLowerCase().includes(q) || (b.url || "").toLowerCase().includes(q) || (b.notes || "").toLowerCase().includes(q);
@@ -178,6 +205,34 @@ const BookmarksPage = () => {
                 </button>
               ))}
             </div>
+
+            {/* Project filter */}
+            {projects.length > 0 && (
+              <div className="flex items-center rounded-lg p-0.5 overflow-x-auto" style={{ background: "hsl(var(--secondary) / 0.4)", border: "1px solid hsl(var(--border) / 0.2)" }}>
+                <button
+                  onClick={() => setFilterProject("all")}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap ${filterProject === "all" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <FolderOpen className="w-3 h-3 inline mr-1" />Todos
+                </button>
+                <button
+                  onClick={() => setFilterProject("none")}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap ${filterProject === "none" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  Sem projeto
+                </button>
+                {projects.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => setFilterProject(p.id)}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 whitespace-nowrap ${filterProject === p.id ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: p.color }} />
+                    <span className="truncate max-w-[80px]">{p.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
 
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               <Button
@@ -251,6 +306,26 @@ const BookmarksPage = () => {
                   placeholder="Notas, credenciais, informações... (opcional)"
                   className="w-full bg-secondary/40 border border-border/30 rounded-md p-2.5 text-sm text-foreground resize-none min-h-[60px] outline-none focus:border-primary/30 transition-colors"
                 />
+                {/* Project selector */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs text-muted-foreground/60">Projeto:</span>
+                  <button
+                    onClick={() => setFormProjectId(null)}
+                    className={`px-2 py-0.5 rounded-md text-xs font-medium transition-all ${formProjectId === null ? "bg-primary/15 text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+                  >
+                    Nenhum
+                  </button>
+                  {projects.map(p => (
+                    <button
+                      key={p.id}
+                      onClick={() => setFormProjectId(p.id)}
+                      className={`px-2 py-0.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${formProjectId === p.id ? "bg-primary/15 text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+                    >
+                      <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+                      {p.name}
+                    </button>
+                  ))}
+                </div>
                 <div className="flex items-center gap-2 justify-end">
                   <Button variant="ghost" size="sm" onClick={() => setShowForm(false)} className="text-muted-foreground">
                     Cancelar
@@ -363,6 +438,26 @@ const BookmarksPage = () => {
                         placeholder="Notas..."
                         className="w-full bg-secondary/40 border border-border/30 rounded-md p-2 text-sm text-foreground resize-none min-h-[50px] outline-none focus:border-primary/30 transition-colors"
                       />
+                      {/* Project selector in edit */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs text-muted-foreground/60">Projeto:</span>
+                        <button
+                          onClick={() => setEditProjectId(null)}
+                          className={`px-2 py-0.5 rounded-md text-xs font-medium transition-all ${editProjectId === null ? "bg-primary/15 text-primary" : "text-muted-foreground/40 hover:text-muted-foreground"}`}
+                        >
+                          Nenhum
+                        </button>
+                        {projects.map(p => (
+                          <button
+                            key={p.id}
+                            onClick={() => setEditProjectId(p.id)}
+                            className={`px-2 py-0.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${editProjectId === p.id ? "bg-primary/15 text-primary" : "text-muted-foreground/40 hover:text-muted-foreground"}`}
+                          >
+                            <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+                            {p.name}
+                          </button>
+                        ))}
+                      </div>
                       <div className="flex gap-2 justify-end">
                         <Button variant="ghost" size="sm" onClick={() => setEditingId(null)} className="h-7 text-xs">Cancelar</Button>
                         <Button size="sm" onClick={handleSaveEdit} className="h-7 text-xs gap-1" style={{ background: "var(--gradient-primary)" }}>
@@ -400,9 +495,20 @@ const BookmarksPage = () => {
                             {b.notes}
                           </p>
                         )}
-                        <span className="text-[10px] text-muted-foreground/30 font-mono mt-1.5 block">
-                          {new Date(b.created_at).toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}
-                        </span>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className="text-[10px] text-muted-foreground/30 font-mono">
+                            {new Date(b.created_at).toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}
+                          </span>
+                          {b.project_id && (() => {
+                            const proj = projects.find(p => p.id === b.project_id);
+                            return proj ? (
+                              <span className="flex items-center gap-1 text-[10px] text-muted-foreground/50">
+                                <div className="w-2 h-2 rounded-full" style={{ background: proj.color }} />
+                                {proj.name}
+                              </span>
+                            ) : null;
+                          })()}
+                        </div>
                       </div>
 
                       {/* Actions */}
