@@ -94,6 +94,19 @@ const BookmarksPage = () => {
 
   useEffect(() => { fetchBookmarks(); fetchProjects(); }, [fetchBookmarks, fetchProjects]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "n" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) return;
+        e.preventDefault();
+        setShowForm(true);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const handleAdd = async () => {
     if (!formTitle.trim() || !user) return;
     setSaving(true);
