@@ -206,7 +206,35 @@ const BookmarksPage = () => {
               ))}
             </div>
 
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+            {/* Project filter */}
+            {projects.length > 0 && (
+              <div className="flex items-center rounded-lg p-0.5 overflow-x-auto" style={{ background: "hsl(var(--secondary) / 0.4)", border: "1px solid hsl(var(--border) / 0.2)" }}>
+                <button
+                  onClick={() => setFilterProject("all")}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap ${filterProject === "all" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <FolderOpen className="w-3 h-3 inline mr-1" />Todos
+                </button>
+                <button
+                  onClick={() => setFilterProject("none")}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap ${filterProject === "none" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  Sem projeto
+                </button>
+                {projects.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => setFilterProject(p.id)}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 whitespace-nowrap ${filterProject === p.id ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: p.color }} />
+                    <span className="truncate max-w-[80px]">{p.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+
               <Button
                 onClick={() => setShowForm(!showForm)}
                 className="h-9 gap-1.5 font-bold text-xs sm:text-sm"
