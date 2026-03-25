@@ -722,7 +722,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               </motion.button>
 
               {/* Difficulty selector */}
-              <div className="flex items-center flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ opacity: difficulty > 0 ? 1 : undefined }}>
+              <div className="flex items-center flex-shrink-0" onClick={(e) => e.stopPropagation()} style={{ opacity: difficulty > 0 ? 1 : undefined }}>
                 {[1, 2, 3].map(level => (
                   <motion.button
                     key={level}
