@@ -486,18 +486,31 @@ const BookmarksPage = () => {
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-foreground truncate">{b.title}</span>
-                          {b.url && (
+                          {b.url ? (
                             <a
                               href={b.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-[11px] text-primary/60 hover:text-primary flex items-center gap-1 flex-shrink-0 transition-colors"
-                              title={b.url}
+                              className="text-sm font-bold text-foreground hover:text-primary truncate transition-colors underline-offset-2 hover:underline"
                             >
-                              <ExternalLink className="w-3 h-3" />
-                              <span className="hidden sm:inline truncate max-w-[180px]">{extractDomain(b.url)}</span>
+                              {b.title}
                             </a>
+                          ) : (
+                            <span className="text-sm font-bold text-foreground truncate">{b.title}</span>
+                          )}
+                          {b.url && (
+                            <span className="text-[11px] text-muted-foreground/40 truncate max-w-[150px] hidden sm:inline">
+                              {extractDomain(b.url)}
+                            </span>
+                          )}
+                          {b.url && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(b.url!); toast.success("Link copiado!"); }}
+                              className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-primary transition-all flex-shrink-0"
+                              title="Copiar link"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </button>
                           )}
                         </div>
                         {b.notes && (
