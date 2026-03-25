@@ -1074,7 +1074,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                           }`}
                           style={sub.is_completed ? { boxShadow: "0 0 8px rgba(16,185,129,0.3)" } : {}}
                         >
-                          {sub.is_completed && <Check className="w-2.5 h-2.5 text-success" />}
+                          {sub.is_completed && <Check className="w-3 h-3 text-success" />}
                         </motion.button>
 
                         {editingSubtaskId === sub.id ? (
