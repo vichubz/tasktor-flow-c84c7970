@@ -306,7 +306,26 @@ const BookmarksPage = () => {
                   placeholder="Notas, credenciais, informações... (opcional)"
                   className="w-full bg-secondary/40 border border-border/30 rounded-md p-2.5 text-sm text-foreground resize-none min-h-[60px] outline-none focus:border-primary/30 transition-colors"
                 />
-                <div className="flex items-center gap-2 justify-end">
+                {/* Project selector */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs text-muted-foreground/60">Projeto:</span>
+                  <button
+                    onClick={() => setFormProjectId(null)}
+                    className={`px-2 py-0.5 rounded-md text-xs font-medium transition-all ${formProjectId === null ? "bg-primary/15 text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+                  >
+                    Nenhum
+                  </button>
+                  {projects.map(p => (
+                    <button
+                      key={p.id}
+                      onClick={() => setFormProjectId(p.id)}
+                      className={`px-2 py-0.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${formProjectId === p.id ? "bg-primary/15 text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+                    >
+                      <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+                      {p.name}
+                    </button>
+                  ))}
+                </div>
                   <Button variant="ghost" size="sm" onClick={() => setShowForm(false)} className="text-muted-foreground">
                     Cancelar
                   </Button>
