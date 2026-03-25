@@ -142,6 +142,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   const [newLinkUrl, setNewLinkUrl] = useState("");
   const [newLinkLabel, setNewLinkLabel] = useState("");
   const [addingLink, setAddingLink] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
   const [loadingLinks, setLoadingLinks] = useState(false);
 
   // Listen for clipboard changes
