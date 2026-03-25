@@ -818,7 +818,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
           {/* Subtask dropdown panel — appears below the card row */}
           <AnimatePresence>
-            {showSubtaskDropdown && totalSubtasks > 0 && (
+            {showSubtaskDropdown && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
