@@ -1047,79 +1047,71 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     </div>
                   </div>
 
-                  {/* Project + Deadline + Standby in compact grid */}
-                  <div className="grid grid-cols-2 gap-3 relative z-10 mb-2">
-                    {/* Project selector */}
-                    <div>
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Projeto</span>
-                      <Select value={task.project_id || "none"} onValueChange={handleProjectChange}>
-                        <SelectTrigger className="bg-secondary/40 border-border/30 h-8 text-sm w-full">
-                          <SelectValue placeholder="Selecionar projeto" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
-                          <SelectItem value="none"><span className="text-muted-foreground">Sem projeto</span></SelectItem>
-                          {projects.map(p => (
-                            <SelectItem key={p.id} value={p.id}>
-                              <span className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-                                {p.name}
-                              </span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Deadline editor */}
-                    <div>
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Prazo</span>
-                      <div className="flex items-center gap-1.5">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-secondary/40 border border-border/30 text-sm hover:border-primary/30 transition-colors">
-                              <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground" />
-                              {task.deadline
-                                ? parseLocalDate(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })
-                                : <span className="text-muted-foreground/50">Definir</span>}
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={task.deadline ? parseLocalDate(task.deadline) : undefined}
-                              onSelect={handleDeadlineChange}
-                              className="p-3 pointer-events-auto"
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        {task.deadline && (
-                          <motion.button
-                            onClick={() => handleDeadlineChange(undefined)}
-                            whileHover={{ scale: 1.1 }}
-                            className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </motion.button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Standby toggle */}
-                  <div className="relative z-10">
+                  {/* Standby + Project + Deadline — single row */}
+                  <div className="flex items-center gap-2 flex-wrap relative z-10">
+                    {/* Standby toggle */}
                     <motion.button
                       onClick={handleToggleStandby}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                         standby
                           ? "bg-amber-400/10 text-amber-400 border border-amber-400/20"
                           : "bg-secondary/40 text-muted-foreground border border-border/30 hover:border-amber-400/30 hover:text-amber-400/80"
                       }`}
                     >
-                      <Hourglass className={`w-3.5 h-3.5 ${standby ? "animate-pulse" : ""}`} />
-                      {standby ? "Em standby — reativar" : "Standby"}
+                      <Hourglass className={`w-3 h-3 ${standby ? "animate-pulse" : ""}`} />
+                      {standby ? "Standby ✓" : "Standby"}
                     </motion.button>
+
+                    {/* Project selector */}
+                    <Select value={task.project_id || "none"} onValueChange={handleProjectChange}>
+                      <SelectTrigger className="bg-secondary/40 border-border/30 h-8 text-xs w-[140px]">
+                        <SelectValue placeholder="Projeto" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
+                        <SelectItem value="none"><span className="text-muted-foreground">Sem projeto</span></SelectItem>
+                        {projects.map(p => (
+                          <SelectItem key={p.id} value={p.id}>
+                            <span className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                              {p.name}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {/* Deadline */}
+                    <div className="flex items-center gap-1">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-secondary/40 border border-border/30 text-xs hover:border-primary/30 transition-colors">
+                            <CalendarIcon className="w-3 h-3 text-muted-foreground" />
+                            {task.deadline
+                              ? parseLocalDate(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })
+                              : <span className="text-muted-foreground/50">Prazo</span>}
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={task.deadline ? parseLocalDate(task.deadline) : undefined}
+                            onSelect={handleDeadlineChange}
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      {task.deadline && (
+                        <motion.button
+                          onClick={() => handleDeadlineChange(undefined)}
+                          whileHover={{ scale: 1.1 }}
+                          className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </motion.button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.div>
