@@ -583,7 +583,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
             </div>
           ) : (
             /* ── LIST LAYOUT (original) ── */
-            <div className="flex items-center gap-2 sm:gap-2.5 px-1.5 sm:px-2.5 py-2 sm:py-2.5 pl-2.5 sm:pl-3.5">
+            <div className="flex items-center gap-2 sm:gap-2.5 px-1.5 sm:px-2.5 py-2 sm:py-2.5 pl-2.5 sm:pl-3.5 cursor-pointer" onClick={() => handleExpand()}>
               <div
                 {...dragHandleProps}
                 className="flex-shrink-0 cursor-grab touch-none active:cursor-grabbing"
