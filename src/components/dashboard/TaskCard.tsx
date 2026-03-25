@@ -259,9 +259,20 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     const { data, error } = await supabase.from("task_links").insert({ task_id: task.id, url, label, position: links.length } as any).select().single();
     if (error) toast.error("Falha ao adicionar link");
     else if (data) setLinks(prev => [...prev, data as any]);
+
+    // Also save to bookmarks panel
+    supabase.from("bookmarks").insert({
+      user_id: task.user_id,
+      title: label || url.replace(/^https?:\/\/(www\.)?/, "").split("/")[0],
+      url,
+      category: "link",
+      position: 0,
+    } as any).then(() => {});
+
     setNewLinkUrl("");
     setNewLinkLabel("");
     setAddingLink(false);
+    setShowLinkInput(false);
   };
 
   const handleDeleteLink = async (linkId: string) => {
