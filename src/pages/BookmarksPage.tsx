@@ -2,10 +2,16 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Link2, ExternalLink, Plus, X, Search, Trash2, KeyRound, Globe, FileText, Edit2, Check, Loader2, Bookmark } from "lucide-react";
+import { Link2, ExternalLink, Plus, X, Search, Trash2, KeyRound, Globe, FileText, Edit2, Check, Loader2, Bookmark, FolderOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+
+type ProjectItem = {
+  id: string;
+  name: string;
+  color: string;
+};
 
 type BookmarkItem = {
   id: string;
@@ -16,6 +22,7 @@ type BookmarkItem = {
   category: string;
   position: number;
   created_at: string;
+  project_id: string | null;
 };
 
 const CATEGORIES = [
