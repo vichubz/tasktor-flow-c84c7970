@@ -143,6 +143,10 @@ const BookmarksPage = () => {
 
   const filtered = bookmarks.filter(b => {
     if (filterCat !== "all" && b.category !== filterCat) return false;
+    if (filterProject !== "all") {
+      if (filterProject === "none" && b.project_id !== null) return false;
+      if (filterProject !== "none" && b.project_id !== filterProject) return false;
+    }
     if (search) {
       const q = search.toLowerCase();
       return b.title.toLowerCase().includes(q) || (b.url || "").toLowerCase().includes(q) || (b.notes || "").toLowerCase().includes(q);
