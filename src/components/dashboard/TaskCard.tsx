@@ -712,7 +712,8 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 <Star className={`w-3.5 h-3.5 ${highlighted ? "fill-amber-400" : ""}`} />
               </motion.button>
 
-// Description preview with overflow detection
+
+
 function DescriptionPreview({ description, expanded, onToggle }: { description: string; expanded: boolean; onToggle: () => void }) {
   const textRef = useRef<HTMLSpanElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
