@@ -597,21 +597,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                   </div>
                 )}
                 {task.description && !isEditing && (
-                  <div className="mt-0.5">
-                    <span
-                      className={`text-[11px] sm:text-xs text-muted-foreground/60 leading-tight ${descExpanded ? "whitespace-pre-wrap" : "truncate block"}`}
-                    >
-                      {descExpanded ? task.description : task.description}
-                    </span>
-                    {task.description.length > 80 && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setDescExpanded(!descExpanded); }}
-                        className="text-[10px] text-primary/60 hover:text-primary transition-colors font-medium ml-1"
-                      >
-                        {descExpanded ? "ver menos" : "ver mais"}
-                      </button>
-                    )}
-                  </div>
+                  <DescriptionPreview description={task.description} expanded={descExpanded} onToggle={() => setDescExpanded(!descExpanded)} />
                 )}
               </div>
 
