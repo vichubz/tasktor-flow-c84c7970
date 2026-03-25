@@ -129,15 +129,16 @@ const BookmarksPage = () => {
     setEditUrl(b.url || "");
     setEditNotes(b.notes || "");
     setEditCategory(b.category);
+    setEditProjectId(b.project_id);
   };
 
   const handleSaveEdit = async () => {
     if (!editingId || !editTitle.trim()) return;
     let url = editUrl.trim() || null;
     if (url && !url.startsWith("http://") && !url.startsWith("https://")) url = "https://" + url;
-    setBookmarks(prev => prev.map(b => b.id === editingId ? { ...b, title: editTitle.trim(), url, notes: editNotes.trim() || null, category: editCategory } : b));
+    setBookmarks(prev => prev.map(b => b.id === editingId ? { ...b, title: editTitle.trim(), url, notes: editNotes.trim() || null, category: editCategory, project_id: editProjectId } : b));
     setEditingId(null);
-    await supabase.from("bookmarks").update({ title: editTitle.trim(), url, notes: editNotes.trim() || null, category: editCategory } as any).eq("id", editingId);
+    await supabase.from("bookmarks").update({ title: editTitle.trim(), url, notes: editNotes.trim() || null, category: editCategory, project_id: editProjectId } as any).eq("id", editingId);
   };
 
   const filtered = bookmarks.filter(b => {
