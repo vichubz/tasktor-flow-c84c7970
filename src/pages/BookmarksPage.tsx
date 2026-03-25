@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Link2, ExternalLink, Plus, X, Search, Trash2, KeyRound, Globe, FileText, Edit2, Check, Loader2, Bookmark, FolderOpen } from "lucide-react";
+import { Link2, ExternalLink, Plus, X, Search, Trash2, KeyRound, Globe, FileText, Edit2, Check, Loader2, Bookmark, FolderOpen, Copy } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
