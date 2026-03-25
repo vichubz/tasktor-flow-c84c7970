@@ -880,7 +880,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       <motion.button
                         whileTap={{ scale: 0.8 }}
                         onClick={() => handleSubtaskToggle(sub.id, sub.is_completed)}
-                        className={`w-4.5 h-4.5 rounded border-[1.5px] flex items-center justify-center transition-all flex-shrink-0 ${
+                        className={`w-5 h-5 rounded border-[1.5px] flex items-center justify-center transition-all flex-shrink-0 ${
                           sub.is_completed
                             ? "border-success bg-success/20"
                             : "border-muted-foreground/25 group-hover/sub:border-primary"
