@@ -81,7 +81,17 @@ const BookmarksPage = () => {
     setLoading(false);
   }, [user]);
 
-  useEffect(() => { fetchBookmarks(); }, [fetchBookmarks]);
+  const fetchProjects = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("projects")
+      .select("id, name, color")
+      .eq("user_id", user.id)
+      .order("position");
+    setProjects(data || []);
+  }, [user]);
+
+  useEffect(() => { fetchBookmarks(); fetchProjects(); }, [fetchBookmarks, fetchProjects]);
 
   const handleAdd = async () => {
     if (!formTitle.trim() || !user) return;
