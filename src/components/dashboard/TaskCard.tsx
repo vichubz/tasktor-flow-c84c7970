@@ -70,14 +70,20 @@ function DescriptionPreview({ description, expanded, onToggle }: { description: 
     }
   }, [description, expanded]);
 
+  const showToggle = expanded || isOverflowing;
+  // When "ver mais" is visible and collapsed, truncate more aggressively
+  const truncatedText = !expanded && showToggle && description.length > 60
+    ? description.slice(0, 55).trimEnd() + "…"
+    : description;
+
   return (
-    <div className="mt-0.5">
+    <div className="mt-0.5 overflow-hidden">
       <span
         ref={textRef}
-        className={`text-[11px] sm:text-xs text-muted-foreground/60 leading-tight inline ${expanded ? "whitespace-pre-wrap" : "truncate block"}`}
+        className={`text-[11px] sm:text-xs text-muted-foreground/60 leading-tight ${expanded ? "whitespace-pre-wrap block" : "truncate block"}`}
       >
-        {description}
-        {(expanded || isOverflowing) && (
+        {expanded ? description : truncatedText}
+        {showToggle && (
           <button
             onClick={(e) => { e.stopPropagation(); onToggle(); }}
             className="text-[10px] text-primary/60 hover:text-primary transition-colors font-medium ml-1 inline"
