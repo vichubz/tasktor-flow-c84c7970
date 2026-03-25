@@ -49,6 +49,8 @@ const BookmarksPage = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState("all");
+  const [filterProject, setFilterProject] = useState<string>("all");
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
 
   // New bookmark form
   const [showForm, setShowForm] = useState(false);
@@ -56,6 +58,7 @@ const BookmarksPage = () => {
   const [formUrl, setFormUrl] = useState("");
   const [formNotes, setFormNotes] = useState("");
   const [formCategory, setFormCategory] = useState("link");
+  const [formProjectId, setFormProjectId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Edit state
