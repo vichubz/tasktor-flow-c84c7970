@@ -746,13 +746,13 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
               {/* Highlight toggle */}
               <motion.button
-                onClick={handleToggleHighlight}
+                onClick={(e) => { e.stopPropagation(); handleToggleHighlight(); }}
                 whileHover={{ scale: 1.15 }}
                 whileTap={{ scale: 0.9 }}
                 className={`flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md transition-all ${
                   highlighted
                     ? "text-amber-400"
-                    : "text-muted-foreground/20 hover:text-amber-400/60 opacity-0 group-hover:opacity-100"
+                    : "text-muted-foreground/30 hover:text-amber-400/60"
                 }`}
                 title={highlighted ? "Remover destaque" : "Destacar task"}
               >
