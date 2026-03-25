@@ -264,13 +264,14 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     if (error) toast.error("Falha ao adicionar link");
     else if (data) setLinks(prev => [...prev, data as any]);
 
-    // Also save to bookmarks panel
+    // Also save to bookmarks panel (with project)
     supabase.from("bookmarks").insert({
       user_id: task.user_id,
       title: label || url.replace(/^https?:\/\/(www\.)?/, "").split("/")[0],
       url,
       category: "link",
       position: 0,
+      project_id: task.project_id,
     } as any).then(() => {});
 
     setNewLinkUrl("");
