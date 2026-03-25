@@ -407,8 +407,9 @@ const BookmarksPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: 100 }}
                   transition={{ duration: 0.25, delay: i * 0.03 }}
-                  layout
-                  className="rounded-xl overflow-hidden relative group"
+                   layout
+                  onDoubleClick={() => !isEditing && startEdit(b)}
+                  className="rounded-xl overflow-hidden relative group cursor-default"
                   style={{
                     background: "var(--glass-bg)",
                     border: "1px solid hsl(var(--primary) / 0.08)",
