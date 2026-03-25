@@ -438,6 +438,26 @@ const BookmarksPage = () => {
                         placeholder="Notas..."
                         className="w-full bg-secondary/40 border border-border/30 rounded-md p-2 text-sm text-foreground resize-none min-h-[50px] outline-none focus:border-primary/30 transition-colors"
                       />
+                      {/* Project selector in edit */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs text-muted-foreground/60">Projeto:</span>
+                        <button
+                          onClick={() => setEditProjectId(null)}
+                          className={`px-2 py-0.5 rounded-md text-xs font-medium transition-all ${editProjectId === null ? "bg-primary/15 text-primary" : "text-muted-foreground/40 hover:text-muted-foreground"}`}
+                        >
+                          Nenhum
+                        </button>
+                        {projects.map(p => (
+                          <button
+                            key={p.id}
+                            onClick={() => setEditProjectId(p.id)}
+                            className={`px-2 py-0.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${editProjectId === p.id ? "bg-primary/15 text-primary" : "text-muted-foreground/40 hover:text-muted-foreground"}`}
+                          >
+                            <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+                            {p.name}
+                          </button>
+                        ))}
+                      </div>
                       <div className="flex gap-2 justify-end">
                         <Button variant="ghost" size="sm" onClick={() => setEditingId(null)} className="h-7 text-xs">Cancelar</Button>
                         <Button size="sm" onClick={handleSaveEdit} className="h-7 text-xs gap-1" style={{ background: "var(--gradient-primary)" }}>
