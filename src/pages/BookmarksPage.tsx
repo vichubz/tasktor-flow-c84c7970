@@ -234,7 +234,7 @@ const BookmarksPage = () => {
               </div>
             )}
 
-
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               <Button
                 onClick={() => setShowForm(!showForm)}
                 className="h-9 gap-1.5 font-bold text-xs sm:text-sm"
