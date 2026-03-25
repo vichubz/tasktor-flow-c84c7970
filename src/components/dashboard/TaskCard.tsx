@@ -132,6 +132,11 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   const [hasClipboard, setHasClipboard] = useState(!!subtaskClipboard);
   const [pastingSubtasks, setPastingSubtasks] = useState(false);
   const [standby, setStandby] = useState(!!(task as any).is_standby);
+  const [links, setLinks] = useState<{ id: string; url: string; label: string | null; position: number }[]>([]);
+  const [newLinkUrl, setNewLinkUrl] = useState("");
+  const [newLinkLabel, setNewLinkLabel] = useState("");
+  const [addingLink, setAddingLink] = useState(false);
+  const [loadingLinks, setLoadingLinks] = useState(false);
 
   // Listen for clipboard changes
   useEffect(() => {
