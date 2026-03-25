@@ -710,7 +710,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
               {/* Edit expand button */}
               <motion.button
-                onClick={handleExpand}
+                onClick={(e) => handleExpand(e)}
                 whileHover={{ scale: 1.15 }}
                 whileTap={{ scale: 0.9 }}
                 className="text-foreground/70 hover:text-foreground transition-all flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md bg-secondary/50 hover:bg-secondary/80 border border-border/20"
