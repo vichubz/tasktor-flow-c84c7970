@@ -401,7 +401,10 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     setCompleting(true);
     playCompletionSound();
     const msg = SUCCESS_MESSAGES[Math.floor(Math.random() * SUCCESS_MESSAGES.length)];
-    toast.success(msg);
+    toast.success(msg, {
+      style: { fontSize: "16px", padding: "16px 20px", fontWeight: 700 },
+      duration: 3000,
+    });
     setTimeout(() => {
       onComplete(task.id);
     }, 700);
