@@ -972,11 +972,12 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                           if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleDescBlur(); }
                           if (e.key === "Escape") { setDescription(task.description || ""); setIsEditingDesc(false); }
                         }}
-                        className="w-full bg-secondary/40 text-sm text-foreground rounded-lg p-2.5 outline-none border border-primary/20 min-h-[50px] resize-none"
+                        className="w-full bg-secondary/40 text-sm text-foreground rounded-lg p-2.5 outline-none border border-primary/20 min-h-[60px] resize-y"
                         placeholder="Adicione uma descrição... (Enter para salvar, Shift+Enter para nova linha)"
+                        style={{ maxHeight: "300px" }}
                       />
                     ) : (
-                      <p onClick={() => setIsEditingDesc(true)} className="text-sm text-muted-foreground leading-relaxed cursor-text hover:text-foreground transition-colors min-h-[20px] p-1.5 rounded-md hover:bg-secondary/30">
+                      <p onClick={() => setIsEditingDesc(true)} className="text-sm text-muted-foreground leading-relaxed cursor-text hover:text-foreground transition-colors min-h-[20px] p-1.5 rounded-md hover:bg-secondary/30 whitespace-pre-wrap">
                         {task.description || "Clique para adicionar descrição..."}
                       </p>
                     )}
