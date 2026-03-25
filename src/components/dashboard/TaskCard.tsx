@@ -866,7 +866,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       ) : (
                         <span
                           onClick={() => handleEditSubtask(sub)}
-                          className={`text-xs transition-all flex-1 cursor-text hover:text-primary ${
+                            className={`text-sm transition-all flex-1 cursor-text hover:text-primary ${
                             sub.is_completed ? "line-through text-muted-foreground/40" : "text-foreground"
                           }`}
                         >
