@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, BarChart3, FolderKanban, LogOut, ChevronLeft, ChevronRight, ChevronDown, Calendar, Rocket, BrainCircuit, Video, Settings, Plus } from "lucide-react";
+import { LayoutDashboard, BarChart3, FolderKanban, LogOut, ChevronLeft, ChevronRight, ChevronDown, Calendar, Rocket, BrainCircuit, Video, Settings, Plus, Bookmark } from "lucide-react";
 import logoIcone from "@/assets/tasktor_logo_icone.png";
 import logoText from "@/assets/tasktor_logo_text.png";
 import ProjectManager from "@/components/dashboard/ProjectManager";
@@ -36,6 +36,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
     { to: "/home", icon: Rocket, label: "Início" },
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/calendar", icon: Calendar, label: "Calendário" },
+    { to: "/bookmarks", icon: Bookmark, label: "Links" },
     { to: "/meetings-ai", icon: BrainCircuit, label: "Agente IA" },
     { to: "/meetings", icon: Video, label: "Reuniões" },
     { to: "/metrics", icon: BarChart3, label: "Métricas" },

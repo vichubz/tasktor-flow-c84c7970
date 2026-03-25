@@ -16,6 +16,7 @@ const MeetingsAIPage = lazy(() => import("@/pages/MeetingsAIPage"));
 const CalendarPage = lazy(() => import("@/pages/CalendarPage"));
 const MeetingsPage = lazy(() => import("@/pages/MeetingsPage"));
 const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
+const BookmarksPage = lazy(() => import("@/pages/BookmarksPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -68,6 +69,7 @@ const AnimatedRoutes = () => {
         <Route path="/meetings" element={<WrappedLazy><MeetingsPage /></WrappedLazy>} />
         <Route path="/calendar" element={<WrappedLazy><CalendarPage /></WrappedLazy>} />
         <Route path="/settings" element={<WrappedLazy><SettingsPage /></WrappedLazy>} />
+        <Route path="/bookmarks" element={<WrappedLazy><BookmarksPage /></WrappedLazy>} />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>

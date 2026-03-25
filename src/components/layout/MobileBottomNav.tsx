@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Rocket, BrainCircuit, Calendar, Video } from "lucide-react";
+import { LayoutDashboard, Rocket, BrainCircuit, Calendar, Bookmark } from "lucide-react";
 
 const MobileBottomNav = () => {
   const location = useLocation();
@@ -8,8 +8,8 @@ const MobileBottomNav = () => {
     { to: "/home", icon: Rocket, label: "Início" },
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/calendar", icon: Calendar, label: "Calendário" },
+    { to: "/bookmarks", icon: Bookmark, label: "Links" },
     { to: "/meetings-ai", icon: BrainCircuit, label: "Agente IA" },
-    { to: "/meetings", icon: Video, label: "Reuniões" },
   ];
 
   return (
