@@ -326,6 +326,7 @@ const BookmarksPage = () => {
                     </button>
                   ))}
                 </div>
+                <div className="flex items-center gap-2 justify-end">
                   <Button variant="ghost" size="sm" onClick={() => setShowForm(false)} className="text-muted-foreground">
                     Cancelar
                   </Button>
