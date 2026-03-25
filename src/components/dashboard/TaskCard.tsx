@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Trash2, GripVertical, ChevronDown, AlertTriangle, Clock, Sparkles, Plus, X, Loader2, CalendarIcon, Star, Copy, ClipboardPaste, Zap, ChevronRight, Hourglass } from "lucide-react";
+import { Check, Trash2, GripVertical, ChevronDown, AlertTriangle, Clock, Sparkles, Plus, X, Loader2, CalendarIcon, Star, Copy, ClipboardPaste, Zap, ChevronRight, Hourglass, Link2, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Input } from "@/components/ui/input";
@@ -132,6 +132,11 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   const [hasClipboard, setHasClipboard] = useState(!!subtaskClipboard);
   const [pastingSubtasks, setPastingSubtasks] = useState(false);
   const [standby, setStandby] = useState(!!(task as any).is_standby);
+  const [links, setLinks] = useState<{ id: string; url: string; label: string | null; position: number }[]>([]);
+  const [newLinkUrl, setNewLinkUrl] = useState("");
+  const [newLinkLabel, setNewLinkLabel] = useState("");
+  const [addingLink, setAddingLink] = useState(false);
+  const [loadingLinks, setLoadingLinks] = useState(false);
 
   // Listen for clipboard changes
   useEffect(() => {
@@ -217,7 +222,10 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     if (e) e.stopPropagation();
     const next = !expanded;
     setExpanded(next);
-    if (next && subtasks.length === 0 && !task.subtasks?.length) fetchSubtasks();
+    if (next) {
+      if (subtasks.length === 0 && !task.subtasks?.length) fetchSubtasks();
+      fetchLinks();
+    }
   };
 
   // Ref for subtask input to focus on Tab from title
@@ -227,6 +235,32 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     const next = !showSubtaskDropdown;
     setShowSubtaskDropdown(next);
     if (next && subtasks.length === 0 && !task.subtasks?.length) fetchSubtasks();
+  };
+
+  const fetchLinks = useCallback(async () => {
+    setLoadingLinks(true);
+    const { data } = await supabase.from("task_links").select("*").eq("task_id", task.id).order("position");
+    if (data) setLinks(data as any);
+    setLoadingLinks(false);
+  }, [task.id]);
+
+  const handleAddLink = async () => {
+    if (!newLinkUrl.trim()) return;
+    setAddingLink(true);
+    let url = newLinkUrl.trim();
+    if (!url.startsWith("http://") && !url.startsWith("https://")) url = "https://" + url;
+    const label = newLinkLabel.trim() || null;
+    const { data, error } = await supabase.from("task_links").insert({ task_id: task.id, url, label, position: links.length } as any).select().single();
+    if (error) toast.error("Falha ao adicionar link");
+    else if (data) setLinks(prev => [...prev, data as any]);
+    setNewLinkUrl("");
+    setNewLinkLabel("");
+    setAddingLink(false);
+  };
+
+  const handleDeleteLink = async (linkId: string) => {
+    setLinks(prev => prev.filter(l => l.id !== linkId));
+    await supabase.from("task_links").delete().eq("id", linkId);
   };
 
   // Title editing
@@ -583,7 +617,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
             </div>
           ) : (
             /* ── LIST LAYOUT (original) ── */
-            <div className="flex items-center gap-2 sm:gap-2.5 px-1.5 sm:px-2.5 py-2 sm:py-2.5 pl-2.5 sm:pl-3.5 cursor-pointer" onClick={() => handleExpand()}>
+            <div className="flex items-center gap-2 sm:gap-2.5 px-1.5 sm:px-2.5 py-2 sm:py-2.5 pl-2.5 sm:pl-3.5" onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleSubtaskDropdown(); }}>
               <div
                 {...dragHandleProps}
                 onClick={(e) => e.stopPropagation()}
@@ -784,7 +818,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
           {/* Subtask dropdown panel — appears below the card row */}
           <AnimatePresence>
-            {showSubtaskDropdown && totalSubtasks > 0 && (
+            {showSubtaskDropdown && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
@@ -942,189 +976,143 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     )}
                   </div>
 
-                  {/* Project selector */}
+                  {/* Links section */}
                   <div className="mb-3 relative z-10">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Projeto</span>
-                    <Select value={task.project_id || "none"} onValueChange={handleProjectChange}>
-                      <SelectTrigger className="bg-secondary/40 border-border/30 h-8 text-sm w-full max-w-xs">
-                        <SelectValue placeholder="Selecionar projeto" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
-                        <SelectItem value="none"><span className="text-muted-foreground">Sem projeto</span></SelectItem>
-                        {projects.map(p => (
-                          <SelectItem key={p.id} value={p.id}>
-                            <span className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-                              {p.name}
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                      <Link2 className="w-3 h-3 text-primary/50" />
+                      Links
+                    </span>
 
-                  {/* Deadline editor */}
-                  <div className="mb-3 relative z-10">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Prazo</span>
-                    <div className="flex items-center gap-2">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-secondary/40 border border-border/30 text-sm hover:border-primary/30 transition-colors">
-                            <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground" />
-                            {task.deadline
-                              ? parseLocalDate(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric", year: "numeric" })
-                              : <span className="text-muted-foreground/50">Definir prazo</span>}
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={task.deadline ? parseLocalDate(task.deadline) : undefined}
-                            onSelect={handleDeadlineChange}
-                            className="p-3 pointer-events-auto"
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      {task.deadline && (
-                        <motion.button
-                          onClick={() => handleDeadlineChange(undefined)}
-                          whileHover={{ scale: 1.1 }}
-                          className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </motion.button>
-                      )}
-                    </div>
-                  </div>
+                    {loadingLinks && <Skeleton className="h-7 w-full mb-1" />}
 
-                  {/* Standby toggle */}
-                  <div className="mb-3 relative z-10">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Status</span>
-                    <motion.button
-                      onClick={handleToggleStandby}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                        standby
-                          ? "bg-amber-400/10 text-amber-400 border border-amber-400/20"
-                          : "bg-secondary/40 text-muted-foreground border border-border/30 hover:border-amber-400/30 hover:text-amber-400/80"
-                      }`}
-                    >
-                      <Hourglass className={`w-4 h-4 ${standby ? "animate-pulse" : ""}`} />
-                      {standby ? "Em standby — clique para reativar" : "Colocar em standby"}
-                    </motion.button>
-                  </div>
-
-                  <div className="space-y-1.5 relative z-10">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
-                        <Sparkles className="w-3 h-3 text-primary/50" />
-                        Subtarefas
-                      </span>
-                      <div className="flex items-center gap-1 ml-auto">
-                        {subtasks.length > 0 && (
-                          <motion.button
-                            onClick={handleCopySubtasks}
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all"
-                            title="Copiar subtasks"
-                          >
-                            <Copy className="w-3 h-3" />
-                          </motion.button>
-                        )}
-                        {hasClipboard && (
-                          <motion.button
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            onClick={handlePasteSubtasks}
-                            disabled={pastingSubtasks}
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all disabled:opacity-30"
-                            title="Colar subtasks"
-                          >
-                            {pastingSubtasks ? <Loader2 className="w-3 h-3 animate-spin" /> : <ClipboardPaste className="w-3 h-3" />}
-                          </motion.button>
-                        )}
-                      </div>
-                    </div>
-
-                    {loadingSubtasks && (
-                      <div className="space-y-1.5">
-                        <Skeleton className="h-7 w-full" />
-                        <Skeleton className="h-7 w-3/4" />
-                      </div>
-                    )}
-
-                    {!loadingSubtasks && subtasks.map((sub, si) => (
+                    {!loadingLinks && links.map((link) => (
                       <motion.div
-                        key={sub.id}
-                        initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: si * 0.05 }}
-                        className="flex items-center gap-3 group/sub py-2 px-2 rounded-md hover:bg-primary/[0.04] transition-all"
+                        key={link.id}
+                        initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
+                        className="flex items-center gap-2 group/link py-1.5 px-2 rounded-md hover:bg-primary/[0.04] transition-all"
                       >
-                        <motion.button
-                          whileTap={{ scale: 0.8 }}
-                          onClick={() => handleSubtaskToggle(sub.id, sub.is_completed)}
-                          className={`w-5 h-5 rounded border-[1.5px] flex items-center justify-center transition-all flex-shrink-0 ${
-                            sub.is_completed
-                              ? "border-success bg-success/20"
-                              : "border-muted-foreground/25 group-hover/sub:border-primary"
-                          }`}
-                          style={sub.is_completed ? { boxShadow: "0 0 8px rgba(16,185,129,0.3)" } : {}}
+                        <ExternalLink className="w-3.5 h-3.5 text-primary/50 flex-shrink-0" />
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary/80 hover:text-primary truncate flex-1 underline-offset-2 hover:underline transition-colors"
+                          title={link.url}
                         >
-                          {sub.is_completed && <Check className="w-3 h-3 text-success" />}
-                        </motion.button>
-
-                        {editingSubtaskId === sub.id ? (
-                          <input
-                            autoFocus
-                            value={editingSubtaskTitle}
-                            onChange={(e) => setEditingSubtaskTitle(e.target.value)}
-                            onBlur={() => handleSaveSubtaskTitle(sub.id)}
-                            onKeyDown={(e) => e.key === "Enter" && handleSaveSubtaskTitle(sub.id)}
-                            className="flex-1 bg-transparent text-xs text-foreground outline-none border-b border-primary/30 pb-0.5"
-                          />
-                        ) : (
-                          <span
-                            onClick={() => handleEditSubtask(sub)}
-                            className={`text-sm transition-all flex-1 cursor-text hover:text-primary ${
-                              sub.is_completed ? "line-through text-muted-foreground/40" : "text-foreground"
-                            }`}
-                          >
-                            {sub.title}
-                          </span>
-                        )}
-
+                          {link.label || link.url.replace(/^https?:\/\/(www\.)?/, "").split("/")[0]}
+                        </a>
                         <button
-                          onClick={() => handleDeleteSubtask(sub.id)}
-                          className="opacity-0 group-hover/sub:opacity-100 text-muted-foreground/50 hover:text-destructive transition-all"
+                          onClick={() => handleDeleteLink(link.id)}
+                          className="opacity-0 group-hover/link:opacity-100 text-muted-foreground/50 hover:text-destructive transition-all flex-shrink-0"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
                       </motion.div>
                     ))}
 
-                    {/* Add subtask */}
                     <div className="flex items-center gap-1.5 mt-1.5">
                       <Input
-                        ref={subtaskInputRef}
-                        value={newSubtaskTitle}
-                        onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                        placeholder="Adicionar subtask... (Enter para adicionar)"
-                        className="bg-secondary/40 border-border/30 h-8 text-sm"
-                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSubtask())}
+                        value={newLinkUrl}
+                        onChange={(e) => setNewLinkUrl(e.target.value)}
+                        placeholder="Cole um link..."
+                        className="bg-secondary/40 border-border/30 h-8 text-sm flex-1"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") { e.preventDefault(); handleAddLink(); }
+                        }}
+                      />
+                      <Input
+                        value={newLinkLabel}
+                        onChange={(e) => setNewLinkLabel(e.target.value)}
+                        placeholder="Nome (opcional)"
+                        className="bg-secondary/40 border-border/30 h-8 text-sm w-28"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") { e.preventDefault(); handleAddLink(); }
+                        }}
                       />
                       <motion.button
-                        onClick={handleAddSubtask}
-                        disabled={!newSubtaskTitle.trim() || addingSubtask}
+                        onClick={handleAddLink}
+                        disabled={!newLinkUrl.trim() || addingLink}
                         whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
-                        className="w-7 h-7 rounded-md flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 transition-all disabled:opacity-30 flex-shrink-0"
+                        className="w-8 h-8 rounded-md flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 transition-all disabled:opacity-30 flex-shrink-0"
                       >
-                        {addingSubtask ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                        {addingLink ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                       </motion.button>
                     </div>
+                  </div>
+
+                  {/* Project + Deadline + Standby in compact grid */}
+                  <div className="grid grid-cols-2 gap-3 relative z-10 mb-2">
+                    {/* Project selector */}
+                    <div>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Projeto</span>
+                      <Select value={task.project_id || "none"} onValueChange={handleProjectChange}>
+                        <SelectTrigger className="bg-secondary/40 border-border/30 h-8 text-sm w-full">
+                          <SelectValue placeholder="Selecionar projeto" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
+                          <SelectItem value="none"><span className="text-muted-foreground">Sem projeto</span></SelectItem>
+                          {projects.map(p => (
+                            <SelectItem key={p.id} value={p.id}>
+                              <span className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                                {p.name}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Deadline editor */}
+                    <div>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1.5 block">Prazo</span>
+                      <div className="flex items-center gap-1.5">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-secondary/40 border border-border/30 text-sm hover:border-primary/30 transition-colors">
+                              <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                              {task.deadline
+                                ? parseLocalDate(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })
+                                : <span className="text-muted-foreground/50">Definir</span>}
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={task.deadline ? parseLocalDate(task.deadline) : undefined}
+                              onSelect={handleDeadlineChange}
+                              className="p-3 pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        {task.deadline && (
+                          <motion.button
+                            onClick={() => handleDeadlineChange(undefined)}
+                            whileHover={{ scale: 1.1 }}
+                            className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </motion.button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Standby toggle */}
+                  <div className="relative z-10">
+                    <motion.button
+                      onClick={handleToggleStandby}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                        standby
+                          ? "bg-amber-400/10 text-amber-400 border border-amber-400/20"
+                          : "bg-secondary/40 text-muted-foreground border border-border/30 hover:border-amber-400/30 hover:text-amber-400/80"
+                      }`}
+                    >
+                      <Hourglass className={`w-3.5 h-3.5 ${standby ? "animate-pulse" : ""}`} />
+                      {standby ? "Em standby — reativar" : "Standby"}
+                    </motion.button>
                   </div>
                 </div>
               </motion.div>
