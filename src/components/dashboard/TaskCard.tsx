@@ -876,9 +876,9 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
                       <button
                         onClick={() => handleDeleteSubtask(sub.id)}
-                        className="opacity-0 group-hover/sub:opacity-100 text-muted-foreground/40 hover:text-destructive transition-all"
+                        className="opacity-0 group-hover/sub:opacity-100 text-muted-foreground/50 hover:text-destructive transition-all"
                       >
-                        <X className="w-3 h-3" />
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </motion.div>
                   ))}
