@@ -586,6 +586,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
             <div className="flex items-center gap-2 sm:gap-2.5 px-1.5 sm:px-2.5 py-2 sm:py-2.5 pl-2.5 sm:pl-3.5 cursor-pointer" onClick={() => handleExpand()}>
               <div
                 {...dragHandleProps}
+                onClick={(e) => e.stopPropagation()}
                 className="flex-shrink-0 cursor-grab touch-none active:cursor-grabbing"
                 title="Arrastar task"
               >
