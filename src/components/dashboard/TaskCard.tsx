@@ -616,7 +616,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               </motion.button>
 
               {/* Title + Description preview */}
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
                 {isEditing ? (
                   <input
                     autoFocus value={title}
@@ -625,6 +625,12 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     onKeyDown={(e) => {
                       if (e.key === "Enter") handleTitleBlur();
                       if (e.key === "Escape") { setTitle(task.title); setIsEditing(false); }
+                      if (e.key === "Tab") {
+                        e.preventDefault();
+                        handleTitleBlur();
+                        if (!expanded) handleExpand();
+                        setTimeout(() => subtaskInputRef.current?.focus(), 300);
+                      }
                     }}
                     className="w-full bg-transparent text-foreground text-sm font-bold outline-none border-b-2 border-primary/50 pb-0.5"
                   />
