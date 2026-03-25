@@ -449,10 +449,16 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       autoFocus value={title}
                       onChange={(e) => handleTitleChange(e.target.value)}
                       onBlur={handleTitleBlur}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleTitleBlur();
-                        if (e.key === "Escape") { setTitle(task.title); setIsEditing(false); }
-                      }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleTitleBlur();
+                      if (e.key === "Escape") { setTitle(task.title); setIsEditing(false); }
+                      if (e.key === "Tab") {
+                        e.preventDefault();
+                        handleTitleBlur();
+                        if (!expanded) handleExpand();
+                        setTimeout(() => subtaskInputRef.current?.focus(), 300);
+                      }
+                    }}
                       className="w-full bg-transparent text-foreground text-sm font-bold outline-none border-b-2 border-primary/50 pb-0.5"
                     />
                   ) : (
