@@ -714,38 +714,6 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
 
 
-function DescriptionPreview({ description, expanded, onToggle }: { description: string; expanded: boolean; onToggle: () => void }) {
-  const textRef = useRef<HTMLSpanElement>(null);
-  const [isOverflowing, setIsOverflowing] = useState(false);
-
-  useEffect(() => {
-    const el = textRef.current;
-    if (el && !expanded) {
-      setIsOverflowing(el.scrollWidth > el.clientWidth || description.includes("\n"));
-    }
-  }, [description, expanded]);
-
-  return (
-    <div className="mt-0.5">
-      <span
-        ref={textRef}
-        className={`text-[11px] sm:text-xs text-muted-foreground/60 leading-tight ${expanded ? "whitespace-pre-wrap" : "truncate block"}`}
-      >
-        {description}
-      </span>
-      {(expanded || isOverflowing) && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onToggle(); }}
-          className="text-[10px] text-primary/60 hover:text-primary transition-colors font-medium ml-1"
-        >
-          {expanded ? "ver menos" : "ver mais"}
-        </button>
-      )}
-    </div>
-  );
-}
-
-
               {confirmDelete ? (
                 <motion.button
                   onClick={handleDelete}
