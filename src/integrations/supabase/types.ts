@@ -21,6 +21,7 @@ export type Database = {
           id: string
           notes: string | null
           position: number
+          project_id: string | null
           title: string
           url: string | null
           user_id: string
@@ -31,6 +32,7 @@ export type Database = {
           id?: string
           notes?: string | null
           position?: number
+          project_id?: string | null
           title: string
           url?: string | null
           user_id: string
@@ -41,11 +43,20 @@ export type Database = {
           id?: string
           notes?: string | null
           position?: number
+          project_id?: string | null
           title?: string
           url?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       google_tokens: {
         Row: {

@@ -1,0 +1,1 @@
+ALTER TABLE public.bookmarks ADD COLUMN project_id uuid REFERENCES public.projects(id) ON DELETE SET NULL DEFAULT NULL;
