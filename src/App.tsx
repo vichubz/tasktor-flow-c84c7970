@@ -16,6 +16,7 @@ const MeetingsAIPage = lazy(() => import("@/pages/MeetingsAIPage"));
 const CalendarPage = lazy(() => import("@/pages/CalendarPage"));
 const MeetingsPage = lazy(() => import("@/pages/MeetingsPage"));
 const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
+const BookmarksPage = lazy(() => import("@/pages/BookmarksPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
