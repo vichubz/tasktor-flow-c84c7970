@@ -495,9 +495,20 @@ const BookmarksPage = () => {
                             {b.notes}
                           </p>
                         )}
-                        <span className="text-[10px] text-muted-foreground/30 font-mono mt-1.5 block">
-                          {new Date(b.created_at).toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}
-                        </span>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className="text-[10px] text-muted-foreground/30 font-mono">
+                            {new Date(b.created_at).toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}
+                          </span>
+                          {b.project_id && (() => {
+                            const proj = projects.find(p => p.id === b.project_id);
+                            return proj ? (
+                              <span className="flex items-center gap-1 text-[10px] text-muted-foreground/50">
+                                <div className="w-2 h-2 rounded-full" style={{ background: proj.color }} />
+                                {proj.name}
+                              </span>
+                            ) : null;
+                          })()}
+                        </div>
                       </div>
 
                       {/* Actions */}
