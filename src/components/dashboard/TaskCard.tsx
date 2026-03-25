@@ -74,18 +74,18 @@ function DescriptionPreview({ description, expanded, onToggle }: { description: 
     <div className="mt-0.5">
       <span
         ref={textRef}
-        className={`text-[11px] sm:text-xs text-muted-foreground/60 leading-tight ${expanded ? "whitespace-pre-wrap" : "truncate block"}`}
+        className={`text-[11px] sm:text-xs text-muted-foreground/60 leading-tight inline ${expanded ? "whitespace-pre-wrap" : "truncate block"}`}
       >
         {description}
+        {(expanded || isOverflowing) && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggle(); }}
+            className="text-[10px] text-primary/60 hover:text-primary transition-colors font-medium ml-1 inline"
+          >
+            {expanded ? "ver menos" : "ver mais"}
+          </button>
+        )}
       </span>
-      {(expanded || isOverflowing) && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onToggle(); }}
-          className="text-[10px] text-primary/60 hover:text-primary transition-colors font-medium ml-1"
-        >
-          {expanded ? "ver menos" : "ver mais"}
-        </button>
-      )}
     </div>
   );
 }
