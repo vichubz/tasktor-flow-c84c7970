@@ -213,11 +213,15 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     setLoadingSubtasks(false);
   }, [task.id]);
 
-  const handleExpand = () => {
+  const handleExpand = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     const next = !expanded;
     setExpanded(next);
     if (next && subtasks.length === 0 && !task.subtasks?.length) fetchSubtasks();
   };
+
+  // Ref for subtask input to focus on Tab from title
+  const subtaskInputRef = useRef<HTMLInputElement>(null);
 
   const handleToggleSubtaskDropdown = () => {
     const next = !showSubtaskDropdown;
@@ -383,7 +387,6 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
       >
         <div
           className="rounded-xl overflow-hidden relative"
-          onDoubleClick={(e) => { e.preventDefault(); handleExpand(); }}
           style={{
             background: highlighted
               ? "linear-gradient(145deg, hsl(var(--primary) / 0.06), hsl(var(--accent) / 0.03), hsl(var(--card)))"
@@ -446,10 +449,16 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       autoFocus value={title}
                       onChange={(e) => handleTitleChange(e.target.value)}
                       onBlur={handleTitleBlur}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleTitleBlur();
-                        if (e.key === "Escape") { setTitle(task.title); setIsEditing(false); }
-                      }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleTitleBlur();
+                      if (e.key === "Escape") { setTitle(task.title); setIsEditing(false); }
+                      if (e.key === "Tab") {
+                        e.preventDefault();
+                        handleTitleBlur();
+                        if (!expanded) handleExpand();
+                        setTimeout(() => subtaskInputRef.current?.focus(), 300);
+                      }
+                    }}
                       className="w-full bg-transparent text-foreground text-sm font-bold outline-none border-b-2 border-primary/50 pb-0.5"
                     />
                   ) : (
@@ -574,9 +583,10 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
             </div>
           ) : (
             /* ── LIST LAYOUT (original) ── */
-            <div className="flex items-center gap-2 sm:gap-2.5 px-1.5 sm:px-2.5 py-2 sm:py-2.5 pl-2.5 sm:pl-3.5">
+            <div className="flex items-center gap-2 sm:gap-2.5 px-1.5 sm:px-2.5 py-2 sm:py-2.5 pl-2.5 sm:pl-3.5 cursor-pointer" onClick={() => handleExpand()}>
               <div
                 {...dragHandleProps}
+                onClick={(e) => e.stopPropagation()}
                 className="flex-shrink-0 cursor-grab touch-none active:cursor-grabbing"
                 title="Arrastar task"
               >
@@ -607,7 +617,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               </motion.button>
 
               {/* Title + Description preview */}
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
                 {isEditing ? (
                   <input
                     autoFocus value={title}
@@ -616,6 +626,12 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     onKeyDown={(e) => {
                       if (e.key === "Enter") handleTitleBlur();
                       if (e.key === "Escape") { setTitle(task.title); setIsEditing(false); }
+                      if (e.key === "Tab") {
+                        e.preventDefault();
+                        handleTitleBlur();
+                        if (!expanded) handleExpand();
+                        setTimeout(() => subtaskInputRef.current?.focus(), 300);
+                      }
                     }}
                     className="w-full bg-transparent text-foreground text-sm font-bold outline-none border-b-2 border-primary/50 pb-0.5"
                   />
@@ -682,7 +698,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               {/* Subtask dropdown button */}
               {totalSubtasks > 0 && (
                 <motion.button
-                  onClick={handleToggleSubtaskDropdown}
+                  onClick={(e) => { e.stopPropagation(); handleToggleSubtaskDropdown(); }}
                   whileHover={{ scale: 1.1 }}
                   className="flex items-center gap-0.5 flex-shrink-0 px-1 py-0.5 rounded hover:bg-primary/10 transition-colors"
                 >
@@ -695,7 +711,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
               {/* Edit expand button */}
               <motion.button
-                onClick={handleExpand}
+                onClick={(e) => handleExpand(e)}
                 whileHover={{ scale: 1.15 }}
                 whileTap={{ scale: 0.9 }}
                 className="text-foreground/70 hover:text-foreground transition-all flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md bg-secondary/50 hover:bg-secondary/80 border border-border/20"
@@ -707,7 +723,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               </motion.button>
 
               {/* Difficulty selector */}
-              <div className="flex items-center flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ opacity: difficulty > 0 ? 1 : undefined }}>
+              <div className="flex items-center flex-shrink-0" onClick={(e) => e.stopPropagation()} style={{ opacity: difficulty > 0 ? 1 : undefined }}>
                 {[1, 2, 3].map(level => (
                   <motion.button
                     key={level}
@@ -731,13 +747,13 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
               {/* Highlight toggle */}
               <motion.button
-                onClick={handleToggleHighlight}
+                onClick={(e) => { e.stopPropagation(); handleToggleHighlight(); }}
                 whileHover={{ scale: 1.15 }}
                 whileTap={{ scale: 0.9 }}
                 className={`flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md transition-all ${
                   highlighted
                     ? "text-amber-400"
-                    : "text-muted-foreground/20 hover:text-amber-400/60 opacity-0 group-hover:opacity-100"
+                    : "text-muted-foreground/30 hover:text-amber-400/60"
                 }`}
                 title={highlighted ? "Remover destaque" : "Destacar task"}
               >
@@ -748,7 +764,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
               {confirmDelete ? (
                 <motion.button
-                  onClick={handleDelete}
+                  onClick={(e) => { e.stopPropagation(); handleDelete(); }}
                   initial={{ scale: 0.8 }} animate={{ scale: 1 }}
                   className="text-destructive text-[10px] font-bold px-2 py-0.5 rounded-md bg-destructive/10 border border-destructive/20 flex-shrink-0"
                 >
@@ -756,9 +772,9 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 </motion.button>
               ) : (
                 <motion.button
-                  onClick={handleDelete}
+                  onClick={(e) => { e.stopPropagation(); handleDelete(); }}
                   whileHover={{ scale: 1.15, backgroundColor: "rgba(239,68,68,0.08)" }}
-                  className="text-muted-foreground/20 hover:text-destructive transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100"
+                  className="text-muted-foreground/30 hover:text-destructive transition-all flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </motion.button>
@@ -825,12 +841,12 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       key={sub.id}
                       initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: si * 0.03 }}
-                      className="flex items-center gap-2.5 group/sub py-1 px-2 rounded-md hover:bg-primary/[0.04] transition-all"
+                      className="flex items-center gap-2.5 group/sub py-1.5 px-2 rounded-md hover:bg-primary/[0.04] transition-all"
                     >
                       <motion.button
                         whileTap={{ scale: 0.8 }}
                         onClick={() => handleSubtaskToggle(sub.id, sub.is_completed)}
-                        className={`w-4 h-4 rounded border-[1.5px] flex items-center justify-center transition-all flex-shrink-0 ${
+                        className={`w-4.5 h-4.5 rounded border-[1.5px] flex items-center justify-center transition-all flex-shrink-0 ${
                           sub.is_completed
                             ? "border-success bg-success/20"
                             : "border-muted-foreground/25 group-hover/sub:border-primary"
@@ -851,7 +867,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       ) : (
                         <span
                           onClick={() => handleEditSubtask(sub)}
-                          className={`text-xs transition-all flex-1 cursor-text hover:text-primary ${
+                            className={`text-sm transition-all flex-1 cursor-text hover:text-primary ${
                             sub.is_completed ? "line-through text-muted-foreground/40" : "text-foreground"
                           }`}
                         >
@@ -861,9 +877,9 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
                       <button
                         onClick={() => handleDeleteSubtask(sub.id)}
-                        className="opacity-0 group-hover/sub:opacity-100 text-muted-foreground/40 hover:text-destructive transition-all"
+                        className="opacity-0 group-hover/sub:opacity-100 text-muted-foreground/50 hover:text-destructive transition-all"
                       >
-                        <X className="w-3 h-3" />
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </motion.div>
                   ))}
@@ -1046,19 +1062,19 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                         key={sub.id}
                         initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: si * 0.05 }}
-                        className="flex items-center gap-2.5 group/sub py-1.5 px-2 rounded-md hover:bg-primary/[0.04] transition-all"
+                        className="flex items-center gap-3 group/sub py-2 px-2 rounded-md hover:bg-primary/[0.04] transition-all"
                       >
                         <motion.button
                           whileTap={{ scale: 0.8 }}
                           onClick={() => handleSubtaskToggle(sub.id, sub.is_completed)}
-                          className={`w-4 h-4 rounded border-[1.5px] flex items-center justify-center transition-all flex-shrink-0 ${
+                          className={`w-5 h-5 rounded border-[1.5px] flex items-center justify-center transition-all flex-shrink-0 ${
                             sub.is_completed
                               ? "border-success bg-success/20"
                               : "border-muted-foreground/25 group-hover/sub:border-primary"
                           }`}
                           style={sub.is_completed ? { boxShadow: "0 0 8px rgba(16,185,129,0.3)" } : {}}
                         >
-                          {sub.is_completed && <Check className="w-2.5 h-2.5 text-success" />}
+                          {sub.is_completed && <Check className="w-3 h-3 text-success" />}
                         </motion.button>
 
                         {editingSubtaskId === sub.id ? (
@@ -1073,7 +1089,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                         ) : (
                           <span
                             onClick={() => handleEditSubtask(sub)}
-                            className={`text-xs transition-all flex-1 cursor-text hover:text-primary ${
+                            className={`text-sm transition-all flex-1 cursor-text hover:text-primary ${
                               sub.is_completed ? "line-through text-muted-foreground/40" : "text-foreground"
                             }`}
                           >
@@ -1083,9 +1099,9 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
                         <button
                           onClick={() => handleDeleteSubtask(sub.id)}
-                          className="opacity-0 group-hover/sub:opacity-100 text-muted-foreground/40 hover:text-destructive transition-all"
+                          className="opacity-0 group-hover/sub:opacity-100 text-muted-foreground/50 hover:text-destructive transition-all"
                         >
-                          <X className="w-3 h-3" />
+                          <X className="w-3.5 h-3.5" />
                         </button>
                       </motion.div>
                     ))}
@@ -1093,10 +1109,11 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     {/* Add subtask */}
                     <div className="flex items-center gap-1.5 mt-1.5">
                       <Input
+                        ref={subtaskInputRef}
                         value={newSubtaskTitle}
                         onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                        placeholder="Adicionar subtask..."
-                        className="bg-secondary/40 border-border/30 h-7 text-xs"
+                        placeholder="Adicionar subtask... (Enter para adicionar)"
+                        className="bg-secondary/40 border-border/30 h-8 text-sm"
                         onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSubtask())}
                       />
                       <motion.button
