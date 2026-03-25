@@ -407,8 +407,9 @@ const BookmarksPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: 100 }}
                   transition={{ duration: 0.25, delay: i * 0.03 }}
-                  layout
-                  className="rounded-xl overflow-hidden relative group"
+                   layout
+                  onDoubleClick={() => !isEditing && startEdit(b)}
+                  className="rounded-xl overflow-hidden relative group cursor-default"
                   style={{
                     background: "var(--glass-bg)",
                     border: "1px solid hsl(var(--primary) / 0.08)",
@@ -519,18 +520,18 @@ const BookmarksPage = () => {
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-1.5">
-                          <span className="text-[10px] text-muted-foreground/30 font-mono">
-                            {new Date(b.created_at).toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}
-                          </span>
                           {b.project_id && (() => {
                             const proj = projects.find(p => p.id === b.project_id);
                             return proj ? (
-                              <span className="flex items-center gap-1 text-[10px] text-muted-foreground/50">
-                                <div className="w-2 h-2 rounded-full" style={{ background: proj.color }} />
+                              <span className="flex items-center gap-1.5 text-xs font-semibold px-1.5 py-0.5 rounded-md" style={{ backgroundColor: `${proj.color}18`, color: proj.color }}>
+                                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: proj.color }} />
                                 {proj.name}
                               </span>
                             ) : null;
                           })()}
+                          <span className="text-[10px] text-muted-foreground/30 font-mono">
+                            {new Date(b.created_at).toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}
+                          </span>
                         </div>
                       </div>
 

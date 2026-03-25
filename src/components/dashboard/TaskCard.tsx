@@ -30,11 +30,14 @@ interface TaskCardProps {
 }
 
 const SUCCESS_MESSAGES = [
-  "Task concluída! Bom trabalho! 🎉",
-  "Mais uma feita! Continue assim! 🚀",
-  "Feito! Você está on fire hoje! ✈️",
-  "Concluída! Foco total! 🎯",
-  "Ótimo! Próxima! ⚡",
+  "Máquina! Segue o ritmo! 🔥",
+  "Isso aí! Imparável! 💪",
+  "Bora! Mais uma pro caixão! ⚡",
+  "Tá voando hoje! 🚀",
+  "Produtividade tá absurda! 🎯",
+  "Monstro! Não para! 💥",
+  "Legendário! Continue assim! 👑",
+  "Missão cumprida! Next! ✅",
 ];
 
 function getTaskAge(createdAt: string): string {
@@ -261,13 +264,14 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     if (error) toast.error("Falha ao adicionar link");
     else if (data) setLinks(prev => [...prev, data as any]);
 
-    // Also save to bookmarks panel
+    // Also save to bookmarks panel (with project)
     supabase.from("bookmarks").insert({
       user_id: task.user_id,
       title: label || url.replace(/^https?:\/\/(www\.)?/, "").split("/")[0],
       url,
       category: "link",
       position: 0,
+      project_id: task.project_id,
     } as any).then(() => {});
 
     setNewLinkUrl("");
@@ -397,7 +401,10 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     setCompleting(true);
     playCompletionSound();
     const msg = SUCCESS_MESSAGES[Math.floor(Math.random() * SUCCESS_MESSAGES.length)];
-    toast.success(msg);
+    toast.success(msg, {
+      style: { fontSize: "16px", padding: "16px 20px", fontWeight: 700 },
+      duration: 3000,
+    });
     setTimeout(() => {
       onComplete(task.id);
     }, 700);
