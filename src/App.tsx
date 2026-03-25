@@ -69,6 +69,7 @@ const AnimatedRoutes = () => {
         <Route path="/meetings" element={<WrappedLazy><MeetingsPage /></WrappedLazy>} />
         <Route path="/calendar" element={<WrappedLazy><CalendarPage /></WrappedLazy>} />
         <Route path="/settings" element={<WrappedLazy><SettingsPage /></WrappedLazy>} />
+        <Route path="/bookmarks" element={<WrappedLazy><BookmarksPage /></WrappedLazy>} />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>

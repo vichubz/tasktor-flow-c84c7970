@@ -36,6 +36,7 @@ const AppSidebar = ({ onProjectsChange }: AppSidebarProps) => {
     { to: "/home", icon: Rocket, label: "Início" },
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/calendar", icon: Calendar, label: "Calendário" },
+    { to: "/bookmarks", icon: Bookmark, label: "Links" },
     { to: "/meetings-ai", icon: BrainCircuit, label: "Agente IA" },
     { to: "/meetings", icon: Video, label: "Reuniões" },
     { to: "/metrics", icon: BarChart3, label: "Métricas" },
