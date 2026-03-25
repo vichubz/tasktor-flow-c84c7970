@@ -698,7 +698,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
               {/* Subtask dropdown button */}
               {totalSubtasks > 0 && (
                 <motion.button
-                  onClick={handleToggleSubtaskDropdown}
+                  onClick={(e) => { e.stopPropagation(); handleToggleSubtaskDropdown(); }}
                   whileHover={{ scale: 1.1 }}
                   className="flex items-center gap-0.5 flex-shrink-0 px-1 py-0.5 rounded hover:bg-primary/10 transition-colors"
                 >
