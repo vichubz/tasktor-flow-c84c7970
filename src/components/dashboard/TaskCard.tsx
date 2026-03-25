@@ -213,11 +213,15 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     setLoadingSubtasks(false);
   }, [task.id]);
 
-  const handleExpand = () => {
+  const handleExpand = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     const next = !expanded;
     setExpanded(next);
     if (next && subtasks.length === 0 && !task.subtasks?.length) fetchSubtasks();
   };
+
+  // Ref for subtask input to focus on Tab from title
+  const subtaskInputRef = useRef<HTMLInputElement>(null);
 
   const handleToggleSubtaskDropdown = () => {
     const next = !showSubtaskDropdown;
