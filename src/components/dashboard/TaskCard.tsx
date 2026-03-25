@@ -840,7 +840,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       key={sub.id}
                       initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: si * 0.03 }}
-                      className="flex items-center gap-2.5 group/sub py-1 px-2 rounded-md hover:bg-primary/[0.04] transition-all"
+                      className="flex items-center gap-2.5 group/sub py-1.5 px-2 rounded-md hover:bg-primary/[0.04] transition-all"
                     >
                       <motion.button
                         whileTap={{ scale: 0.8 }}
