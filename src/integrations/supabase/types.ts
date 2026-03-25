@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookmarks: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          notes: string | null
+          position: number
+          title: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          position?: number
+          title: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          position?: number
+          title?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       google_tokens: {
         Row: {
           access_token: string
