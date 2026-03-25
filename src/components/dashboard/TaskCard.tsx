@@ -142,6 +142,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
   const [newLinkUrl, setNewLinkUrl] = useState("");
   const [newLinkLabel, setNewLinkLabel] = useState("");
   const [addingLink, setAddingLink] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
   const [loadingLinks, setLoadingLinks] = useState(false);
 
   // Listen for clipboard changes
@@ -259,9 +260,20 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     const { data, error } = await supabase.from("task_links").insert({ task_id: task.id, url, label, position: links.length } as any).select().single();
     if (error) toast.error("Falha ao adicionar link");
     else if (data) setLinks(prev => [...prev, data as any]);
+
+    // Also save to bookmarks panel
+    supabase.from("bookmarks").insert({
+      user_id: task.user_id,
+      title: label || url.replace(/^https?:\/\/(www\.)?/, "").split("/")[0],
+      url,
+      category: "link",
+      position: 0,
+    } as any).then(() => {});
+
     setNewLinkUrl("");
     setNewLinkLabel("");
     setAddingLink(false);
+    setShowLinkInput(false);
   };
 
   const handleDeleteLink = async (linkId: string) => {
@@ -1017,34 +1029,59 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       </motion.div>
                     ))}
 
-                    <div className="flex items-center gap-1.5 mt-1.5">
-                      <Input
-                        value={newLinkUrl}
-                        onChange={(e) => setNewLinkUrl(e.target.value)}
-                        placeholder="Cole um link..."
-                        className="bg-secondary/40 border-border/30 h-8 text-sm flex-1"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") { e.preventDefault(); handleAddLink(); }
-                        }}
-                      />
-                      <Input
-                        value={newLinkLabel}
-                        onChange={(e) => setNewLinkLabel(e.target.value)}
-                        placeholder="Nome (opcional)"
-                        className="bg-secondary/40 border-border/30 h-8 text-sm w-28"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") { e.preventDefault(); handleAddLink(); }
-                        }}
-                      />
-                      <motion.button
-                        onClick={handleAddLink}
-                        disabled={!newLinkUrl.trim() || addingLink}
-                        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
-                        className="w-8 h-8 rounded-md flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 transition-all disabled:opacity-30 flex-shrink-0"
+                    {showLinkInput ? (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="flex items-center gap-1.5 mt-1.5"
                       >
-                        {addingLink ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                        <Input
+                          autoFocus
+                          value={newLinkUrl}
+                          onChange={(e) => setNewLinkUrl(e.target.value)}
+                          placeholder="URL..."
+                          className="bg-secondary/40 border-border/30 h-7 text-xs w-[160px]"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") { e.preventDefault(); handleAddLink(); }
+                            if (e.key === "Escape") { setShowLinkInput(false); setNewLinkUrl(""); setNewLinkLabel(""); }
+                          }}
+                        />
+                        <Input
+                          value={newLinkLabel}
+                          onChange={(e) => setNewLinkLabel(e.target.value)}
+                          placeholder="Nome"
+                          className="bg-secondary/40 border-border/30 h-7 text-xs w-[90px]"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") { e.preventDefault(); handleAddLink(); }
+                            if (e.key === "Escape") { setShowLinkInput(false); setNewLinkUrl(""); setNewLinkLabel(""); }
+                          }}
+                        />
+                        <motion.button
+                          onClick={handleAddLink}
+                          disabled={!newLinkUrl.trim() || addingLink}
+                          whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+                          className="w-7 h-7 rounded-md flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 transition-all disabled:opacity-30 flex-shrink-0"
+                        >
+                          {addingLink ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                        </motion.button>
+                        <button
+                          onClick={() => { setShowLinkInput(false); setNewLinkUrl(""); setNewLinkLabel(""); }}
+                          className="text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </motion.div>
+                    ) : (
+                      <motion.button
+                        onClick={() => setShowLinkInput(true)}
+                        whileHover={{ scale: 1.03 }}
+                        className="flex items-center gap-1 mt-1.5 px-2 py-1 rounded-md text-[10px] font-medium text-primary/60 hover:text-primary bg-primary/5 hover:bg-primary/10 border border-primary/10 transition-all w-fit"
+                      >
+                        <Plus className="w-3 h-3" />
+                        Adicionar link
                       </motion.button>
-                    </div>
+                    )}
                   </div>
 
                   {/* Standby + Project + Deadline — single row */}
