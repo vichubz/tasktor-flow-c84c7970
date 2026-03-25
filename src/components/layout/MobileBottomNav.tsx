@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Rocket, BrainCircuit, Calendar, Video } from "lucide-react";
+import { LayoutDashboard, Rocket, BrainCircuit, Calendar, Bookmark } from "lucide-react";
 
 const MobileBottomNav = () => {
   const location = useLocation();
