@@ -1010,16 +1010,19 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                         initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
                         className="flex items-center gap-2 group/link py-1.5 px-2 rounded-md hover:bg-primary/[0.04] transition-all"
                       >
-                        <ExternalLink className="w-3.5 h-3.5 text-primary/50 flex-shrink-0" />
-                        <a
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-primary/80 hover:text-primary truncate flex-1 underline-offset-2 hover:underline transition-colors"
-                          title={link.url}
-                        >
-                          {link.label || link.url.replace(/^https?:\/\/(www\.)?/, "").split("/")[0]}
+                        <a href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 flex-1 min-w-0">
+                          <ExternalLink className="w-3.5 h-3.5 text-primary/50 flex-shrink-0" />
+                          <span className="text-sm text-primary/80 hover:text-primary truncate underline-offset-2 hover:underline transition-colors cursor-pointer">
+                            {link.label || link.url.replace(/^https?:\/\/(www\.)?/, "").split("/")[0]}
+                          </span>
                         </a>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(link.url); toast.success("Link copiado!"); }}
+                          className="opacity-0 group-hover/link:opacity-100 text-muted-foreground/40 hover:text-primary transition-all flex-shrink-0"
+                          title="Copiar link"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </button>
                         <button
                           onClick={() => handleDeleteLink(link.id)}
                           className="opacity-0 group-hover/link:opacity-100 text-muted-foreground/50 hover:text-destructive transition-all flex-shrink-0"
