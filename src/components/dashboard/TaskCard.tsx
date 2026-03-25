@@ -222,7 +222,10 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     if (e) e.stopPropagation();
     const next = !expanded;
     setExpanded(next);
-    if (next && subtasks.length === 0 && !task.subtasks?.length) fetchSubtasks();
+    if (next) {
+      if (subtasks.length === 0 && !task.subtasks?.length) fetchSubtasks();
+      fetchLinks();
+    }
   };
 
   // Ref for subtask input to focus on Tab from title
@@ -232,6 +235,32 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
     const next = !showSubtaskDropdown;
     setShowSubtaskDropdown(next);
     if (next && subtasks.length === 0 && !task.subtasks?.length) fetchSubtasks();
+  };
+
+  const fetchLinks = useCallback(async () => {
+    setLoadingLinks(true);
+    const { data } = await supabase.from("task_links").select("*").eq("task_id", task.id).order("position");
+    if (data) setLinks(data as any);
+    setLoadingLinks(false);
+  }, [task.id]);
+
+  const handleAddLink = async () => {
+    if (!newLinkUrl.trim()) return;
+    setAddingLink(true);
+    let url = newLinkUrl.trim();
+    if (!url.startsWith("http://") && !url.startsWith("https://")) url = "https://" + url;
+    const label = newLinkLabel.trim() || null;
+    const { data, error } = await supabase.from("task_links").insert({ task_id: task.id, url, label, position: links.length } as any).select().single();
+    if (error) toast.error("Falha ao adicionar link");
+    else if (data) setLinks(prev => [...prev, data as any]);
+    setNewLinkUrl("");
+    setNewLinkLabel("");
+    setAddingLink(false);
+  };
+
+  const handleDeleteLink = async (linkId: string) => {
+    setLinks(prev => prev.filter(l => l.id !== linkId));
+    await supabase.from("task_links").delete().eq("id", linkId);
   };
 
   // Title editing
