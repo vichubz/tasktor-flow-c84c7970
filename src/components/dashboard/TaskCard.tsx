@@ -1109,10 +1109,11 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     {/* Add subtask */}
                     <div className="flex items-center gap-1.5 mt-1.5">
                       <Input
+                        ref={subtaskInputRef}
                         value={newSubtaskTitle}
                         onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                        placeholder="Adicionar subtask..."
-                        className="bg-secondary/40 border-border/30 h-7 text-xs"
+                        placeholder="Adicionar subtask... (Enter para adicionar)"
+                        className="bg-secondary/40 border-border/30 h-8 text-sm"
                         onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSubtask())}
                       />
                       <motion.button
