@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Video, Plus, Trash2, Clock, FolderKanban, FileText, Link2, X, Loader2, CalendarDays } from "lucide-react";
+import { Video, Plus, Trash2, Clock, FolderKanban, FileText, Link2, X, Loader2, CalendarDays, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ const MeetingsPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [linkingId, setLinkingId] = useState<string | null>(null);
+  const [expandedPastId, setExpandedPastId] = useState<string | null>(null);
 
   // Form state
   const [formTitle, setFormTitle] = useState("");
@@ -312,20 +313,43 @@ const MeetingsPage = () => {
                       </div>
                     </motion.div>
                   ) : (
-                    /* Compact row for past days */
-                    <motion.div key={meeting.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors group">
-                      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: meeting.project?.color || "hsl(var(--accent))" }} />
-                      <span className="text-xs font-medium text-foreground truncate flex-1">{meeting.title}</span>
-                      {meeting.project && (
-                        <span className="text-[10px] font-semibold flex-shrink-0 hidden sm:inline" style={{ color: meeting.project.color }}>{meeting.project.name}</span>
-                      )}
-                      {meeting.summary && <FileText className="w-3 h-3 text-accent flex-shrink-0" />}
-                      <span className="text-[10px] text-muted-foreground font-mono flex-shrink-0">
-                        {Math.floor(meeting.duration_minutes / 60)}h{(meeting.duration_minutes % 60).toString().padStart(2, "0")}
-                      </span>
-                      <motion.button onClick={() => handleDelete(meeting.id, meeting.meeting_date)} whileHover={{ scale: 1.1 }} className="opacity-0 group-hover:opacity-100 text-muted-foreground/30 hover:text-destructive transition-all p-0.5 flex-shrink-0" title="Excluir">
-                        <Trash2 className="w-3 h-3" />
-                      </motion.button>
+                    /* Compact row for past days — expandable */
+                    <motion.div key={meeting.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }} className="rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors group">
+                      <div className="flex items-center gap-2 px-3 py-2 cursor-pointer" onClick={() => setExpandedPastId(prev => prev === meeting.id ? null : meeting.id)}>
+                        <ChevronRight className={`w-3 h-3 text-muted-foreground/40 transition-transform flex-shrink-0 ${expandedPastId === meeting.id ? "rotate-90" : ""}`} />
+                        <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: meeting.project?.color || "hsl(var(--accent))" }} />
+                        <span className="text-xs font-medium text-foreground truncate flex-1">{meeting.title}</span>
+                        {meeting.project && (
+                          <span className="text-[10px] font-semibold flex-shrink-0 hidden sm:inline" style={{ color: meeting.project.color }}>{meeting.project.name}</span>
+                        )}
+                        {meeting.summary && <FileText className="w-3 h-3 text-accent flex-shrink-0" />}
+                        <span className="text-[10px] text-muted-foreground font-mono flex-shrink-0">
+                          {Math.floor(meeting.duration_minutes / 60)}h{(meeting.duration_minutes % 60).toString().padStart(2, "0")}
+                        </span>
+                        <motion.button onClick={(e) => { e.stopPropagation(); handleDelete(meeting.id, meeting.meeting_date); }} whileHover={{ scale: 1.1 }} className="opacity-0 group-hover:opacity-100 text-muted-foreground/30 hover:text-destructive transition-all p-0.5 flex-shrink-0" title="Excluir">
+                          <Trash2 className="w-3 h-3" />
+                        </motion.button>
+                      </div>
+                      <AnimatePresence>
+                        {expandedPastId === meeting.id && (
+                          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                            <div className="px-3 pb-2.5 pt-0 space-y-1.5">
+                              {meeting.description && (
+                                <p className="text-[11px] text-muted-foreground/70 pl-5">{meeting.description}</p>
+                              )}
+                              {meeting.summary && (
+                                <div className="ml-5 p-2 rounded-md bg-accent/5 border border-accent/10">
+                                  <p className="text-[10px] font-semibold text-accent">{meeting.summary.title || "Resumo"}</p>
+                                  <p className="text-[10px] text-muted-foreground line-clamp-3 mt-0.5">{meeting.summary.result?.slice(0, 200)}</p>
+                                </div>
+                              )}
+                              {!meeting.description && !meeting.summary && (
+                                <p className="text-[10px] text-muted-foreground/40 pl-5 italic">Sem anotações</p>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
                   ))}
                 </div>
