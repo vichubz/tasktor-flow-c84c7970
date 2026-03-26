@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Video, Plus, Trash2, Clock, FolderKanban, FileText, Link2, X, Loader2, ChevronDown } from "lucide-react";
+import { Video, Plus, Trash2, Clock, FolderKanban, FileText, Link2, X, Loader2, CalendarDays } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,6 @@ const MeetingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [linkingId, setLinkingId] = useState<string | null>(null);
 
   // Form state
@@ -30,7 +29,15 @@ const MeetingsPage = () => {
   const [formDurationH, setFormDurationH] = useState("0");
   const [formDurationM, setFormDurationM] = useState("30");
   const [formDesc, setFormDesc] = useState("");
-  const [formDate, setFormDate] = useState(new Date().toISOString().split("T")[0]);
+  const [formDate, setFormDate] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  });
+
+  const today = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }, []);
 
   const fetchMeetings = useCallback(async () => {
     if (!user) return;
@@ -39,12 +46,13 @@ const MeetingsPage = () => {
       .from("meetings")
       .select("*, project:projects(id, name, color), summary:meeting_summaries(id, title, result)")
       .eq("user_id", user.id)
-      .eq("meeting_date", selectedDate)
-      .order("created_at", { ascending: false });
+      .order("meeting_date", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(200);
     if (error) { console.error(error); toast.error("Erro ao carregar reuniões"); }
     else setMeetings((data as Meeting[]) || []);
     setLoading(false);
-  }, [user, selectedDate]);
+  }, [user]);
 
   const fetchProjects = useCallback(async () => {
     if (!user) return;
@@ -60,6 +68,27 @@ const MeetingsPage = () => {
 
   useEffect(() => { fetchMeetings(); }, [fetchMeetings]);
   useEffect(() => { fetchProjects(); fetchSummaries(); }, [fetchProjects, fetchSummaries]);
+
+  // Group meetings by date
+  const groupedMeetings = useMemo(() => {
+    const groups: { date: string; meetings: Meeting[] }[] = [];
+    const map = new Map<string, Meeting[]>();
+    for (const m of meetings) {
+      const d = m.meeting_date;
+      if (!map.has(d)) map.set(d, []);
+      map.get(d)!.push(m);
+    }
+    // Sort dates descending, but today always first
+    const dates = Array.from(map.keys()).sort((a, b) => {
+      if (a === today) return -1;
+      if (b === today) return 1;
+      return b.localeCompare(a);
+    });
+    for (const d of dates) {
+      groups.push({ date: d, meetings: map.get(d)! });
+    }
+    return groups;
+  }, [meetings, today]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +106,6 @@ const MeetingsPage = () => {
     if (error) { toast.error("Erro ao criar reunião"); }
     else {
       toast.success("Reunião registrada!");
-      // Update meeting_logs
       await upsertMeetingLog(formDate);
       setFormTitle(""); setFormDesc(""); setFormProjectId("none"); setFormDurationH("0"); setFormDurationM("30");
       setShowForm(false);
@@ -88,13 +116,11 @@ const MeetingsPage = () => {
 
   const upsertMeetingLog = async (date: string) => {
     if (!user) return;
-    // Recalculate from meetings table
     const { data: allMeetings } = await supabase.from("meetings").select("duration_minutes").eq("user_id", user.id).eq("meeting_date", date);
     if (!allMeetings) return;
     const totalMinutes = allMeetings.reduce((sum, m) => sum + (m.duration_minutes || 0), 0);
     const totalHours = totalMinutes / 60;
     const count = allMeetings.length;
-
     const { data: existing } = await supabase.from("meeting_logs").select("id").eq("user_id", user.id).eq("date", date).maybeSingle();
     if (existing) {
       await supabase.from("meeting_logs").update({ hours: totalHours, meeting_count: count }).eq("id", existing.id);
@@ -103,14 +129,14 @@ const MeetingsPage = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, meetingDate: string) => {
     const prev = [...meetings];
     setMeetings(m => m.filter(x => x.id !== id));
     const { error } = await supabase.from("meetings").delete().eq("id", id);
     if (error) { toast.error("Erro ao excluir"); setMeetings(prev); }
     else {
       toast.success("Reunião excluída");
-      await upsertMeetingLog(selectedDate);
+      await upsertMeetingLog(meetingDate);
     }
   };
 
@@ -120,9 +146,20 @@ const MeetingsPage = () => {
     else { toast.success("Transcrição vinculada!"); setLinkingId(null); fetchMeetings(); }
   };
 
-  const totalMinutes = meetings.reduce((sum, m) => sum + (m.duration_minutes || 0), 0);
-  const totalH = Math.floor(totalMinutes / 60);
-  const totalM = totalMinutes % 60;
+  const formatDateLabel = (dateStr: string) => {
+    if (dateStr === today) return "Hoje";
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const date = new Date(y, m - 1, d);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (dateStr === `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`) return "Ontem";
+    return date.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+  };
+
+  const getDayStats = (dayMeetings: Meeting[]) => {
+    const totalMin = dayMeetings.reduce((sum, m) => sum + (m.duration_minutes || 0), 0);
+    return { count: dayMeetings.length, hours: Math.floor(totalMin / 60), minutes: totalMin % 60 };
+  };
 
   return (
     <div className="flex-1 flex flex-col h-full p-4 md:p-8 overflow-y-auto">
@@ -137,23 +174,10 @@ const MeetingsPage = () => {
             <p className="text-xs text-muted-foreground">Registre e gerencie suas reuniões</p>
           </div>
         </div>
-        <Button onClick={() => { setShowForm(true); setFormDate(selectedDate); }} className="gap-2 font-bold text-xs" style={{ background: "var(--gradient-primary)", boxShadow: "0 0 15px rgba(14,165,195,0.2)" }}>
+        <Button onClick={() => { setShowForm(true); setFormDate(today); }} className="gap-2 font-bold text-xs" style={{ background: "var(--gradient-primary)", boxShadow: "0 0 15px rgba(14,165,195,0.2)" }}>
           <Plus className="w-4 h-4" />
           <span className="hidden sm:inline">Nova Reunião</span>
         </Button>
-      </div>
-
-      {/* Date + Stats */}
-      <div className="flex items-center gap-4 mb-4">
-        <Input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} className="bg-secondary/60 border-border/30 w-44" />
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Video className="w-4 h-4 text-accent" />
-          <span className="font-mono font-bold text-accent">{meetings.length}</span>
-          <span>reuniões</span>
-          <span className="text-muted-foreground/40">•</span>
-          <Clock className="w-4 h-4 text-primary" />
-          <span className="font-mono font-bold text-foreground">{totalH}h{totalM.toString().padStart(2, "0")}</span>
-        </div>
       </div>
 
       {/* Create form */}
@@ -190,81 +214,107 @@ const MeetingsPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Meetings list */}
-      <div className="flex-1 space-y-2">
+      {/* Meetings grouped by day */}
+      <div className="flex-1 space-y-6">
         {loading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="h-20 rounded-xl shimmer" />
           ))
-        ) : meetings.length === 0 ? (
+        ) : groupedMeetings.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
             <Video className="w-10 h-10 mx-auto mb-3 text-primary/30" />
-            <p className="text-sm">Nenhuma reunião registrada neste dia</p>
+            <p className="text-sm">Nenhuma reunião registrada ainda</p>
           </div>
         ) : (
-          meetings.map((meeting, i) => (
-            <motion.div key={meeting.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="stat-card rounded-xl p-4 group">
-              <div className="flex items-start gap-3">
-                <div className="w-1 min-h-[40px] rounded-full flex-shrink-0 mt-0.5" style={{ background: meeting.project?.color || "hsl(var(--accent))" }} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{meeting.title}</p>
-                  <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground font-mono">
-                        {Math.floor(meeting.duration_minutes / 60)}h{(meeting.duration_minutes % 60).toString().padStart(2, "0")}
-                      </span>
-                    </div>
-                    {meeting.project && (
-                      <div className="flex items-center gap-1">
-                        <FolderKanban className="w-3 h-3" style={{ color: meeting.project.color }} />
-                        <span className="text-[10px] font-bold" style={{ color: meeting.project.color }}>{meeting.project.name}</span>
-                      </div>
-                    )}
-                    {meeting.summary && (
-                      <div className="flex items-center gap-1 text-accent">
-                        <FileText className="w-3 h-3" />
-                        <span className="text-[10px] font-bold">Transcrição vinculada</span>
-                      </div>
-                    )}
+          groupedMeetings.map((group) => {
+            const stats = getDayStats(group.meetings);
+            const isToday = group.date === today;
+            return (
+              <div key={group.date}>
+                {/* Day header */}
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${isToday ? "bg-primary/15" : "bg-secondary/60"}`}>
+                    <CalendarDays className={`w-3.5 h-3.5 ${isToday ? "text-primary" : "text-muted-foreground"}`} />
+                    <span className={`text-xs font-bold uppercase tracking-wider ${isToday ? "text-primary" : "text-muted-foreground"}`}>
+                      {formatDateLabel(group.date)}
+                    </span>
                   </div>
-                  {meeting.description && (
-                    <p className="text-xs text-muted-foreground/70 mt-1.5 line-clamp-2">{meeting.description}</p>
-                  )}
-
-                  {/* Linked summary preview */}
-                  {meeting.summary && (
-                    <div className="mt-2 p-2 rounded-lg bg-accent/5 border border-accent/10">
-                      <p className="text-[11px] font-semibold text-accent mb-1">{meeting.summary.title || "Resumo"}</p>
-                      <p className="text-[10px] text-muted-foreground line-clamp-3">{meeting.summary.result?.slice(0, 200)}</p>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="font-mono font-bold text-accent">{stats.count}</span>
+                    <span>reuniões</span>
+                    <span className="text-muted-foreground/30">•</span>
+                    <Clock className="w-3 h-3" />
+                    <span className="font-mono font-bold text-foreground">{stats.hours}h{stats.minutes.toString().padStart(2, "0")}</span>
+                  </div>
+                  <div className="flex-1 h-px bg-border/20" />
                 </div>
 
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  {linkingId === meeting.id ? (
-                    <div className="flex items-center gap-1">
-                      <Select onValueChange={(v) => handleLinkSummary(meeting.id, v)}>
-                        <SelectTrigger className="h-7 text-xs bg-secondary/60 border-border/30 w-40"><SelectValue placeholder="Selecionar..." /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Nenhuma</SelectItem>
-                          {summaries.map(s => <SelectItem key={s.id} value={s.id}>{s.title || "Sem título"}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <button onClick={() => setLinkingId(null)} className="text-muted-foreground hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
-                    </div>
-                  ) : (
-                    <motion.button onClick={() => setLinkingId(meeting.id)} whileHover={{ scale: 1.1 }} className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-accent transition-all p-1" title="Vincular transcrição">
-                      <Link2 className="w-4 h-4" />
-                    </motion.button>
-                  )}
-                  <motion.button onClick={() => handleDelete(meeting.id)} whileHover={{ scale: 1.1 }} className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-destructive transition-all p-1" title="Excluir">
-                    <Trash2 className="w-4 h-4" />
-                  </motion.button>
+                {/* Day meetings */}
+                <div className="space-y-2">
+                  {group.meetings.map((meeting, i) => (
+                    <motion.div key={meeting.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }} className="stat-card rounded-xl p-4 group">
+                      <div className="flex items-start gap-3">
+                        <div className="w-1 min-h-[40px] rounded-full flex-shrink-0 mt-0.5" style={{ background: meeting.project?.color || "hsl(var(--accent))" }} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-foreground">{meeting.title}</p>
+                          <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground font-mono">
+                                {Math.floor(meeting.duration_minutes / 60)}h{(meeting.duration_minutes % 60).toString().padStart(2, "0")}
+                              </span>
+                            </div>
+                            {meeting.project && (
+                              <div className="flex items-center gap-1">
+                                <FolderKanban className="w-3 h-3" style={{ color: meeting.project.color }} />
+                                <span className="text-[10px] font-bold" style={{ color: meeting.project.color }}>{meeting.project.name}</span>
+                              </div>
+                            )}
+                            {meeting.summary && (
+                              <div className="flex items-center gap-1 text-accent">
+                                <FileText className="w-3 h-3" />
+                                <span className="text-[10px] font-bold">Transcrição vinculada</span>
+                              </div>
+                            )}
+                          </div>
+                          {meeting.description && (
+                            <p className="text-xs text-muted-foreground/70 mt-1.5 line-clamp-2">{meeting.description}</p>
+                          )}
+                          {meeting.summary && (
+                            <div className="mt-2 p-2 rounded-lg bg-accent/5 border border-accent/10">
+                              <p className="text-[11px] font-semibold text-accent mb-1">{meeting.summary.title || "Resumo"}</p>
+                              <p className="text-[10px] text-muted-foreground line-clamp-3">{meeting.summary.result?.slice(0, 200)}</p>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          {linkingId === meeting.id ? (
+                            <div className="flex items-center gap-1">
+                              <Select onValueChange={(v) => handleLinkSummary(meeting.id, v)}>
+                                <SelectTrigger className="h-7 text-xs bg-secondary/60 border-border/30 w-40"><SelectValue placeholder="Selecionar..." /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="none">Nenhuma</SelectItem>
+                                  {summaries.map(s => <SelectItem key={s.id} value={s.id}>{s.title || "Sem título"}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                              <button onClick={() => setLinkingId(null)} className="text-muted-foreground hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
+                            </div>
+                          ) : (
+                            <motion.button onClick={() => setLinkingId(meeting.id)} whileHover={{ scale: 1.1 }} className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-accent transition-all p-1" title="Vincular transcrição">
+                              <Link2 className="w-4 h-4" />
+                            </motion.button>
+                          )}
+                          <motion.button onClick={() => handleDelete(meeting.id, meeting.meeting_date)} whileHover={{ scale: 1.1 }} className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-destructive transition-all p-1" title="Excluir">
+                            <Trash2 className="w-4 h-4" />
+                          </motion.button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
               </div>
-            </motion.div>
-          ))
+            );
+          })
         )}
       </div>
     </div>
