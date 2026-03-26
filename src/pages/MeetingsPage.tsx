@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Video, Plus, Trash2, Clock, FolderKanban, FileText, Link2, X, Loader2, CalendarDays, ChevronRight } from "lucide-react";
+import EditableMeeting from "@/components/meetings/EditableMeeting";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -258,36 +259,14 @@ const MeetingsPage = () => {
                       <div className="flex items-start gap-3">
                         <div className="w-1 min-h-[40px] rounded-full flex-shrink-0 mt-0.5" style={{ background: meeting.project?.color || "hsl(var(--accent))" }} />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-foreground">{meeting.title}</p>
-                          <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground font-mono">
-                                {Math.floor(meeting.duration_minutes / 60)}h{(meeting.duration_minutes % 60).toString().padStart(2, "0")}
-                              </span>
-                            </div>
-                            {meeting.project && (
-                              <div className="flex items-center gap-1">
-                                <FolderKanban className="w-3 h-3" style={{ color: meeting.project.color }} />
-                                <span className="text-[10px] font-bold" style={{ color: meeting.project.color }}>{meeting.project.name}</span>
-                              </div>
-                            )}
-                            {meeting.summary && (
-                              <div className="flex items-center gap-1 text-accent">
-                                <FileText className="w-3 h-3" />
-                                <span className="text-[10px] font-bold">Transcrição vinculada</span>
-                              </div>
-                            )}
-                          </div>
-                          {meeting.description && (
-                            <p className="text-xs text-muted-foreground/70 mt-1.5 line-clamp-2">{meeting.description}</p>
-                          )}
+                          <EditableMeeting meeting={meeting} projects={projects} onUpdated={fetchMeetings} />
                           {meeting.summary && (
                             <div className="mt-2 p-2 rounded-lg bg-accent/5 border border-accent/10">
                               <p className="text-[11px] font-semibold text-accent mb-1">{meeting.summary.title || "Resumo"}</p>
                               <p className="text-[10px] text-muted-foreground line-clamp-3">{meeting.summary.result?.slice(0, 200)}</p>
                             </div>
                           )}
+
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0">
                           {linkingId === meeting.id ? (
@@ -333,18 +312,13 @@ const MeetingsPage = () => {
                       <AnimatePresence>
                         {expandedPastId === meeting.id && (
                           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                            <div className="px-3 pb-2.5 pt-0 space-y-1.5">
-                              {meeting.description && (
-                                <p className="text-[11px] text-muted-foreground/70 pl-5">{meeting.description}</p>
-                              )}
+                            <div className="px-3 pb-2.5 pt-0 pl-7">
+                              <EditableMeeting meeting={meeting} projects={projects} onUpdated={fetchMeetings} />
                               {meeting.summary && (
-                                <div className="ml-5 p-2 rounded-md bg-accent/5 border border-accent/10">
+                                <div className="mt-1.5 p-2 rounded-md bg-accent/5 border border-accent/10">
                                   <p className="text-[10px] font-semibold text-accent">{meeting.summary.title || "Resumo"}</p>
                                   <p className="text-[10px] text-muted-foreground line-clamp-3 mt-0.5">{meeting.summary.result?.slice(0, 200)}</p>
                                 </div>
-                              )}
-                              {!meeting.description && !meeting.summary && (
-                                <p className="text-[10px] text-muted-foreground/40 pl-5 italic">Sem anotações</p>
                               )}
                             </div>
                           </motion.div>
