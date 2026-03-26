@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Video, Plus, Trash2, Clock, FolderKanban, FileText, Link2, X, Loader2, CalendarDays } from "lucide-react";
+import { Video, Plus, Trash2, Clock, FolderKanban, FileText, Link2, X, Loader2, CalendarDays, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
