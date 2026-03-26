@@ -265,7 +265,8 @@ const MeetingsPage = () => {
                               <p className="text-[11px] font-semibold text-accent mb-1">{meeting.summary.title || "Resumo"}</p>
                               <p className="text-[10px] text-muted-foreground line-clamp-3">{meeting.summary.result?.slice(0, 200)}</p>
                             </div>
-                          )
+                          )}
+
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0">
                           {linkingId === meeting.id ? (
