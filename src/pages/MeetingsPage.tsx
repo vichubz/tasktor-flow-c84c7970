@@ -22,6 +22,7 @@ const MeetingsPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [linkingId, setLinkingId] = useState<string | null>(null);
+  const [expandedPastId, setExpandedPastId] = useState<string | null>(null);
 
   // Form state
   const [formTitle, setFormTitle] = useState("");
