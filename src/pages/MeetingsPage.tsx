@@ -334,18 +334,13 @@ const MeetingsPage = () => {
                       <AnimatePresence>
                         {expandedPastId === meeting.id && (
                           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                            <div className="px-3 pb-2.5 pt-0 space-y-1.5">
-                              {meeting.description && (
-                                <p className="text-[11px] text-muted-foreground/70 pl-5">{meeting.description}</p>
-                              )}
+                            <div className="px-3 pb-2.5 pt-0 pl-7">
+                              <EditableMeeting meeting={meeting} projects={projects} onUpdated={fetchMeetings} />
                               {meeting.summary && (
-                                <div className="ml-5 p-2 rounded-md bg-accent/5 border border-accent/10">
+                                <div className="mt-1.5 p-2 rounded-md bg-accent/5 border border-accent/10">
                                   <p className="text-[10px] font-semibold text-accent">{meeting.summary.title || "Resumo"}</p>
                                   <p className="text-[10px] text-muted-foreground line-clamp-3 mt-0.5">{meeting.summary.result?.slice(0, 200)}</p>
                                 </div>
-                              )}
-                              {!meeting.description && !meeting.summary && (
-                                <p className="text-[10px] text-muted-foreground/40 pl-5 italic">Sem anotações</p>
                               )}
                             </div>
                           </motion.div>
