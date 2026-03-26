@@ -250,8 +250,9 @@ const MeetingsPage = () => {
                 </div>
 
                 {/* Day meetings */}
-                <div className="space-y-2">
-                  {group.meetings.map((meeting, i) => (
+                <div className={isToday ? "space-y-2" : "space-y-1"}>
+                  {group.meetings.map((meeting, i) => isToday ? (
+                    /* Full card for today */
                     <motion.div key={meeting.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }} className="stat-card rounded-xl p-4 group">
                       <div className="flex items-start gap-3">
                         <div className="w-1 min-h-[40px] rounded-full flex-shrink-0 mt-0.5" style={{ background: meeting.project?.color || "hsl(var(--accent))" }} />
@@ -309,6 +310,22 @@ const MeetingsPage = () => {
                           </motion.button>
                         </div>
                       </div>
+                    </motion.div>
+                  ) : (
+                    /* Compact row for past days */
+                    <motion.div key={meeting.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors group">
+                      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: meeting.project?.color || "hsl(var(--accent))" }} />
+                      <span className="text-xs font-medium text-foreground truncate flex-1">{meeting.title}</span>
+                      {meeting.project && (
+                        <span className="text-[10px] font-semibold flex-shrink-0 hidden sm:inline" style={{ color: meeting.project.color }}>{meeting.project.name}</span>
+                      )}
+                      {meeting.summary && <FileText className="w-3 h-3 text-accent flex-shrink-0" />}
+                      <span className="text-[10px] text-muted-foreground font-mono flex-shrink-0">
+                        {Math.floor(meeting.duration_minutes / 60)}h{(meeting.duration_minutes % 60).toString().padStart(2, "0")}
+                      </span>
+                      <motion.button onClick={() => handleDelete(meeting.id, meeting.meeting_date)} whileHover={{ scale: 1.1 }} className="opacity-0 group-hover:opacity-100 text-muted-foreground/30 hover:text-destructive transition-all p-0.5 flex-shrink-0" title="Excluir">
+                        <Trash2 className="w-3 h-3" />
+                      </motion.button>
                     </motion.div>
                   ))}
                 </div>
