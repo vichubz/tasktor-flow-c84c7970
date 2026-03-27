@@ -323,29 +323,20 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg p-0 overflow-hidden border-primary/20 bg-card/95 backdrop-blur-xl">
+      <DialogContent className="sm:max-w-lg p-0 overflow-hidden border-primary/20 bg-card">
         <DialogTitle className="sr-only">Smart Task Creator</DialogTitle>
 
         {/* Header */}
         <div className="px-5 pt-5 pb-3 border-b border-border/20">
           <div className="flex items-center gap-3">
-            <motion.div
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center animate-smart-glow"
               style={{
                 background: "linear-gradient(135deg, rgba(255,120,50,0.2), rgba(255,80,20,0.1))",
-                boxShadow: "0 0 20px rgba(255,100,40,0.15)",
               }}
-              animate={{
-                boxShadow: [
-                  "0 0 10px rgba(255,100,40,0.1)",
-                  "0 0 25px rgba(255,100,40,0.25)",
-                  "0 0 10px rgba(255,100,40,0.1)",
-                ],
-              }}
-              transition={{ duration: 2, repeat: Infinity }}
             >
               <Flame className="w-5 h-5 text-orange-400" />
-            </motion.div>
+            </div>
             <div className="flex-1">
               <h3 className="text-sm font-bold text-foreground">Smart Task Creator</h3>
               <p className="text-[11px] text-muted-foreground">
@@ -410,13 +401,10 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                           : "bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary"
                       }`}
                     >
-                      {isRecording ? (
-                        <motion.div
-                          animate={{ scale: [1, 1.2, 1] }}
-                          transition={{ duration: 1, repeat: Infinity }}
-                        >
+                    {isRecording ? (
+                        <div className="animate-pulse">
                           <Square className="w-4 h-4 fill-current" />
-                        </motion.div>
+                        </div>
                       ) : (
                         <Mic className="w-4 h-4" />
                       )}
@@ -432,19 +420,17 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                       exit={{ opacity: 0, height: 0 }}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20"
                     >
-                      <motion.div
-                        className="w-2 h-2 rounded-full bg-red-500"
-                        animate={{ opacity: [1, 0.3, 1] }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                      />
+                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                       <span className="text-xs text-red-400 font-medium">Gravando... fale suas tasks</span>
                       <div className="flex items-center gap-0.5 ml-auto">
                         {[0, 1, 2, 3, 4].map((i) => (
-                          <motion.div
+                          <div
                             key={i}
-                            className="w-0.5 bg-red-400/60 rounded-full"
-                            animate={{ height: [4, 12 + Math.random() * 8, 4] }}
-                            transition={{ duration: 0.5 + Math.random() * 0.3, repeat: Infinity, delay: i * 0.1 }}
+                            className="w-0.5 bg-red-400/60 rounded-full animate-waveform"
+                            style={{
+                              animationDelay: `${i * 0.12}s`,
+                              animationDuration: `${0.6 + i * 0.08}s`,
+                            }}
                           />
                         ))}
                       </div>
