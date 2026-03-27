@@ -401,13 +401,10 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                           : "bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary"
                       }`}
                     >
-                      {isRecording ? (
-                        <motion.div
-                          animate={{ scale: [1, 1.2, 1] }}
-                          transition={{ duration: 1, repeat: Infinity }}
-                        >
+                    {isRecording ? (
+                        <div className="animate-pulse">
                           <Square className="w-4 h-4 fill-current" />
-                        </motion.div>
+                        </div>
                       ) : (
                         <Mic className="w-4 h-4" />
                       )}
