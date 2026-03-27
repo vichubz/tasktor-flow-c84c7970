@@ -411,7 +411,7 @@ const BookmarksPage = () => {
                   layout
                   onDoubleClick={() => isEditing ? setEditingId(null) : startEdit(b)}
                   whileHover={{ scale: 1.008, y: -1 }}
-                  className="rounded-xl overflow-hidden relative group cursor-default transition-all border border-border/60 hover:border-primary/40 hover:shadow-[0_0_15px_hsl(var(--primary)/0.15),inset_0_0_15px_hsl(var(--primary)/0.05)]"
+                  className="rounded-xl overflow-hidden relative group cursor-default transition-all border border-border/60 hover:border-primary/40 hover:shadow-[0_0_15px_hsl(var(--primary)/0.15),inset_0_0_15px_hsl(var(--primary)/0.05)] lightning-sweep"
                   style={{
                     background: "var(--glass-bg)",
                     backdropFilter: "blur(20px)",
