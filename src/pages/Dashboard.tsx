@@ -83,6 +83,10 @@ const Dashboard = () => {
         e.preventDefault();
         inlineCreatorRef.current?.activate();
       }
+      if ((e.key === "i" || e.key === "I") && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setShowSmartTask(true);
+      }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
