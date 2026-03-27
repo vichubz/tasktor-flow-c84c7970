@@ -481,10 +481,27 @@ const BookmarksPage = () => {
                   ) : (
                     /* Display mode */
                     <div className="px-4 pl-5 py-3 flex items-center gap-3">
-                      {/* Category icon */}
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${catMeta.color}`} style={{ background: "hsl(var(--secondary) / 0.6)" }}>
-                        <CatIcon className="w-4 h-4" />
-                      </div>
+                      {/* Category icon — double click to copy */}
+                      <motion.div
+                        onDoubleClick={(e) => {
+                          e.stopPropagation();
+                          if (b.url) {
+                            navigator.clipboard.writeText(b.url);
+                            setCopiedIconId(b.id);
+                            toast.success("Link copiado!");
+                            setTimeout(() => setCopiedIconId(null), 1500);
+                          }
+                        }}
+                        whileHover={{ scale: 1.15, rotate: 5 }}
+                        whileTap={{ scale: 0.9 }}
+                        animate={copiedIconId === b.id ? { scale: [1, 1.3, 1], rotate: [0, -10, 10, 0] } : {}}
+                        transition={{ duration: 0.3 }}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer ${copiedIconId === b.id ? "text-green-400" : catMeta.color}`}
+                        style={{ background: "hsl(var(--secondary) / 0.6)" }}
+                        title="Duplo clique para copiar link"
+                      >
+                        {copiedIconId === b.id ? <Check className="w-4 h-4" /> : <CatIcon className="w-4 h-4" />}
+                      </motion.div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
