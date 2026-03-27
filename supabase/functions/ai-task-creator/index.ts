@@ -10,8 +10,9 @@ const corsHeaders = {
 const SYSTEM_PROMPT = `Você é um assistente que extrai dados estruturados de tasks a partir de linguagem natural.
 
 REGRAS:
-- Sempre responda chamando a tool "create_task"
-- Extraia título, descrição, subtasks, dificuldade e nome do projeto
+- Sempre responda chamando a tool "create_tasks" (plural!)
+- O usuário pode solicitar UMA ou MÚLTIPLAS tasks de uma vez. Identifique todas.
+- Extraia título, descrição, subtasks, dificuldade e nome do projeto para CADA task
 - Se o usuário mencionar subtasks (ex: "com subtasks: X, Y, Z" ou listar itens), extraia-as
 - Se o usuário não mencionar subtasks mas a task for complexa, sugira subtasks relevantes
 - Dificuldade: 0 (sem nível), 1 (fácil), 2 (médio), 3 (difícil) — infira pelo contexto
@@ -20,7 +21,8 @@ REGRAS:
 - IMPORTANTE: o nome do projeto pode estar escrito de forma diferente (abreviado, com erro de digitação). Faça fuzzy matching inteligente
 - Título deve ser conciso e claro
 - Descrição pode ser null se não houver detalhes extras
-- Idioma: mantenha o mesmo idioma do input do usuário`;
+- Idioma: mantenha o mesmo idioma do input do usuário
+- Se o usuário listar vários itens (ex: "criar task A, task B e task C"), crie uma task para CADA item`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -57,9 +59,9 @@ serve(async (req) => {
       );
     }
 
-    const { prompt, projects } = await req.json();
+    const { prompt, audio_base64, audio_media_type, projects } = await req.json();
 
-    if (!prompt || !prompt.trim()) {
+    if ((!prompt || !prompt.trim()) && !audio_base64) {
       return new Response(
         JSON.stringify({ success: false, error: "Prompt vazio" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -69,7 +71,28 @@ serve(async (req) => {
     const projectList = Array.isArray(projects) ? projects : [];
     const projectNames = projectList.map((p: { name: string }) => p.name).join(", ");
 
-    const userMessage = `Projetos disponíveis: [${projectNames || "nenhum"}]\n\nSolicitação do usuário:\n${prompt}`;
+    // Build content blocks
+    const contentBlocks: any[] = [];
+    
+    if (audio_base64) {
+      contentBlocks.push({
+        type: "input_audio",
+        source: {
+          type: "base64",
+          media_type: audio_media_type || "audio/webm",
+          data: audio_base64,
+        },
+      });
+      contentBlocks.push({
+        type: "text",
+        text: `Projetos disponíveis: [${projectNames || "nenhum"}]\n\nO usuário enviou um áudio. Transcreva e interprete o que ele disse para criar as tasks.`,
+      });
+    } else {
+      contentBlocks.push({
+        type: "text",
+        text: `Projetos disponíveis: [${projectNames || "nenhum"}]\n\nSolicitação do usuário:\n${prompt}`,
+      });
+    }
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -80,27 +103,37 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 1024,
+        max_tokens: 2048,
         system: SYSTEM_PROMPT,
         tools: [
           {
-            name: "create_task",
-            description: "Cria uma task estruturada a partir do input do usuário",
+            name: "create_tasks",
+            description: "Cria uma ou mais tasks estruturadas a partir do input do usuário",
             input_schema: {
               type: "object",
               properties: {
-                title: { type: "string", description: "Título conciso da task" },
-                description: { type: "string", description: "Descrição detalhada (opcional)" },
-                difficulty: { type: "integer", minimum: 0, maximum: 3, description: "0=sem nível, 1=fácil, 2=médio, 3=difícil" },
-                project_name: { type: "string", description: "Nome do projeto mais adequado da lista, ou null" },
-                subtasks: { type: "array", items: { type: "string" }, description: "Lista de subtasks" },
+                tasks: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      title: { type: "string", description: "Título conciso da task" },
+                      description: { type: "string", description: "Descrição detalhada (opcional)" },
+                      difficulty: { type: "integer", minimum: 0, maximum: 3, description: "0=sem nível, 1=fácil, 2=médio, 3=difícil" },
+                      project_name: { type: "string", description: "Nome do projeto mais adequado da lista, ou null" },
+                      subtasks: { type: "array", items: { type: "string" }, description: "Lista de subtasks" },
+                    },
+                    required: ["title"],
+                  },
+                  description: "Lista de tasks a serem criadas",
+                },
               },
-              required: ["title"],
+              required: ["tasks"],
             },
           },
         ],
-        tool_choice: { type: "tool", name: "create_task" },
-        messages: [{ role: "user", content: userMessage }],
+        tool_choice: { type: "tool", name: "create_tasks" },
+        messages: [{ role: "user", content: contentBlocks }],
       }),
     });
 
@@ -115,33 +148,25 @@ serve(async (req) => {
 
     const data = await response.json();
 
-    // Extract tool use result
     const toolUse = data.content?.find((block: any) => block.type === "tool_use");
-    if (!toolUse || !toolUse.input) {
+    if (!toolUse || !toolUse.input || !Array.isArray(toolUse.input.tasks)) {
       return new Response(
         JSON.stringify({ success: false, error: "IA não retornou dados estruturados" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const result = toolUse.input;
+    // Fuzzy match helper
+    const fuzzyMatchProject = (projectName: string | null): string | null => {
+      if (!projectName || projectList.length === 0) return null;
+      const searchName = projectName.toLowerCase().trim();
 
-    // Fuzzy match project_name to actual project
-    let project_id: string | null = null;
-    if (result.project_name && projectList.length > 0) {
-      const searchName = result.project_name.toLowerCase().trim();
-
-      // Exact match first
       let match = projectList.find((p: any) => p.name.toLowerCase() === searchName);
-
-      // Contains match
       if (!match) {
         match = projectList.find((p: any) =>
           p.name.toLowerCase().includes(searchName) || searchName.includes(p.name.toLowerCase())
         );
       }
-
-      // Similarity match (simple character overlap)
       if (!match) {
         let bestScore = 0;
         for (const p of projectList) {
@@ -159,20 +184,20 @@ serve(async (req) => {
           }
         }
       }
+      return match ? match.id : null;
+    };
 
-      if (match) project_id = match.id;
-    }
+    const tasks = toolUse.input.tasks.map((t: any) => ({
+      title: t.title || "Nova Task",
+      description: t.description || null,
+      difficulty: typeof t.difficulty === "number" ? Math.min(3, Math.max(0, t.difficulty)) : 0,
+      project_id: fuzzyMatchProject(t.project_name),
+      project_name: t.project_name || null,
+      subtasks: Array.isArray(t.subtasks) ? t.subtasks : [],
+    }));
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        title: result.title || "Nova Task",
-        description: result.description || null,
-        difficulty: typeof result.difficulty === "number" ? Math.min(3, Math.max(0, result.difficulty)) : 0,
-        project_id,
-        project_name: result.project_name || null,
-        subtasks: Array.isArray(result.subtasks) ? result.subtasks : [],
-      }),
+      JSON.stringify({ success: true, tasks }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {

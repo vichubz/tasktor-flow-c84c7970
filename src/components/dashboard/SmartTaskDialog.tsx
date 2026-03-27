@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Mic, Square, Loader2, Plus, X, ArrowLeft, Sparkles, Zap, Send } from "lucide-react";
+import { Flame, Mic, Square, Loader2, Plus, X, ArrowLeft, Sparkles, Zap, Send, Check, SkipForward, CheckCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ interface SmartTaskDialogProps {
   onCreated: () => Promise<void>;
 }
 
-interface AIResult {
+interface AITask {
   title: string;
   description: string | null;
   difficulty: number;
@@ -28,26 +28,32 @@ interface AIResult {
   subtasks: string[];
 }
 
-type DialogState = "input" | "loading" | "preview";
+type DialogState = "input" | "loading" | "review";
 
 const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskDialogProps) => {
   const { user } = useAuth();
   const [state, setState] = useState<DialogState>("input");
   const [prompt, setPrompt] = useState("");
   const [isRecording, setIsRecording] = useState(false);
-  const [result, setResult] = useState<AIResult | null>(null);
+  const [tasks, setTasks] = useState<AITask[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [createdCount, setCreatedCount] = useState(0);
+  const [skippedCount, setSkippedCount] = useState(0);
   const [creating, setCreating] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Speech recognition support
-  const speechSupported = typeof window !== "undefined" && ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+  const mediaRecorderSupported = typeof window !== "undefined" && !!window.MediaRecorder;
 
   useEffect(() => {
     if (open) {
       setState("input");
       setPrompt("");
-      setResult(null);
+      setTasks([]);
+      setCurrentIndex(0);
+      setCreatedCount(0);
+      setSkippedCount(0);
       setCreating(false);
       setIsRecording(false);
       setTimeout(() => textareaRef.current?.focus(), 100);
@@ -57,70 +63,63 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
   }, [open]);
 
   const stopRecording = useCallback(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-      recognitionRef.current = null;
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
     }
     setIsRecording(false);
   }, []);
 
-  const toggleRecording = useCallback(() => {
+  const toggleRecording = useCallback(async () => {
     if (isRecording) {
       stopRecording();
       return;
     }
 
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+          ? "audio/webm;codecs=opus"
+          : "audio/webm",
+      });
+      audioChunksRef.current = [];
 
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = "pt-BR";
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
 
-    let finalTranscript = prompt;
-
-    recognition.onresult = (event: any) => {
-      let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += (finalTranscript ? " " : "") + transcript;
-        } else {
-          interim = transcript;
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        if (audioBlob.size > 0) {
+          // Convert to base64 and send to AI
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64 = (reader.result as string).split(",")[1];
+            handleGenerateWithAudio(base64);
+          };
+          reader.readAsDataURL(audioBlob);
         }
-      }
-      setPrompt(finalTranscript + (interim ? " " + interim : ""));
-    };
+      };
 
-    recognition.onerror = () => {
-      stopRecording();
-      toast.error("Erro no reconhecimento de voz");
-    };
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch {
+      toast.error("Não foi possível acessar o microfone");
+    }
+  }, [isRecording, stopRecording]);
 
-    recognition.onend = () => {
-      setIsRecording(false);
-      recognitionRef.current = null;
-    };
-
-    recognitionRef.current = recognition;
-    recognition.start();
-    setIsRecording(true);
-  }, [isRecording, prompt, stopRecording]);
-
-  const handleGenerate = async () => {
-    if (!prompt.trim() || !user) return;
-
-    // Stop recording if active
-    stopRecording();
-
+  const handleGenerateWithAudio = async (audioBase64: string) => {
+    if (!user) return;
     setState("loading");
 
     try {
       const { data, error } = await supabase.functions.invoke("ai-task-creator", {
         body: {
-          prompt: prompt.trim(),
-          projects: projects.map(p => ({ id: p.id, name: p.name })),
+          audio_base64: audioBase64,
+          audio_media_type: "audio/webm",
+          projects: projects.map((p) => ({ id: p.id, name: p.name })),
         },
       });
 
@@ -128,26 +127,66 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
         throw new Error(data?.error || error?.message || "Erro ao processar");
       }
 
-      setResult({
-        title: data.title,
-        description: data.description,
-        difficulty: data.difficulty,
-        project_id: data.project_id,
-        subtasks: data.subtasks || [],
-      });
-      setState("preview");
+      const aiTasks: AITask[] = data.tasks || [];
+      if (aiTasks.length === 0) {
+        toast.error("IA não identificou nenhuma task");
+        setState("input");
+        return;
+      }
+
+      setTasks(aiTasks);
+      setCurrentIndex(0);
+      setCreatedCount(0);
+      setSkippedCount(0);
+      setState("review");
     } catch (e: any) {
       toast.error(e.message || "Erro ao gerar task com IA");
       setState("input");
     }
   };
 
-  const handleCreate = async () => {
-    if (!result || !user || creating) return;
+  const handleGenerate = async () => {
+    if (!prompt.trim() || !user) return;
+    stopRecording();
+    setState("loading");
+
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-task-creator", {
+        body: {
+          prompt: prompt.trim(),
+          projects: projects.map((p) => ({ id: p.id, name: p.name })),
+        },
+      });
+
+      if (error || !data?.success) {
+        throw new Error(data?.error || error?.message || "Erro ao processar");
+      }
+
+      const aiTasks: AITask[] = data.tasks || [];
+      if (aiTasks.length === 0) {
+        toast.error("IA não identificou nenhuma task");
+        setState("input");
+        return;
+      }
+
+      setTasks(aiTasks);
+      setCurrentIndex(0);
+      setCreatedCount(0);
+      setSkippedCount(0);
+      setState("review");
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao gerar task com IA");
+      setState("input");
+    }
+  };
+
+  const currentTask = tasks[currentIndex] || null;
+
+  const handleApproveTask = async () => {
+    if (!currentTask || !user || creating) return;
     setCreating(true);
 
     try {
-      // Get next position
       const { data: lastTask } = await supabase
         .from("tasks")
         .select("position")
@@ -158,15 +197,14 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
 
       const position = lastTask && lastTask.length > 0 ? lastTask[0].position + 1 : 0;
 
-      // Insert task
       const { data: newTask, error: taskError } = await supabase
         .from("tasks")
         .insert({
           user_id: user.id,
-          title: result.title,
-          description: result.description,
-          difficulty: result.difficulty,
-          project_id: result.project_id,
+          title: currentTask.title,
+          description: currentTask.description,
+          difficulty: currentTask.difficulty,
+          project_id: currentTask.project_id,
           position,
         })
         .select("id")
@@ -174,42 +212,116 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
 
       if (taskError) throw taskError;
 
-      // Insert subtasks
-      if (result.subtasks.length > 0 && newTask) {
-        const subtaskRows = result.subtasks.map((title, i) => ({
-          task_id: newTask.id,
-          title,
-          position: i,
-        }));
-        const { error: subError } = await supabase.from("subtasks").insert(subtaskRows);
-        if (subError) console.error("Subtask insert error:", subError);
+      if (currentTask.subtasks.length > 0 && newTask) {
+        await supabase.from("subtasks").insert(
+          currentTask.subtasks.filter(s => s.trim()).map((title, i) => ({
+            task_id: newTask.id,
+            title,
+            position: i,
+          }))
+        );
       }
 
-      toast.success("Task criada com IA! 🔥");
-      await onCreated();
-      onOpenChange(false);
-    } catch (e: any) {
+      setCreatedCount((c) => c + 1);
+      goToNextOrFinish();
+    } catch {
       toast.error("Falha ao criar task");
     } finally {
       setCreating(false);
     }
   };
 
+  const handleSkipTask = () => {
+    setSkippedCount((c) => c + 1);
+    goToNextOrFinish();
+  };
+
+  const goToNextOrFinish = () => {
+    if (currentIndex + 1 < tasks.length) {
+      setCurrentIndex((i) => i + 1);
+    } else {
+      // All done
+      const created = createdCount + (creating ? 0 : 1); // approximate
+      toast.success(`${created} task${created !== 1 ? "s" : ""} criada${created !== 1 ? "s" : ""} com IA! 🔥`);
+      onCreated();
+      onOpenChange(false);
+    }
+  };
+
+  const handleApproveAll = async () => {
+    if (!user || creating) return;
+    setCreating(true);
+
+    try {
+      const remaining = tasks.slice(currentIndex);
+      let created = 0;
+
+      for (const task of remaining) {
+        const { data: lastTask } = await supabase
+          .from("tasks")
+          .select("position")
+          .eq("user_id", user.id)
+          .eq("is_completed", false)
+          .order("position", { ascending: false })
+          .limit(1);
+
+        const position = lastTask && lastTask.length > 0 ? lastTask[0].position + 1 : 0;
+
+        const { data: newTask, error } = await supabase
+          .from("tasks")
+          .insert({
+            user_id: user.id,
+            title: task.title,
+            description: task.description,
+            difficulty: task.difficulty,
+            project_id: task.project_id,
+            position,
+          })
+          .select("id")
+          .single();
+
+        if (!error && newTask && task.subtasks.length > 0) {
+          await supabase.from("subtasks").insert(
+            task.subtasks.filter(s => s.trim()).map((title, i) => ({
+              task_id: newTask.id,
+              title,
+              position: i,
+            }))
+          );
+        }
+        if (!error) created++;
+      }
+
+      const total = createdCount + created;
+      toast.success(`${total} task${total !== 1 ? "s" : ""} criada${total !== 1 ? "s" : ""} com IA! 🔥`);
+      await onCreated();
+      onOpenChange(false);
+    } catch {
+      toast.error("Falha ao criar tasks");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const updateCurrentTask = (updates: Partial<AITask>) => {
+    setTasks((prev) => prev.map((t, i) => (i === currentIndex ? { ...t, ...updates } : t)));
+  };
+
   const updateSubtask = (index: number, value: string) => {
-    if (!result) return;
-    const updated = [...result.subtasks];
+    if (!currentTask) return;
+    const updated = [...currentTask.subtasks];
     updated[index] = value;
-    setResult({ ...result, subtasks: updated });
+    updateCurrentTask({ subtasks: updated });
   };
 
   const removeSubtask = (index: number) => {
-    if (!result) return;
-    setResult({ ...result, subtasks: result.subtasks.filter((_, i) => i !== index) });
+    if (!currentTask) return;
+    updateCurrentTask({ subtasks: currentTask.subtasks.filter((_, i) => i !== index) });
   };
 
   const addSubtask = () => {
-    if (!result) return;
-    setResult({ ...result, subtasks: [...result.subtasks, ""] });
+    if (!currentTask) return;
+    updateCurrentTask({ subtasks: [...currentTask.subtasks, ""] });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -246,10 +358,32 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
             >
               <Flame className="w-5 h-5 text-orange-400" />
             </motion.div>
-            <div>
+            <div className="flex-1">
               <h3 className="text-sm font-bold text-foreground">Smart Task Creator</h3>
-              <p className="text-[11px] text-muted-foreground">Descreva sua task por texto ou voz</p>
+              <p className="text-[11px] text-muted-foreground">
+                {state === "review"
+                  ? `Task ${currentIndex + 1} de ${tasks.length} — ${createdCount} criada${createdCount !== 1 ? "s" : ""}`
+                  : "Descreva suas tasks por texto ou voz"}
+              </p>
             </div>
+            {state === "review" && tasks.length > 1 && (
+              <div className="flex gap-1">
+                {tasks.map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      i < currentIndex
+                        ? "bg-green-400"
+                        : i === currentIndex
+                        ? "bg-orange-400"
+                        : "bg-muted-foreground/20"
+                    }`}
+                    animate={i === currentIndex ? { scale: [1, 1.3, 1] } : {}}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -269,14 +403,14 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                   <Textarea
                     ref={textareaRef}
                     value={prompt}
-                    onChange={e => setPrompt(e.target.value)}
+                    onChange={(e) => setPrompt(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder='Ex: "Criar API de pagamentos no Backend com subtasks: endpoints, testes e docs"'
+                    placeholder='Ex: "Criar API de pagamentos no Backend com subtasks: endpoints, testes e docs. Também fazer design da landing page no Frontend"'
                     className="min-h-[100px] bg-secondary/30 border-border/20 resize-none pr-12 text-sm placeholder:text-muted-foreground/40"
                   />
-                  {/* Mic button inside textarea */}
-                  {speechSupported && (
+                  {mediaRecorderSupported && (
                     <motion.button
+                      type="button"
                       onClick={toggleRecording}
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
@@ -300,7 +434,6 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                   )}
                 </div>
 
-                {/* Recording indicator */}
                 <AnimatePresence>
                   {isRecording && (
                     <motion.div
@@ -314,10 +447,9 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                         animate={{ opacity: [1, 0.3, 1] }}
                         transition={{ duration: 1, repeat: Infinity }}
                       />
-                      <span className="text-xs text-red-400 font-medium">Gravando... fale sua task</span>
-                      {/* Simple waveform */}
+                      <span className="text-xs text-red-400 font-medium">Gravando... fale suas tasks</span>
                       <div className="flex items-center gap-0.5 ml-auto">
-                        {[0, 1, 2, 3, 4].map(i => (
+                        {[0, 1, 2, 3, 4].map((i) => (
                           <motion.div
                             key={i}
                             className="w-0.5 bg-red-400/60 rounded-full"
@@ -333,15 +465,16 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                 <div className="flex items-center justify-between pt-1">
                   <p className="text-[10px] text-muted-foreground/40">
                     <kbd className="bg-secondary/60 px-1 py-0.5 rounded text-[9px] font-mono">Ctrl+Enter</kbd> gerar
+                    {" · "}Pode pedir múltiplas tasks
                   </p>
                   <Button
                     onClick={handleGenerate}
-                    disabled={!prompt.trim()}
+                    disabled={!prompt.trim() || isRecording}
                     size="sm"
                     className="gap-2 font-bold"
                     style={{
-                      background: prompt.trim() ? "linear-gradient(135deg, hsl(25 90% 50%), hsl(15 85% 45%))" : undefined,
-                      boxShadow: prompt.trim() ? "0 0 15px rgba(255,100,40,0.2)" : undefined,
+                      background: prompt.trim() && !isRecording ? "linear-gradient(135deg, hsl(25 90% 50%), hsl(15 85% 45%))" : undefined,
+                      boxShadow: prompt.trim() && !isRecording ? "0 0 15px rgba(255,100,40,0.2)" : undefined,
                     }}
                   >
                     <Send className="w-3.5 h-3.5" />
@@ -372,7 +505,6 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                 </motion.div>
                 <p className="text-center text-sm text-muted-foreground font-medium">Analisando com IA...</p>
 
-                {/* Skeleton fields */}
                 <div className="space-y-3 px-2">
                   {[80, 60, 100, 45].map((w, i) => (
                     <motion.div
@@ -397,21 +529,22 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
               </motion.div>
             )}
 
-            {/* PREVIEW STATE */}
-            {state === "preview" && result && (
+            {/* REVIEW STATE — one task at a time */}
+            {state === "review" && currentTask && (
               <motion.div
-                key="preview"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                key={`review-${currentIndex}`}
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -30 }}
+                transition={{ duration: 0.25 }}
                 className="space-y-3 pt-2"
               >
                 {/* Title */}
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
                   <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Título</label>
                   <Input
-                    value={result.title}
-                    onChange={e => setResult({ ...result, title: e.target.value })}
+                    value={currentTask.title}
+                    onChange={(e) => updateCurrentTask({ title: e.target.value })}
                     className="bg-secondary/30 border-border/20 font-medium"
                   />
                 </motion.div>
@@ -420,14 +553,14 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                   <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Descrição</label>
                   <Textarea
-                    value={result.description || ""}
-                    onChange={e => setResult({ ...result, description: e.target.value || null })}
+                    value={currentTask.description || ""}
+                    onChange={(e) => updateCurrentTask({ description: e.target.value || null })}
                     className="bg-secondary/30 border-border/20 min-h-[60px] resize-none text-sm"
                     placeholder="Sem descrição"
                   />
                 </motion.div>
 
-                {/* Project + Difficulty row */}
+                {/* Project + Difficulty */}
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -437,15 +570,15 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                   <div>
                     <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Projeto</label>
                     <Select
-                      value={result.project_id || "none"}
-                      onValueChange={v => setResult({ ...result, project_id: v === "none" ? null : v })}
+                      value={currentTask.project_id || "none"}
+                      onValueChange={(v) => updateCurrentTask({ project_id: v === "none" ? null : v })}
                     >
                       <SelectTrigger className="bg-secondary/30 border-border/20 h-9 text-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
                         <SelectItem value="none"><span className="text-muted-foreground">Sem projeto</span></SelectItem>
-                        {projects.map(p => (
+                        {projects.map((p) => (
                           <SelectItem key={p.id} value={p.id}>
                             <span className="flex items-center gap-2">
                               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
@@ -459,8 +592,8 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                   <div>
                     <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Dificuldade</label>
                     <Select
-                      value={String(result.difficulty)}
-                      onValueChange={v => setResult({ ...result, difficulty: Number(v) })}
+                      value={String(currentTask.difficulty)}
+                      onValueChange={(v) => updateCurrentTask({ difficulty: Number(v) })}
                     >
                       <SelectTrigger className="bg-secondary/30 border-border/20 h-9 text-xs">
                         <SelectValue />
@@ -469,9 +602,10 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                         {difficultyLabels.map((label, i) => (
                           <SelectItem key={i} value={String(i)}>
                             <span className="flex items-center gap-1.5">
-                              {i > 0 && Array.from({ length: i }).map((_, j) => (
-                                <Zap key={j} className="w-3 h-3 text-orange-400 fill-orange-400" />
-                              ))}
+                              {i > 0 &&
+                                Array.from({ length: i }).map((_, j) => (
+                                  <Zap key={j} className="w-3 h-3 text-orange-400 fill-orange-400" />
+                                ))}
                               {label}
                             </span>
                           </SelectItem>
@@ -485,7 +619,7 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                      Subtasks ({result.subtasks.length})
+                      Subtasks ({currentTask.subtasks.length})
                     </label>
                     <motion.button
                       onClick={addSubtask}
@@ -496,9 +630,9 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                       <Plus className="w-3.5 h-3.5" />
                     </motion.button>
                   </div>
-                  <div className="space-y-1.5 max-h-[160px] overflow-y-auto">
+                  <div className="space-y-1.5 max-h-[130px] overflow-y-auto">
                     <AnimatePresence>
-                      {result.subtasks.map((sub, i) => (
+                      {currentTask.subtasks.map((sub, i) => (
                         <motion.div
                           key={i}
                           initial={{ opacity: 0, x: -10 }}
@@ -510,7 +644,7 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                           <div className="w-1.5 h-1.5 rounded-full bg-primary/40 flex-shrink-0" />
                           <Input
                             value={sub}
-                            onChange={e => updateSubtask(i, e.target.value)}
+                            onChange={(e) => updateSubtask(i, e.target.value)}
                             className="h-8 bg-secondary/20 border-border/15 text-xs flex-1"
                             placeholder="Subtask..."
                           />
@@ -525,7 +659,7 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                         </motion.div>
                       ))}
                     </AnimatePresence>
-                    {result.subtasks.length === 0 && (
+                    {currentTask.subtasks.length === 0 && (
                       <p className="text-[11px] text-muted-foreground/40 py-2 text-center">Nenhuma subtask</p>
                     )}
                   </div>
@@ -536,7 +670,7 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.25 }}
-                  className="flex items-center justify-between pt-2"
+                  className="flex items-center justify-between pt-2 gap-2"
                 >
                   <Button
                     variant="ghost"
@@ -547,23 +681,53 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                     <ArrowLeft className="w-3.5 h-3.5" />
                     Voltar
                   </Button>
-                  <Button
-                    onClick={handleCreate}
-                    disabled={!result.title.trim() || creating}
-                    size="sm"
-                    className="gap-2 font-bold"
-                    style={{
-                      background: "linear-gradient(135deg, hsl(25 90% 50%), hsl(15 85% 45%))",
-                      boxShadow: "0 0 15px rgba(255,100,40,0.2)",
-                    }}
-                  >
-                    {creating ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Sparkles className="w-3.5 h-3.5" />
+
+                  <div className="flex items-center gap-2">
+                    {/* Skip */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleSkipTask}
+                      disabled={creating}
+                      className="gap-1 text-muted-foreground hover:text-foreground"
+                    >
+                      <SkipForward className="w-3.5 h-3.5" />
+                      Pular
+                    </Button>
+
+                    {/* Approve all remaining */}
+                    {tasks.length - currentIndex > 1 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleApproveAll}
+                        disabled={creating}
+                        className="gap-1.5 text-xs border-green-500/30 text-green-400 hover:bg-green-500/10"
+                      >
+                        {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCheck className="w-3.5 h-3.5" />}
+                        Aprovar todas ({tasks.length - currentIndex})
+                      </Button>
                     )}
-                    {creating ? "Criando..." : "Criar Task"}
-                  </Button>
+
+                    {/* Approve current */}
+                    <Button
+                      onClick={handleApproveTask}
+                      disabled={!currentTask.title.trim() || creating}
+                      size="sm"
+                      className="gap-1.5 font-bold"
+                      style={{
+                        background: "linear-gradient(135deg, hsl(25 90% 50%), hsl(15 85% 45%))",
+                        boxShadow: "0 0 15px rgba(255,100,40,0.2)",
+                      }}
+                    >
+                      {creating ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Check className="w-3.5 h-3.5" />
+                      )}
+                      {creating ? "Criando..." : currentIndex + 1 < tasks.length ? "Aprovar" : "Criar"}
+                    </Button>
+                  </div>
                 </motion.div>
               </motion.div>
             )}
