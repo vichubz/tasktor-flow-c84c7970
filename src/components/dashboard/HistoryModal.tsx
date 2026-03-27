@@ -180,7 +180,7 @@ const EffortHistoryTab = ({ projects }: { projects: Project[] }) => {
               </TableRow>
             ) : (
               tasks.map(task => (
-                <TableRow key={task.id} className="border-border/10 hover:bg-secondary/20">
+                <TableRow key={task.id} className="border-border/10 hover:bg-secondary/20 group">
                   <TableCell className="text-xs font-mono">
                     {task.completed_at ? new Date(task.completed_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }) : "—"}
                   </TableCell>
