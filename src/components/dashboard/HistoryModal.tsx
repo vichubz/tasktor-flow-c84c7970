@@ -67,6 +67,10 @@ const EffortHistoryTab = ({ projects }: { projects: Project[] }) => {
   const [loading, setLoading] = useState(true);
   const [filterProject, setFilterProject] = useState("all");
   const [filterDate, setFilterDate] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editProject, setEditProject] = useState("");
+  const [editDifficulty, setEditDifficulty] = useState(0);
 
   const fetchTasks = useCallback(async () => {
     if (!user) return;
@@ -96,6 +100,24 @@ const EffortHistoryTab = ({ projects }: { projects: Project[] }) => {
     return Array.from({ length: level }, (_, i) => (
       <Zap key={i} className="w-3 h-3 text-amber-500 inline" />
     ));
+  };
+
+  const startEdit = (task: any) => {
+    setEditingId(task.id);
+    setEditTitle(task.title);
+    setEditProject(task.project_id || "none");
+    setEditDifficulty(task.difficulty || 0);
+  };
+
+  const saveEdit = async (id: string) => {
+    await supabase.from("tasks").update({
+      title: editTitle.trim(),
+      project_id: editProject === "none" ? null : editProject,
+      difficulty: editDifficulty,
+    }).eq("id", id);
+    setEditingId(null);
+    toast.success("Tarefa atualizada");
+    fetchTasks();
   };
 
   return (
@@ -138,7 +160,7 @@ const EffortHistoryTab = ({ projects }: { projects: Project[] }) => {
               <TableHead className="text-xs">Tarefa</TableHead>
               <TableHead className="text-xs">Projeto</TableHead>
               <TableHead className="text-xs">Dificuldade</TableHead>
-              <TableHead className="text-xs">Pontos</TableHead>
+              <TableHead className="text-xs w-16"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -162,20 +184,71 @@ const EffortHistoryTab = ({ projects }: { projects: Project[] }) => {
                   <TableCell className="text-xs font-mono">
                     {task.completed_at ? new Date(task.completed_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }) : "—"}
                   </TableCell>
-                  <TableCell className="text-xs text-foreground truncate max-w-[200px]">{task.title}</TableCell>
-                  <TableCell>
-                    <span className="flex items-center gap-1.5 text-xs">
-                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: task.project?.color || "#666" }} />
-                      {task.project?.name || "Sem projeto"}
-                    </span>
+                  <TableCell className="text-xs max-w-[200px]">
+                    {editingId === task.id ? (
+                      <Input value={editTitle} onChange={e => setEditTitle(e.target.value)}
+                        className="h-7 text-xs bg-secondary/50 border-border/30"
+                        onKeyDown={e => e.key === "Enter" && saveEdit(task.id)} />
+                    ) : (
+                      <span className="text-foreground truncate block">{task.title}</span>
+                    )}
                   </TableCell>
                   <TableCell>
-                    <span className="flex items-center gap-0.5">
-                      {getDifficultyIcons(task.difficulty)}
-                    </span>
+                    {editingId === task.id ? (
+                      <Select value={editProject} onValueChange={setEditProject}>
+                        <SelectTrigger className="h-7 w-32 text-xs bg-secondary/50 border-border/30">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-card/95 backdrop-blur-xl border-border/30">
+                          <SelectItem value="none">Sem projeto</SelectItem>
+                          {projects.map(p => (
+                            <SelectItem key={p.id} value={p.id}>
+                              <span className="flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+                                {p.name}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <span className="flex items-center gap-1.5 text-xs">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: task.project?.color || "#666" }} />
+                        {task.project?.name || "Sem projeto"}
+                      </span>
+                    )}
                   </TableCell>
-                  <TableCell className="text-xs font-mono font-bold text-amber-500">
-                    {Math.max(task.difficulty || 0, 1)}
+                  <TableCell>
+                    {editingId === task.id ? (
+                      <div className="flex gap-1">
+                        {[0, 1, 2, 3].map(d => (
+                          <button key={d} onClick={() => setEditDifficulty(d)}
+                            className={`w-6 h-6 rounded text-[10px] font-bold transition-colors ${editDifficulty === d ? "bg-amber-500/20 text-amber-500 border border-amber-500/40" : "bg-secondary/50 text-muted-foreground hover:text-foreground"}`}>
+                            {d}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="flex items-center gap-0.5">
+                        {getDifficultyIcons(task.difficulty)}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === task.id ? (
+                      <div className="flex gap-1">
+                        <button onClick={() => saveEdit(task.id)} className="w-6 h-6 rounded flex items-center justify-center text-green-500 hover:bg-green-500/15 transition-colors">
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => setEditingId(null)} className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-secondary/50 transition-colors">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => startEdit(task)} className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors opacity-0 group-hover:opacity-100">
+                        <Pencil className="w-3 h-3" />
+                      </button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
