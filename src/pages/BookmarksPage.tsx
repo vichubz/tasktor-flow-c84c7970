@@ -485,68 +485,56 @@ const BookmarksPage = () => {
                         <CatIcon className="w-4 h-4" />
                       </div>
 
-                      {/* Content — single row layout */}
-                      <div className="flex-1 min-w-0 flex items-center gap-3">
-                        {/* Title */}
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            {b.url ? (
-                              <a
-                                href={b.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm font-bold text-foreground hover:text-primary truncate transition-colors underline-offset-2 hover:underline"
-                              >
-                                {b.title}
-                              </a>
-                            ) : (
-                              <span className="text-sm font-bold text-foreground truncate">{b.title}</span>
-                            )}
-                          </div>
-                          {b.url && (
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          {b.url ? (
                             <a
                               href={b.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-sm text-primary/80 hover:text-primary truncate block mt-0.5 transition-colors max-w-full font-medium"
+                              className="text-sm font-bold text-foreground hover:text-primary truncate transition-colors underline-offset-2 hover:underline"
                             >
-                              {b.url.replace(/^https?:\/\//, "")}
+                              {b.title}
                             </a>
+                          ) : (
+                            <span className="text-sm font-bold text-foreground truncate">{b.title}</span>
                           )}
-                          {b.notes && (
-                            <p className="text-xs text-muted-foreground/60 mt-0.5 whitespace-pre-wrap leading-relaxed line-clamp-2">
-                              {b.notes}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Project badge + date — beside title */}
-                        <div className="flex items-center gap-2 flex-shrink-0">
                           {b.project_id && (() => {
                             const proj = projects.find(p => p.id === b.project_id);
                             return proj ? (
-                              <span className="flex items-center gap-1.5 text-xs font-semibold px-1.5 py-0.5 rounded-md" style={{ backgroundColor: `${proj.color}18`, color: proj.color }}>
+                              <span className="flex items-center gap-1.5 text-xs font-semibold px-1.5 py-0.5 rounded-md flex-shrink-0" style={{ backgroundColor: `${proj.color}18`, color: proj.color }}>
                                 <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: proj.color }} />
                                 {proj.name}
                               </span>
                             ) : null;
                           })()}
-                          <span className="text-[11px] text-muted-foreground/50 font-mono whitespace-nowrap">
-                            {new Date(b.created_at).toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}
-                          </span>
+                          {b.url && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(b.url!); toast.success("Link copiado!"); }}
+                              className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground/60 hover:text-primary hover:bg-primary/10 transition-all flex-shrink-0"
+                              title="Copiar link"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
+                        {b.url && (
+                          <a
+                            href={b.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-primary/80 hover:text-primary truncate block mt-0.5 transition-colors max-w-full font-medium"
+                          >
+                            {b.url.replace(/^https?:\/\//, "")}
+                          </a>
+                        )}
+                        {b.notes && (
+                          <p className="text-xs text-muted-foreground/60 mt-0.5 whitespace-pre-wrap leading-relaxed line-clamp-2">
+                            {b.notes}
+                          </p>
+                        )}
                       </div>
-
-                      {/* Copy button — bigger */}
-                      {b.url && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(b.url!); toast.success("Link copiado!"); }}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground/60 hover:text-primary hover:bg-primary/10 transition-all flex-shrink-0"
-                          title="Copiar link"
-                        >
-                          <Copy className="w-4.5 h-4.5" />
-                        </button>
-                      )}
 
                       {/* Actions */}
                       <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
