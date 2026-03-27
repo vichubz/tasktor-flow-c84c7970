@@ -531,9 +531,9 @@ const BookmarksPage = () => {
                               href={b.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-accent font-medium truncate max-w-[200px] hover:text-primary transition-colors flex-shrink-0"
+                              className="text-xs text-accent font-medium truncate max-w-[350px] hover:text-primary transition-colors flex-shrink-0"
                             >
-                              {extractDomain(b.url)}
+                              {b.url.replace(/^https?:\/\//, "")}
                             </a>
                           )}
                           {b.url && (
