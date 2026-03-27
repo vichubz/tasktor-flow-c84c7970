@@ -499,6 +499,7 @@ const Dashboard = () => {
       </div>
 
       <NewTaskDialog open={showNewTask} onOpenChange={setShowNewTask} projects={projects} onCreated={fetchData} />
+      <SmartTaskDialog open={showSmartTask} onOpenChange={setShowSmartTask} projects={projects} onCreated={fetchData} />
     </div>
   );
 };
