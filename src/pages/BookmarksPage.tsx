@@ -69,6 +69,7 @@ const BookmarksPage = () => {
   const [editNotes, setEditNotes] = useState("");
   const [editCategory, setEditCategory] = useState("link");
   const [editProjectId, setEditProjectId] = useState<string | null>(null);
+  const [copiedIconId, setCopiedIconId] = useState<string | null>(null);
 
   const fetchBookmarks = useCallback(async () => {
     if (!user) return;
