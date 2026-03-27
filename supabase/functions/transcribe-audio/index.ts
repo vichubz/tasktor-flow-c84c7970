@@ -12,10 +12,10 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) {
       return new Response(
-        JSON.stringify({ success: false, error: "API key não configurada" }),
+        JSON.stringify({ success: false, error: "OPENAI_API_KEY não configurada" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -29,60 +29,48 @@ serve(async (req) => {
       );
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Decode base64 to binary
+    const binaryString = atob(audio_base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    // Determine file extension from media type
+    const ext = (media_type || "audio/webm").includes("wav") ? "wav" 
+      : (media_type || "audio/webm").includes("mp3") ? "mp3" 
+      : "webm";
+
+    // Build multipart form data for Whisper API
+    const formData = new FormData();
+    const blob = new Blob([bytes], { type: media_type || "audio/webm" });
+    formData.append("file", blob, `audio.${ext}`);
+    formData.append("model", "whisper-1");
+    formData.append("language", "pt");
+
+    const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          {
-            role: "system",
-            content: `Você é um transcritor de áudio. Sua única função é transcrever o áudio do usuário em texto limpo e bem formatado.
-
-REGRAS:
-- Transcreva exatamente o que o usuário disse
-- Corrija erros gramaticais óbvios e pontuação
-- Mantenha o idioma original do áudio
-- NÃO adicione interpretações, comentários ou formatação extra
-- NÃO diga coisas como "O usuário disse:" — retorne APENAS o texto transcrito
-- Se o áudio mencionar tasks, projetos, subtasks etc., mantenha tudo exatamente como dito`
-          },
-          {
-            role: "user",
-            content: [
-              {
-                type: "input_audio",
-                input_audio: {
-                  data: audio_base64,
-                  format: (media_type || "audio/webm").includes("wav") ? "wav" : "mp3",
-                },
-              },
-              {
-                type: "text",
-                text: "Transcreva este áudio em texto limpo.",
-              },
-            ],
-          },
-        ],
-      }),
+      body: formData,
     });
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ success: false, error: "Limite de requisições excedido, tente novamente em instantes." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({ success: false, error: "Limite de requisições excedido, tente novamente em instantes." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ success: false, error: "Créditos insuficientes." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      if (response.status === 402 || response.status === 401) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Erro de autenticação ou créditos insuficientes na OpenAI." }),
+          { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
       const errorText = await response.text();
-      console.error("Transcription API error:", response.status, errorText);
+      console.error("Whisper API error:", response.status, errorText);
       return new Response(
         JSON.stringify({ success: false, error: "Erro ao transcrever áudio" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -90,7 +78,7 @@ REGRAS:
     }
 
     const data = await response.json();
-    const text = data.choices?.[0]?.message?.content?.trim() || "";
+    const text = data.text?.trim() || "";
 
     if (!text) {
       return new Response(
