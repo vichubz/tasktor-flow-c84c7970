@@ -535,10 +535,6 @@ const BookmarksPage = () => {
                           </p>
                         )}
                       </div>
-                        >
-                          <Copy className="w-4.5 h-4.5" />
-                        </button>
-                      )}
 
                       {/* Actions */}
                       <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
