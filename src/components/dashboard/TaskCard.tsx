@@ -445,13 +445,22 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
         } ${highlighted ? "task-highlighted" : ""} ${standby ? "opacity-50" : ""}`}
       >
         <div
-          className="rounded-xl overflow-hidden relative"
+          className="rounded-xl overflow-hidden relative lightning-sweep"
           style={{
             background: highlighted
               ? "linear-gradient(145deg, hsl(var(--primary) / 0.06), hsl(var(--accent) / 0.03), hsl(var(--card)))"
               : "var(--glass-bg)",
-            border: `1px solid ${highlighted ? "transparent" : "hsl(var(--primary) / 0.08)"}`,
+            border: `1px solid ${highlighted ? "hsl(var(--primary) / 0.25)" : "hsl(var(--border) / 0.5)"}`,
             backdropFilter: "blur(20px)",
+            transition: "border-color 0.3s, box-shadow 0.3s",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.35)";
+            e.currentTarget.style.boxShadow = "0 0 12px hsl(var(--primary) / 0.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = highlighted ? "hsl(var(--primary) / 0.25)" : "hsl(var(--border) / 0.5)";
+            e.currentTarget.style.boxShadow = "none";
           }}
         >
           {/* Full-screen confetti */}
@@ -642,7 +651,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
             </div>
           ) : (
             /* ── LIST LAYOUT (original) ── */
-            <div className="flex items-center gap-2 sm:gap-2.5 px-1.5 sm:px-2.5 py-2 sm:py-2.5 pl-2.5 sm:pl-3.5" onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleSubtaskDropdown(); }}>
+            <div className="flex items-center gap-2 sm:gap-2.5 px-1.5 sm:px-2.5 py-1.5 sm:py-2 pl-2.5 sm:pl-3.5" onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleSubtaskDropdown(); }}>
               <div
                 {...dragHandleProps}
                 onClick={(e) => e.stopPropagation()}
