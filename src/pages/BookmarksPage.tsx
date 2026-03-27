@@ -414,7 +414,7 @@ const BookmarksPage = () => {
                   className="rounded-xl overflow-hidden relative group cursor-default transition-colors"
                   style={{
                     background: "var(--glass-bg)",
-                    border: "1px solid hsl(var(--primary) / 0.08)",
+                    border: "1px solid hsl(var(--border) / 0.4)",
                     backdropFilter: "blur(20px)",
                   }}
                 >
@@ -528,6 +528,16 @@ const BookmarksPage = () => {
                             ) : null;
                           })()}
                           {b.url && (
+                            <a
+                              href={b.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-accent font-medium truncate max-w-[200px] hover:text-primary transition-colors flex-shrink-0"
+                            >
+                              {extractDomain(b.url)}
+                            </a>
+                          )}
+                          {b.url && (
                             <button
                               onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(b.url!); toast.success("Link copiado!"); }}
                               className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground/60 hover:text-primary hover:bg-primary/10 transition-all flex-shrink-0"
@@ -537,16 +547,6 @@ const BookmarksPage = () => {
                             </button>
                           )}
                         </div>
-                        {b.url && (
-                          <a
-                            href={b.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-primary/80 hover:text-primary truncate block mt-0.5 transition-colors max-w-full font-medium"
-                          >
-                            {b.url.replace(/^https?:\/\//, "")}
-                          </a>
-                        )}
                         {b.notes && (
                           <p className="text-xs text-muted-foreground/60 mt-0.5 whitespace-pre-wrap leading-relaxed line-clamp-2">
                             {b.notes}
