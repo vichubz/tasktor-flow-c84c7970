@@ -10,7 +10,8 @@ import CompletedTasks from "@/components/dashboard/CompletedTasks";
 import InlineTaskCreator, { type InlineTaskCreatorHandle } from "@/components/dashboard/InlineTaskCreator";
 import SkeletonTaskCard from "@/components/dashboard/SkeletonTaskCard";
 import KanbanBoard from "@/components/dashboard/KanbanBoard";
-import { Plus, Filter, Inbox, Sparkles, Zap, List, Columns } from "lucide-react";
+import SmartTaskDialog from "@/components/dashboard/SmartTaskDialog";
+import { Plus, Filter, Inbox, Sparkles, Zap, List, Columns, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Tables } from "@/integrations/supabase/types";
@@ -26,6 +27,7 @@ const Dashboard = () => {
   const [filterProject, setFilterProject] = useState<string>("all");
   const [filterDifficulty, setFilterDifficulty] = useState<string>("all");
   const [showNewTask, setShowNewTask] = useState(false);
+  const [showSmartTask, setShowSmartTask] = useState(false);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"list" | "kanban">(() => 
     (localStorage.getItem("taskViewMode") as "list" | "kanban") || "list"
@@ -80,6 +82,10 @@ const Dashboard = () => {
       if ((e.key === "n" || e.key === "N") && !isInput && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
         inlineCreatorRef.current?.activate();
+      }
+      if ((e.key === "i" || e.key === "I") && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setShowSmartTask(true);
       }
     };
     document.addEventListener("keydown", handler);
@@ -304,6 +310,31 @@ const Dashboard = () => {
                 <SelectItem value="3"><span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /><Zap className="w-3 h-3 text-orange-400 fill-orange-400" /> Difícil</span></SelectItem>
               </SelectContent>
             </Select>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                onClick={() => setShowSmartTask(true)}
+                className="h-9 w-9 p-0 relative overflow-hidden"
+                variant="outline"
+                style={{
+                  borderColor: "rgba(255,120,50,0.3)",
+                  background: "linear-gradient(135deg, rgba(255,120,50,0.1), rgba(255,80,20,0.05))",
+                }}
+                title="Smart Task (Ctrl+I)"
+              >
+                <motion.div
+                  animate={{
+                    boxShadow: [
+                      "0 0 0px rgba(255,100,40,0)",
+                      "0 0 12px rgba(255,100,40,0.3)",
+                      "0 0 0px rgba(255,100,40,0)",
+                    ],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute inset-0 rounded-md"
+                />
+                <Flame className="w-4 h-4 text-orange-400 relative z-10" />
+              </Button>
+            </motion.div>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               <Button
                 onClick={() => setShowNewTask(true)}
@@ -468,6 +499,7 @@ const Dashboard = () => {
       </div>
 
       <NewTaskDialog open={showNewTask} onOpenChange={setShowNewTask} projects={projects} onCreated={fetchData} />
+      <SmartTaskDialog open={showSmartTask} onOpenChange={setShowSmartTask} projects={projects} onCreated={fetchData} />
     </div>
   );
 };
