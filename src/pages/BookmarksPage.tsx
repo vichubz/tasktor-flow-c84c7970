@@ -486,7 +486,7 @@ const BookmarksPage = () => {
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           {b.url ? (
                             <a
                               href={b.url}
@@ -500,20 +500,25 @@ const BookmarksPage = () => {
                             <span className="text-sm font-bold text-foreground truncate">{b.title}</span>
                           )}
                           {b.url && (
-                            <span className="text-[11px] text-muted-foreground/40 truncate max-w-[150px] hidden sm:inline">
-                              {extractDomain(b.url)}
-                            </span>
-                          )}
-                          {b.url && (
                             <button
                               onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(b.url!); toast.success("Link copiado!"); }}
-                              className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-primary transition-all flex-shrink-0"
+                              className="opacity-0 group-hover:opacity-100 text-muted-foreground/50 hover:text-primary transition-all flex-shrink-0"
                               title="Copiar link"
                             >
-                              <Copy className="w-3 h-3" />
+                              <Copy className="w-3.5 h-3.5" />
                             </button>
                           )}
                         </div>
+                        {b.url && (
+                          <a
+                            href={b.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary/60 hover:text-primary truncate block mt-0.5 transition-colors max-w-full"
+                          >
+                            {b.url.replace(/^https?:\/\//, "")}
+                          </a>
+                        )}
                         {b.notes && (
                           <p className="text-xs text-muted-foreground/60 mt-1 whitespace-pre-wrap leading-relaxed line-clamp-3">
                             {b.notes}
