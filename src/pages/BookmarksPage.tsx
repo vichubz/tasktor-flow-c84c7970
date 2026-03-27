@@ -407,9 +407,10 @@ const BookmarksPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: 100 }}
                   transition={{ duration: 0.25, delay: i * 0.03 }}
-                   layout
+                  layout
                   onDoubleClick={() => !isEditing && startEdit(b)}
-                  className="rounded-xl overflow-hidden relative group cursor-default"
+                  whileHover={{ scale: 1.008, y: -1, boxShadow: "0 4px 20px hsl(var(--primary) / 0.08)" }}
+                  className="rounded-xl overflow-hidden relative group cursor-default transition-colors"
                   style={{
                     background: "var(--glass-bg)",
                     border: "1px solid hsl(var(--primary) / 0.08)",
@@ -478,83 +479,90 @@ const BookmarksPage = () => {
                     </div>
                   ) : (
                     /* Display mode */
-                    <div className="px-4 pl-5 py-3 flex items-start gap-3">
+                    <div className="px-4 pl-5 py-3 flex items-center gap-3">
                       {/* Category icon */}
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${catMeta.color}`} style={{ background: "hsl(var(--secondary) / 0.6)" }}>
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${catMeta.color}`} style={{ background: "hsl(var(--secondary) / 0.6)" }}>
                         <CatIcon className="w-4 h-4" />
                       </div>
 
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {b.url ? (
+                      {/* Content — single row layout */}
+                      <div className="flex-1 min-w-0 flex items-center gap-3">
+                        {/* Title */}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            {b.url ? (
+                              <a
+                                href={b.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm font-bold text-foreground hover:text-primary truncate transition-colors underline-offset-2 hover:underline"
+                              >
+                                {b.title}
+                              </a>
+                            ) : (
+                              <span className="text-sm font-bold text-foreground truncate">{b.title}</span>
+                            )}
+                          </div>
+                          {b.url && (
                             <a
                               href={b.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-sm font-bold text-foreground hover:text-primary truncate transition-colors underline-offset-2 hover:underline"
+                              className="text-sm text-primary/80 hover:text-primary truncate block mt-0.5 transition-colors max-w-full font-medium"
                             >
-                              {b.title}
+                              {b.url.replace(/^https?:\/\//, "")}
                             </a>
-                          ) : (
-                            <span className="text-sm font-bold text-foreground truncate">{b.title}</span>
                           )}
-                          {b.url && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(b.url!); toast.success("Link copiado!"); }}
-                              className="opacity-0 group-hover:opacity-100 text-muted-foreground/50 hover:text-primary transition-all flex-shrink-0"
-                              title="Copiar link"
-                            >
-                              <Copy className="w-3.5 h-3.5" />
-                            </button>
+                          {b.notes && (
+                            <p className="text-xs text-muted-foreground/60 mt-0.5 whitespace-pre-wrap leading-relaxed line-clamp-2">
+                              {b.notes}
+                            </p>
                           )}
                         </div>
-                        {b.url && (
-                          <a
-                            href={b.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-primary/80 hover:text-primary truncate block mt-1 transition-colors max-w-full font-medium"
-                          >
-                            {b.url.replace(/^https?:\/\//, "")}
-                          </a>
-                        )}
-                        {b.notes && (
-                          <p className="text-xs text-muted-foreground/60 mt-1 whitespace-pre-wrap leading-relaxed line-clamp-3">
-                            {b.notes}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 mt-1.5">
+
+                        {/* Project badge + date — beside title */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
                           {b.project_id && (() => {
                             const proj = projects.find(p => p.id === b.project_id);
                             return proj ? (
                               <span className="flex items-center gap-1.5 text-xs font-semibold px-1.5 py-0.5 rounded-md" style={{ backgroundColor: `${proj.color}18`, color: proj.color }}>
-                                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: proj.color }} />
+                                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: proj.color }} />
                                 {proj.name}
                               </span>
                             ) : null;
                           })()}
-                          <span className="text-[10px] text-muted-foreground/30 font-mono">
+                          <span className="text-[11px] text-muted-foreground/50 font-mono whitespace-nowrap">
                             {new Date(b.created_at).toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}
                           </span>
                         </div>
                       </div>
+
+                      {/* Copy button — bigger */}
+                      {b.url && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(b.url!); toast.success("Link copiado!"); }}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground/60 hover:text-primary hover:bg-primary/10 transition-all flex-shrink-0"
+                          title="Copiar link"
+                        >
+                          <Copy className="w-4.5 h-4.5" />
+                        </button>
+                      )}
 
                       {/* Actions */}
                       <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                         <motion.button
                           onClick={() => startEdit(b)}
                           whileHover={{ scale: 1.1 }}
-                          className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-secondary/50 transition-all"
+                          className="w-8 h-8 rounded-md flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-secondary/50 transition-all"
                         >
-                          <Edit2 className="w-3.5 h-3.5" />
+                          <Edit2 className="w-4 h-4" />
                         </motion.button>
                         <motion.button
                           onClick={() => handleDelete(b.id)}
                           whileHover={{ scale: 1.1 }}
-                          className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
+                          className="w-8 h-8 rounded-md flex items-center justify-center text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-all"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4" />
                         </motion.button>
                       </div>
                     </div>
