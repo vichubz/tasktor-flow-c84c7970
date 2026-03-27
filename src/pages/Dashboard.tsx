@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [filterProject, setFilterProject] = useState<string>("all");
   const [filterDifficulty, setFilterDifficulty] = useState<string>("all");
   const [showNewTask, setShowNewTask] = useState(false);
+  const [showSmartTask, setShowSmartTask] = useState(false);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"list" | "kanban">(() => 
     (localStorage.getItem("taskViewMode") as "list" | "kanban") || "list"
