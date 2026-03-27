@@ -445,13 +445,22 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
         } ${highlighted ? "task-highlighted" : ""} ${standby ? "opacity-50" : ""}`}
       >
         <div
-          className="rounded-xl overflow-hidden relative"
+          className="rounded-xl overflow-hidden relative lightning-sweep"
           style={{
             background: highlighted
               ? "linear-gradient(145deg, hsl(var(--primary) / 0.06), hsl(var(--accent) / 0.03), hsl(var(--card)))"
               : "var(--glass-bg)",
-            border: `1px solid ${highlighted ? "transparent" : "hsl(var(--primary) / 0.08)"}`,
+            border: `1px solid ${highlighted ? "hsl(var(--primary) / 0.25)" : "hsl(var(--border) / 0.5)"}`,
             backdropFilter: "blur(20px)",
+            transition: "border-color 0.3s, box-shadow 0.3s",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.35)";
+            e.currentTarget.style.boxShadow = "0 0 12px hsl(var(--primary) / 0.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = highlighted ? "hsl(var(--primary) / 0.25)" : "hsl(var(--border) / 0.5)";
+            e.currentTarget.style.boxShadow = "none";
           }}
         >
           {/* Full-screen confetti */}

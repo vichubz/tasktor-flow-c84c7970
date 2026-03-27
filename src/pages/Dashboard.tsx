@@ -405,7 +405,7 @@ const Dashboard = () => {
               <DragDropContext onDragEnd={handleDragEnd}>
                 <Droppable droppableId="tasks">
                   {(provided) => (
-                    <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-3">
+                    <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-1.5">
                       {filteredTasks.map((task, index) => (
                         <Draggable key={task.id} draggableId={task.id} index={index}>
                           {(provided, snapshot) => (
