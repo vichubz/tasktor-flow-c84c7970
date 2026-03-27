@@ -420,19 +420,17 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                       exit={{ opacity: 0, height: 0 }}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20"
                     >
-                      <motion.div
-                        className="w-2 h-2 rounded-full bg-red-500"
-                        animate={{ opacity: [1, 0.3, 1] }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                      />
+                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                       <span className="text-xs text-red-400 font-medium">Gravando... fale suas tasks</span>
                       <div className="flex items-center gap-0.5 ml-auto">
                         {[0, 1, 2, 3, 4].map((i) => (
-                          <motion.div
+                          <div
                             key={i}
-                            className="w-0.5 bg-red-400/60 rounded-full"
-                            animate={{ height: [4, 12 + Math.random() * 8, 4] }}
-                            transition={{ duration: 0.5 + Math.random() * 0.3, repeat: Infinity, delay: i * 0.1 }}
+                            className="w-0.5 bg-red-400/60 rounded-full animate-waveform"
+                            style={{
+                              animationDelay: `${i * 0.12}s`,
+                              animationDuration: `${0.6 + i * 0.08}s`,
+                            }}
                           />
                         ))}
                       </div>
