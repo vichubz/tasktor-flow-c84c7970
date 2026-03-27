@@ -414,7 +414,7 @@ const BookmarksPage = () => {
                   className="rounded-xl overflow-hidden relative group cursor-default transition-colors"
                   style={{
                     background: "var(--glass-bg)",
-                    border: "1px solid hsl(var(--primary) / 0.08)",
+                    border: "1px solid hsl(var(--border) / 0.4)",
                     backdropFilter: "blur(20px)",
                   }}
                 >
