@@ -585,7 +585,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                         ? "text-destructive bg-destructive/10 border border-destructive/20"
                         : daysUntilDeadline !== null && daysUntilDeadline <= 2
                           ? "text-yellow-400 bg-yellow-400/10 border border-yellow-400/15"
-                          : "text-muted-foreground bg-secondary/50 border border-border/50"
+                          : "text-muted-foreground bg-secondary/50 border border-border/70"
                     }`}
                   >
                     {isOverdue ? <AlertTriangle className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />}
@@ -635,7 +635,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 <motion.button
                   onClick={handleExpand}
                   whileHover={{ scale: 1.1 }}
-                  className="text-muted-foreground/40 hover:text-foreground w-5 h-5 flex items-center justify-center rounded-md bg-secondary/50 hover:bg-secondary/80 border border-border/50 transition-all"
+                  className="text-muted-foreground/40 hover:text-foreground w-5 h-5 flex items-center justify-center rounded-md bg-secondary/50 hover:bg-secondary/80 border border-border/70 transition-all"
                 >
                   <motion.span animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
                     <ChevronRight className="w-3 h-3" strokeWidth={2.5} />
@@ -737,7 +737,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                   {task.project.name}
                 </motion.span>
               ) : (
-                <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-md flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/50 hidden sm:inline-flex">
+                <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-md flex-shrink-0 bg-secondary/40 text-muted-foreground/60 border border-border/70 hidden sm:inline-flex">
                   Sem projeto
                 </span>
               )}
@@ -750,7 +750,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       ? "text-destructive bg-destructive/10 border border-destructive/20"
                       : daysUntilDeadline !== null && daysUntilDeadline <= 2
                         ? "text-yellow-400 bg-yellow-400/10 border border-yellow-400/15"
-                        : "text-muted-foreground bg-secondary/50 border border-border/50"
+                        : "text-muted-foreground bg-secondary/50 border border-border/70"
                   }`}
                 >
                   {isOverdue ? (
@@ -782,7 +782,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 onClick={(e) => handleExpand(e)}
                 whileHover={{ scale: 1.15 }}
                 whileTap={{ scale: 0.9 }}
-                className="text-foreground/70 hover:text-foreground transition-all flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md bg-secondary/50 hover:bg-secondary/80 border border-border/50"
+                className="text-foreground/70 hover:text-foreground transition-all flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md bg-secondary/50 hover:bg-secondary/80 border border-border/70"
                 title="Editar detalhes"
               >
                 <motion.span animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
@@ -860,7 +860,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                 className="overflow-hidden"
               >
-                <div className="px-3 sm:px-5 pb-3 pt-1 border-t border-border/40" style={{ background: "rgba(14,165,195,0.02)" }}>
+                <div className="px-3 sm:px-5 pb-3 pt-1 border-t border-border/70" style={{ background: "rgba(14,165,195,0.02)" }}>
                   {/* Progress bar + copy/paste */}
                   <div className="flex items-center gap-2 mb-2">
                     <div className="flex items-center gap-1 flex-shrink-0">
@@ -958,7 +958,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       value={newSubtaskTitle}
                       onChange={(e) => setNewSubtaskTitle(e.target.value)}
                       placeholder="Adicionar subtask..."
-                      className="bg-secondary/40 border-border/50 h-7 text-xs"
+                      className="bg-secondary/40 border-border/70 h-7 text-xs"
                       onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSubtask())}
                     />
                     <motion.button
@@ -985,7 +985,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 className="overflow-hidden"
               >
-                <div className="px-3 sm:px-5 pb-4 pt-2 border-t border-border/40 relative">
+                <div className="px-3 sm:px-5 pb-4 pt-2 border-t border-border/70 relative">
                   <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent pointer-events-none" />
 
                   {/* Description */}
@@ -1060,7 +1060,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                           value={newLinkUrl}
                           onChange={(e) => setNewLinkUrl(e.target.value)}
                           placeholder="URL..."
-                          className="bg-secondary/40 border-border/50 h-7 text-xs w-[160px]"
+                          className="bg-secondary/40 border-border/70 h-7 text-xs w-[160px]"
                           onKeyDown={(e) => {
                             if (e.key === "Enter") { e.preventDefault(); handleAddLink(); }
                             if (e.key === "Escape") { setShowLinkInput(false); setNewLinkUrl(""); setNewLinkLabel(""); }
@@ -1070,7 +1070,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                           value={newLinkLabel}
                           onChange={(e) => setNewLinkLabel(e.target.value)}
                           placeholder="Nome"
-                          className="bg-secondary/40 border-border/50 h-7 text-xs w-[90px]"
+                          className="bg-secondary/40 border-border/70 h-7 text-xs w-[90px]"
                           onKeyDown={(e) => {
                             if (e.key === "Enter") { e.preventDefault(); handleAddLink(); }
                             if (e.key === "Escape") { setShowLinkInput(false); setNewLinkUrl(""); setNewLinkLabel(""); }
@@ -1113,7 +1113,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                       className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                         standby
                           ? "bg-amber-400/10 text-amber-400 border border-amber-400/20"
-                          : "bg-secondary/40 text-muted-foreground border border-border/50 hover:border-amber-400/30 hover:text-amber-400/80"
+                          : "bg-secondary/40 text-muted-foreground border border-border/70 hover:border-amber-400/30 hover:text-amber-400/80"
                       }`}
                     >
                       <Hourglass className={`w-3 h-3 ${standby ? "animate-pulse" : ""}`} />
@@ -1122,10 +1122,10 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
 
                     {/* Project selector */}
                     <Select value={task.project_id || "none"} onValueChange={handleProjectChange}>
-                      <SelectTrigger className="bg-secondary/40 border-border/50 h-8 text-xs w-[140px]">
+                      <SelectTrigger className="bg-secondary/40 border-border/70 h-8 text-xs w-[140px]">
                         <SelectValue placeholder="Projeto" />
                       </SelectTrigger>
-                      <SelectContent className="bg-card/95 backdrop-blur-xl border-border/50">
+                      <SelectContent className="bg-card/95 backdrop-blur-xl border-border/70">
                         <SelectItem value="none"><span className="text-muted-foreground">Sem projeto</span></SelectItem>
                         {projects.map(p => (
                           <SelectItem key={p.id} value={p.id}>
@@ -1142,7 +1142,7 @@ const TaskCard = ({ task, index, isDragging, projects, onComplete, onDelete, onU
                     <div className="flex items-center gap-1">
                       <Popover>
                         <PopoverTrigger asChild>
-                          <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-secondary/40 border border-border/50 text-xs hover:border-primary/30 transition-colors">
+                          <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-secondary/40 border border-border/70 text-xs hover:border-primary/30 transition-colors">
                             <CalendarIcon className="w-3 h-3 text-muted-foreground" />
                             {task.deadline
                               ? parseLocalDate(task.deadline).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })
