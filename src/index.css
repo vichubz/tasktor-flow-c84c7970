@@ -791,3 +791,8 @@
 .animate-orb-pulse-slow { animation: orb-pulse-slow 10s ease-in-out 2s infinite; }
 .animate-orb-pulse-slower { animation: orb-pulse-slower 12s ease-in-out 4s infinite; }
 .animate-scanning-light { animation: scanning-light 4s linear infinite; }
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
