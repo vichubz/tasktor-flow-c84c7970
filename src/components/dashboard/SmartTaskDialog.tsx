@@ -323,7 +323,7 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg p-0 overflow-hidden border-primary/20 bg-card/95 backdrop-blur-xl">
+      <DialogContent className="sm:max-w-lg p-0 overflow-hidden border-primary/20 bg-card">
         <DialogTitle className="sr-only">Smart Task Creator</DialogTitle>
 
         {/* Header */}
