@@ -329,23 +329,14 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
         {/* Header */}
         <div className="px-5 pt-5 pb-3 border-b border-border/20">
           <div className="flex items-center gap-3">
-            <motion.div
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center animate-smart-glow"
               style={{
                 background: "linear-gradient(135deg, rgba(255,120,50,0.2), rgba(255,80,20,0.1))",
-                boxShadow: "0 0 20px rgba(255,100,40,0.15)",
               }}
-              animate={{
-                boxShadow: [
-                  "0 0 10px rgba(255,100,40,0.1)",
-                  "0 0 25px rgba(255,100,40,0.25)",
-                  "0 0 10px rgba(255,100,40,0.1)",
-                ],
-              }}
-              transition={{ duration: 2, repeat: Infinity }}
             >
               <Flame className="w-5 h-5 text-orange-400" />
-            </motion.div>
+            </div>
             <div className="flex-1">
               <h3 className="text-sm font-bold text-foreground">Smart Task Creator</h3>
               <p className="text-[11px] text-muted-foreground">
