@@ -481,9 +481,9 @@ const BookmarksPage = () => {
                   ) : (
                     /* Display mode */
                     <div className="px-4 pl-5 py-3 flex items-center gap-3">
-                      {/* Category icon — double click to copy */}
+                      {/* Category icon — click to copy */}
                       <motion.div
-                        onDoubleClick={(e) => {
+                        onClick={(e) => {
                           e.stopPropagation();
                           if (b.url) {
                             navigator.clipboard.writeText(b.url);
@@ -498,7 +498,7 @@ const BookmarksPage = () => {
                         transition={{ duration: 0.3 }}
                         className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer ${copiedIconId === b.id ? "text-green-400" : catMeta.color}`}
                         style={{ background: "hsl(var(--secondary) / 0.6)" }}
-                        title="Duplo clique para copiar link"
+                        title="Clique para copiar link"
                       >
                         {copiedIconId === b.id ? <Check className="w-4 h-4" /> : <CatIcon className="w-4 h-4" />}
                       </motion.div>
