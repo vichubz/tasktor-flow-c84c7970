@@ -28,7 +28,7 @@ interface AITask {
   subtasks: string[];
 }
 
-type DialogState = "input" | "loading" | "review";
+type DialogState = "input" | "loading" | "transcribing" | "review";
 
 const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskDialogProps) => {
   const { user } = useAuth();
@@ -38,7 +38,6 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
   const [tasks, setTasks] = useState<AITask[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [createdCount, setCreatedCount] = useState(0);
-  const [skippedCount, setSkippedCount] = useState(0);
   const [creating, setCreating] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -53,7 +52,6 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
       setTasks([]);
       setCurrentIndex(0);
       setCreatedCount(0);
-      setSkippedCount(0);
       setCreating(false);
       setIsRecording(false);
       setTimeout(() => textareaRef.current?.focus(), 100);
@@ -92,11 +90,10 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
         stream.getTracks().forEach((t) => t.stop());
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
         if (audioBlob.size > 0) {
-          // Convert to base64 and send to AI
           const reader = new FileReader();
           reader.onloadend = () => {
             const base64 = (reader.result as string).split(",")[1];
-            handleGenerateWithAudio(base64);
+            transcribeAudio(base64);
           };
           reader.readAsDataURL(audioBlob);
         }
@@ -110,37 +107,26 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
     }
   }, [isRecording, stopRecording]);
 
-  const handleGenerateWithAudio = async (audioBase64: string) => {
-    if (!user) return;
-    setState("loading");
+  const transcribeAudio = async (audioBase64: string) => {
+    setState("transcribing");
 
     try {
-      const { data, error } = await supabase.functions.invoke("ai-task-creator", {
+      const { data, error } = await supabase.functions.invoke("transcribe-audio", {
         body: {
           audio_base64: audioBase64,
-          audio_media_type: "audio/webm",
-          projects: projects.map((p) => ({ id: p.id, name: p.name })),
+          media_type: "audio/webm",
         },
       });
 
       if (error || !data?.success) {
-        throw new Error(data?.error || error?.message || "Erro ao processar");
+        throw new Error(data?.error || error?.message || "Erro ao transcrever");
       }
 
-      const aiTasks: AITask[] = data.tasks || [];
-      if (aiTasks.length === 0) {
-        toast.error("IA não identificou nenhuma task");
-        setState("input");
-        return;
-      }
-
-      setTasks(aiTasks);
-      setCurrentIndex(0);
-      setCreatedCount(0);
-      setSkippedCount(0);
-      setState("review");
+      setPrompt(data.text);
+      setState("input");
+      setTimeout(() => textareaRef.current?.focus(), 100);
     } catch (e: any) {
-      toast.error(e.message || "Erro ao gerar task com IA");
+      toast.error(e.message || "Erro ao transcrever áudio");
       setState("input");
     }
   };
@@ -172,7 +158,6 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
       setTasks(aiTasks);
       setCurrentIndex(0);
       setCreatedCount(0);
-      setSkippedCount(0);
       setState("review");
     } catch (e: any) {
       toast.error(e.message || "Erro ao gerar task com IA");
@@ -214,7 +199,7 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
 
       if (currentTask.subtasks.length > 0 && newTask) {
         await supabase.from("subtasks").insert(
-          currentTask.subtasks.filter(s => s.trim()).map((title, i) => ({
+          currentTask.subtasks.filter((s) => s.trim()).map((title, i) => ({
             task_id: newTask.id,
             title,
             position: i,
@@ -222,8 +207,16 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
         );
       }
 
-      setCreatedCount((c) => c + 1);
-      goToNextOrFinish();
+      const newCreatedCount = createdCount + 1;
+      setCreatedCount(newCreatedCount);
+
+      if (currentIndex + 1 < tasks.length) {
+        setCurrentIndex((i) => i + 1);
+      } else {
+        toast.success(`${newCreatedCount} task${newCreatedCount !== 1 ? "s" : ""} criada${newCreatedCount !== 1 ? "s" : ""} com IA! 🔥`);
+        await onCreated();
+        onOpenChange(false);
+      }
     } catch {
       toast.error("Falha ao criar task");
     } finally {
@@ -232,18 +225,13 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
   };
 
   const handleSkipTask = () => {
-    setSkippedCount((c) => c + 1);
-    goToNextOrFinish();
-  };
-
-  const goToNextOrFinish = () => {
     if (currentIndex + 1 < tasks.length) {
       setCurrentIndex((i) => i + 1);
     } else {
-      // All done
-      const created = createdCount + (creating ? 0 : 1); // approximate
-      toast.success(`${created} task${created !== 1 ? "s" : ""} criada${created !== 1 ? "s" : ""} com IA! 🔥`);
-      onCreated();
+      if (createdCount > 0) {
+        toast.success(`${createdCount} task${createdCount !== 1 ? "s" : ""} criada${createdCount !== 1 ? "s" : ""} com IA! 🔥`);
+        onCreated();
+      }
       onOpenChange(false);
     }
   };
@@ -282,7 +270,7 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
 
         if (!error && newTask && task.subtasks.length > 0) {
           await supabase.from("subtasks").insert(
-            task.subtasks.filter(s => s.trim()).map((title, i) => ({
+            task.subtasks.filter((s) => s.trim()).map((title, i) => ({
               task_id: newTask.id,
               title,
               position: i,
@@ -363,6 +351,8 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
               <p className="text-[11px] text-muted-foreground">
                 {state === "review"
                   ? `Task ${currentIndex + 1} de ${tasks.length} — ${createdCount} criada${createdCount !== 1 ? "s" : ""}`
+                  : state === "transcribing"
+                  ? "Transcrevendo áudio..."
                   : "Descreva suas tasks por texto ou voz"}
               </p>
             </div>
@@ -484,6 +474,42 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
               </motion.div>
             )}
 
+            {/* TRANSCRIBING STATE */}
+            {state === "transcribing" && (
+              <motion.div
+                key="transcribing"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="py-10 flex flex-col items-center gap-4"
+              >
+                <motion.div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(59,130,246,0.15), rgba(99,102,241,0.1))",
+                  }}
+                  animate={{ scale: [1, 1.08, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <Mic className="w-7 h-7 text-blue-400" />
+                </motion.div>
+                <div className="text-center">
+                  <p className="text-sm text-foreground font-medium">Transcrevendo áudio...</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">GPT está processando sua fala</p>
+                </div>
+                <div className="flex gap-1">
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={i}
+                      className="w-1.5 h-1.5 rounded-full bg-blue-400"
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{ duration: 1, repeat: Infinity, delay: i * 0.3 }}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
             {/* LOADING STATE */}
             {state === "loading" && (
               <motion.div
@@ -529,7 +555,7 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
               </motion.div>
             )}
 
-            {/* REVIEW STATE — one task at a time */}
+            {/* REVIEW STATE */}
             {state === "review" && currentTask && (
               <motion.div
                 key={`review-${currentIndex}`}
@@ -539,7 +565,6 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                 transition={{ duration: 0.25 }}
                 className="space-y-3 pt-2"
               >
-                {/* Title */}
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
                   <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Título</label>
                   <Input
@@ -549,7 +574,6 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                   />
                 </motion.div>
 
-                {/* Description */}
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                   <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Descrição</label>
                   <Textarea
@@ -560,7 +584,6 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                   />
                 </motion.div>
 
-                {/* Project + Difficulty */}
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -615,7 +638,6 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                   </div>
                 </motion.div>
 
-                {/* Subtasks */}
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
@@ -665,7 +687,6 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                   </div>
                 </motion.div>
 
-                {/* Actions */}
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -683,7 +704,6 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                   </Button>
 
                   <div className="flex items-center gap-2">
-                    {/* Skip */}
                     <Button
                       variant="ghost"
                       size="sm"
@@ -695,7 +715,6 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                       Pular
                     </Button>
 
-                    {/* Approve all remaining */}
                     {tasks.length - currentIndex > 1 && (
                       <Button
                         variant="outline"
@@ -709,7 +728,6 @@ const SmartTaskDialog = ({ open, onOpenChange, projects, onCreated }: SmartTaskD
                       </Button>
                     )}
 
-                    {/* Approve current */}
                     <Button
                       onClick={handleApproveTask}
                       disabled={!currentTask.title.trim() || creating}

@@ -13,8 +13,10 @@ REGRAS:
 - Sempre responda chamando a tool "create_tasks" (plural!)
 - O usuário pode solicitar UMA ou MÚLTIPLAS tasks de uma vez. Identifique todas.
 - Extraia título, descrição, subtasks, dificuldade e nome do projeto para CADA task
-- Se o usuário mencionar subtasks (ex: "com subtasks: X, Y, Z" ou listar itens), extraia-as
-- Se o usuário não mencionar subtasks mas a task for complexa, sugira subtasks relevantes
+- SUBTASKS SÃO IMPORTANTES: sempre sugira subtasks relevantes e práticas que façam sentido com o objetivo da task. Pense nos passos necessários para completar a task.
+  - Se o usuário mencionar subtasks explicitamente, use-as
+  - Se NÃO mencionar, sugira de 2 a 5 subtasks relevantes baseadas no que precisa ser feito
+  - Subtasks devem ser acionáveis e específicas (ex: "Criar endpoint POST /api/users", não "Fazer backend")
 - Dificuldade: 0 (sem nível), 1 (fácil), 2 (médio), 3 (difícil) — infira pelo contexto
 - Para project_name: analise a lista de projetos disponíveis e escolha o mais adequado
 - Se nenhum projeto combinar, retorne null para project_name
@@ -59,9 +61,9 @@ serve(async (req) => {
       );
     }
 
-    const { prompt, audio_base64, audio_media_type, projects } = await req.json();
+    const { prompt, projects } = await req.json();
 
-    if ((!prompt || !prompt.trim()) && !audio_base64) {
+    if (!prompt || !prompt.trim()) {
       return new Response(
         JSON.stringify({ success: false, error: "Prompt vazio" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -71,28 +73,7 @@ serve(async (req) => {
     const projectList = Array.isArray(projects) ? projects : [];
     const projectNames = projectList.map((p: { name: string }) => p.name).join(", ");
 
-    // Build content blocks
-    const contentBlocks: any[] = [];
-    
-    if (audio_base64) {
-      contentBlocks.push({
-        type: "input_audio",
-        source: {
-          type: "base64",
-          media_type: audio_media_type || "audio/webm",
-          data: audio_base64,
-        },
-      });
-      contentBlocks.push({
-        type: "text",
-        text: `Projetos disponíveis: [${projectNames || "nenhum"}]\n\nO usuário enviou um áudio. Transcreva e interprete o que ele disse para criar as tasks.`,
-      });
-    } else {
-      contentBlocks.push({
-        type: "text",
-        text: `Projetos disponíveis: [${projectNames || "nenhum"}]\n\nSolicitação do usuário:\n${prompt}`,
-      });
-    }
+    const userMessage = `Projetos disponíveis: [${projectNames || "nenhum"}]\n\nSolicitação do usuário:\n${prompt}`;
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -121,11 +102,10 @@ serve(async (req) => {
                       description: { type: "string", description: "Descrição detalhada (opcional)" },
                       difficulty: { type: "integer", minimum: 0, maximum: 3, description: "0=sem nível, 1=fácil, 2=médio, 3=difícil" },
                       project_name: { type: "string", description: "Nome do projeto mais adequado da lista, ou null" },
-                      subtasks: { type: "array", items: { type: "string" }, description: "Lista de subtasks" },
+                      subtasks: { type: "array", items: { type: "string" }, description: "Lista de subtasks práticas e específicas" },
                     },
                     required: ["title"],
                   },
-                  description: "Lista de tasks a serem criadas",
                 },
               },
               required: ["tasks"],
@@ -133,7 +113,7 @@ serve(async (req) => {
           },
         ],
         tool_choice: { type: "tool", name: "create_tasks" },
-        messages: [{ role: "user", content: contentBlocks }],
+        messages: [{ role: "user", content: userMessage }],
       }),
     });
 
@@ -156,7 +136,6 @@ serve(async (req) => {
       );
     }
 
-    // Fuzzy match helper
     const fuzzyMatchProject = (projectName: string | null): string | null => {
       if (!projectName || projectList.length === 0) return null;
       const searchName = projectName.toLowerCase().trim();
