@@ -410,11 +410,10 @@ const BookmarksPage = () => {
                   transition={{ duration: 0.25, delay: i * 0.03 }}
                   layout
                   onDoubleClick={() => isEditing ? setEditingId(null) : startEdit(b)}
-                  whileHover={{ scale: 1.008, y: -1, boxShadow: "0 4px 20px hsl(var(--primary) / 0.08)" }}
-                  className="rounded-xl overflow-hidden relative group cursor-default transition-colors"
+                  whileHover={{ scale: 1.008, y: -1 }}
+                  className="rounded-xl overflow-hidden relative group cursor-default transition-all border border-border/60 hover:border-primary/40 hover:shadow-[0_0_15px_hsl(var(--primary)/0.15),inset_0_0_15px_hsl(var(--primary)/0.05)] lightning-sweep"
                   style={{
                     background: "var(--glass-bg)",
-                    border: "1px solid hsl(var(--border) / 0.4)",
                     backdropFilter: "blur(20px)",
                   }}
                 >
@@ -532,9 +531,9 @@ const BookmarksPage = () => {
                               href={b.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-accent font-medium truncate max-w-[200px] hover:text-primary transition-colors flex-shrink-0"
+                              className="text-xs text-accent font-medium truncate max-w-[350px] hover:text-primary transition-colors flex-shrink-0"
                             >
-                              {extractDomain(b.url)}
+                              {b.url.replace(/^https?:\/\//, "")}
                             </a>
                           )}
                           {b.url && (
