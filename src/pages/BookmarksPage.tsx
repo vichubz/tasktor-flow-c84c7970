@@ -409,7 +409,7 @@ const BookmarksPage = () => {
                   exit={{ opacity: 0, x: 100 }}
                   transition={{ duration: 0.25, delay: i * 0.03 }}
                   layout
-                  onDoubleClick={() => !isEditing && startEdit(b)}
+                  onDoubleClick={() => isEditing ? setEditingId(null) : startEdit(b)}
                   whileHover={{ scale: 1.008, y: -1, boxShadow: "0 4px 20px hsl(var(--primary) / 0.08)" }}
                   className="rounded-xl overflow-hidden relative group cursor-default transition-colors"
                   style={{
