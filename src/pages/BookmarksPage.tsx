@@ -514,7 +514,7 @@ const BookmarksPage = () => {
                             href={b.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs text-primary/60 hover:text-primary truncate block mt-0.5 transition-colors max-w-full"
+                            className="text-sm text-primary/80 hover:text-primary truncate block mt-1 transition-colors max-w-full font-medium"
                           >
                             {b.url.replace(/^https?:\/\//, "")}
                           </a>
